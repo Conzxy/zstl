@@ -65,7 +65,8 @@ namespace TinySTL{
         vector& operator=(vector&&) noexcept;
         vector& operator=(std::initializer_list<T>);
 
-        template<class InputIterator>
+        template<class InputIterator,typename =
+                TinySTL::Enable_if_t<TinySTL::is_input_iterator<InputIterator>::value>>
         void assign(InputIterator first,InputIterator last);
         void assign(size_type n,T const& t);
 

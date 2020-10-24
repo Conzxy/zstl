@@ -57,7 +57,7 @@ namespace TinySTL{
 
     //接受[first,last)，将其中的元素赋给vector
     template<typename T,class Alloc>
-    template<class InputIterator>
+    template<class InputIterator,typename>
     void vector<T,Alloc>::assign(InputIterator first,InputIterator last){
         erase(begin(),end());
         insert(begin(),first,last);
@@ -258,7 +258,7 @@ namespace TinySTL{
     template<class InputIterator>
     void vector<T,Alloc>::range_initialize(InputIterator first, InputIterator last){
         start=allocate_and_copy(first,last);
-        end_of_storage=finish=start+last-first;
+        end_of_storage=finish=start+(last-first);
     }
 
 
@@ -274,7 +274,7 @@ namespace TinySTL{
     template<class InputIterator>
     typename vector<T,Alloc>::iterator
     vector<T,Alloc>::allocate_and_copy(InputIterator first, InputIterator last) {
-        size_type n=first-last;
+        size_type n=last-first;
         iterator result=Alloc::allocate(n);
         TinySTL::uninitialized_copy(first,last,result);
         return result;
