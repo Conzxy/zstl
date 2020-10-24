@@ -242,6 +242,9 @@ namespace TinySTL{
     template<bool B,typename T=void>
     using Enable_if_t=typename Enable_if<B,T>::type;
 
+    template<typename...>
+    using Void_t=void;
+
     template<typename T>
     struct Is_destructible_Helper{
     private:
@@ -319,6 +322,24 @@ namespace TinySTL{
     constexpr bool Is_default_constructible_v
      =decltype(Is_default_constructible(type<T>))::value;
 
+    template<typename from,typename to>
+    struct Is_convertible_helper{
+    private:
+        static void aux(to);
+        template<typename F,
+                typename =decltype(aux(declval<F>()))>
+        static _true_type test(void*);
+        template<typename,typename>
+        static _false_type test(...);
+    public:
+        using type=decltype(test<from>(nullptr));
+    };
+
+    template<typename from,typename to>
+    struct Is_convertible: Is_convertible_helper<from,to>::type{};
+
+    template<typename from,typename to>
+    constexpr bool Is_convertible_v=Is_convertible<from,to>::value;
 
 }
 
