@@ -4,6 +4,7 @@
 //该文件提供迭代器,traits,operation
 //待补充。。。
 #include <cstddef>
+#include "type_traits.h"
 
 namespace TinySTL{
     //以下提供五种迭代器的对应tag
@@ -12,50 +13,6 @@ namespace TinySTL{
     struct Forward_iterator_tag:Input_iterator_tag{};
     struct Bidirectional_iterator_tag:Forward_iterator_tag{};
     struct Random_access_iterator_tag: Bidirectional_iterator_tag{};
-
-
-    template<class T,class Distance>
-    struct Input_Iterator{
-        typedef Input_iterator_tag iterator_category;
-        typedef T                  value_type;
-        typedef Distance           difference_type;
-        typedef T*                 pointer;
-        typedef T&                 reference;
-    };
-    
-    struct Output_Iterator{
-        typedef Output_iterator_tag iterator_category;
-        typedef void                value_type;
-        typedef void                difference_type;
-        typedef void                pointer;
-        typedef void                reference;
-    };
-    template<class T,class Distance>
-    struct Forward_Iterator{
-        typedef Forward_iterator_tag iterator_category;
-        typedef T                    value_type;
-        typedef Distance             difference_type;
-        typedef T*                   pointer;
-        typedef T&                   reference;
-    };
-    
-    template<class T,class Distance>
-    struct Bidirectional_Iterator{
-        typedef Bidirectional_iterator_tag iterator_category;
-        typedef T                          value_type;
-        typedef Distance                   difference_type;
-        typedef T*                         pointer;
-        typedef T&                         reference;
-    };
-    
-    template<class T,class Distance>
-    struct Random_access_iterator{
-        typedef Random_access_iterator_tag iterator_category;
-        typedef T                          value_type;
-        typedef Distance                   difference_type;
-        typedef T*                         pointer;
-        typedef T&                         reference;
-    };
 
     //iterator 一般模板
     template<class Category,class T,class Distance=ptrdiff_t,
@@ -68,14 +25,54 @@ namespace TinySTL{
         typedef Reference reference;
     };
 
+    template<typename T>
+    struct has_iterator_helper{
+    private:
+        template<typename U,typename =typename U::iterator_category>
+        static _true_type test(void*);
+        //fall back
+        template<typename>
+        static _false_type test(...);
+    public:
+        using type=decltype(test<T>(nullptr));
+    };
+
+    template<typename T>
+    struct has_iterator: has_iterator_helper<T>{};
+
+    template<typename T>
+    using has_iterator_t=typename has_iterator<T>::type;
+    template<typename T>
+    constexpr bool has_iterator_v=has_iterator_t<T>::value;
+
     //iterator traits提取迭代器特性
-    template<class iterator>
-    struct iterator_traits{
+    template<typename iterator,bool>
+    struct iterator_traits_impl{
+    };
+
+    template<typename iterator>
+    struct iterator_traits_impl<iterator,true>{
         typedef typename iterator::iterator_catogory  iterator_category;
         typedef typename iterator::value_type         value_type;
         typedef typename iterator::difference_type    difference_type;
         typedef typename iterator::pointer            pointer;
         typedef typename iterator::reference          reference;
+    };
+
+    template<typename iterator,bool>
+    struct iterator_traits_aux{};
+
+    template<typename iterator>
+    struct iterator_traits_aux<iterator,true>: iterator_traits_impl<
+            iterator,
+            TinySTL::Is_convertible_v<typename iterator::iterator_category,
+            Input_iterator_tag> ||
+            TinySTL::Is_convertible_v<typename iterator::iterator_category,
+            Output_iterator_tag>>{};
+
+    template<typename iterator>
+    struct iterator_traits: iterator_traits_aux<iterator,
+                                                has_iterator_v<iterator>>{
     };
 
     //对内置指针的特化
@@ -97,13 +94,36 @@ namespace TinySTL{
         typedef T const&                   reference;
     };
 
+    template<typename T,typename U,bool=has_iterator_v<iterator_traits<T>>>
+    struct has_iterator_of:Bool_constant<TinySTL::Is_convertible_v<
+            typename iterator_traits<T>::iterator_catogory,U>>{
+    };
+
+    template<typename T,typename U>
+    struct has_iterator_of<T,U,false>:_false_type{
+    };
+
+    //iterator Predicate:
+    template<typename iter>
+    struct is_input_iterator:has_iterator_of<iter,Input_iterator_tag>{};
+
+    template<typename iter>
+    struct is_output_iterator:has_iterator_of<iter,Output_iterator_tag>{};
+
+    template<typename iter>
+    struct is_forward_iterator:has_iterator_of<iter,Forward_iterator_tag>{};
+
+    template<typename iter>
+    struct is_bidirectional_iterator:has_iterator_of<iter,Bidirectional_iterator_tag>{};
+
+    template<typename iter>
+    struct is_random_access_iterator:has_iterator_of<iter,Random_access_iterator_tag>{};
+
+    template<typename iter>
+    struct is_iterator:Bool_constant<is_input_iterator<iter>::value ||
+                                     is_output_iterator<iter>::value>{};
+
     //以下函数用于方便提取迭代器的category,difference_type,value_type
-    //Q：后两者设计为什么返回指针？
-    //A：如果直接访问iterator_traits会比较麻烦，
-    //而直接返回类型的话需要与该类型对象耦合，需要构造，拷贝，析构（就算开RVO也得构造），
-    //如果不是右值引用接受该对象，甚至还得拷贝一次，
-    //指针就没这个麻烦（pimpl）
-    //实际上这三个函数并不是标准要求，属于sgi私活
     template<class Iterator>
     constexpr decltype(auto)
     iterator_category(Iterator const&){ //参数只是用于实参推断，无用处故匿名
