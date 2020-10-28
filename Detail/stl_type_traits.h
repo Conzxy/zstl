@@ -267,7 +267,7 @@ namespace TinySTL{
     //generic lambda version
     //helper:check validity of f(args...) for F f and Args...args
     template<typename F,typename...Args,
-            typename=decltype(declval<F>()(declval<Args&&>()...))>
+            typename =decltype(declval<F>()(declval<Args&&>()...))>
     _true_type Is_valid_impl(void*);
 
     template<typename F,typename...Args>
@@ -275,9 +275,6 @@ namespace TinySTL{
     _false_type Is_valid_impl(...);
 
     //inline是为了效率，这里constexpr有const语义，所以是internal linkage
-    //其实除了第一个&&，declval的&&和decltype(Args)&&...的&&去了也没有影响，因为：
-    //假如Args是左值，那么auto推断为T&，折叠为&，而Args是右值，那么auto推断为T，折叠为&&（T为实参的声明类型）
-    //我想这里的&&可能起提示作用，全部设置为universal reference可能是个不错的习惯（编程者的习惯）
     inline constexpr
     auto Is_valid=[](auto f) {      //traits factory
                     return [](auto &&... Args) {
@@ -329,7 +326,7 @@ namespace TinySTL{
         template<typename F,
                 typename =decltype(aux(declval<F>()))>
         static _true_type test(void*);
-        template<typename,typename>
+        template<typename ,typename >
         static _false_type test(...);
     public:
         using type=decltype(test<from>(nullptr));

@@ -13,9 +13,6 @@ namespace TinySTL{
     template<typename T,class Allocator=allocator<T>>
     class vector{
     public:
-        //这里如果把value_type放在后面，则会出现找不到value_type的错误
-        //这是因为value_type是dependent name，所以它们也都是dependent name
-        //第二阶段无法启动ADL（ADL只考虑函数声明），因此找不到名字
         //types:
         using value_type            =T;
         using pointer               =typename allocator_traits<Allocator>::pointer;
