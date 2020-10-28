@@ -9,7 +9,6 @@ namespace TinySTL{
     //dtor
     template<typename T,class Alloc>
     vector<T,Alloc>::~vector(){
-        if(!capacity())
             destroy_and_deallocate(begin(),end());
     }
 
