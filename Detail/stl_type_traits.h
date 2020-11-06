@@ -8,6 +8,52 @@
 
 namespace TinySTL{
 
+    //if condition bool value is true,select the second template parameter
+    //otherwise,select the third template parameter
+    template<bool cond,typename if_true,typename if_false>
+    struct Conditional{
+        using type=if_true;
+    };
+
+    template<typename if_true,typename if_false>
+    struct Conditional<false,if_true,if_false>{
+        using type=if_false;
+    };
+
+    //_or_,_and_可用于组合谓词
+    template<typename ...>
+    struct _or_{};
+
+    template<>
+    struct _or_<> :_false_type{};
+
+    template<typename T>
+    struct _or_ <T>:T{};
+
+    template<typename T1,typename T2>
+    struct _or_<T1,T2>:Conditional<T1::value,T1,T2>::type{};
+
+    template<typename T1,typename T2,typename T3,typename...Tn>
+    struct _or_<T1,T2,T3,Tn...>:Conditional<T1::value,T1,_or_<T2,T3,Tn...>>::type{};
+
+    template<typename...>
+    struct _and_{};
+
+    template<>
+    struct _and_<> :_true_type{};
+
+    template<typename T>
+    struct _and_<T> :T{};
+
+    template<typename T1,typename T2>
+    struct _and_<T1,T2>:Conditional<T1::value,T2,T1>::type{};
+
+    template<typename T1,typename T2,typename T3,typename ...Tn>
+    struct _and_<T1,T2,T3,Tn...> :Conditional<T1::value,_and_<T2,T3,Tn...>,T1>::type{};
+
+    template<typename T>
+    struct _not_:Bool_constant<!bool(T::value)>{};
+
     //以下模板用于去除引用
     template<typename T>
     struct Remove_reference{
@@ -209,6 +255,12 @@ namespace TinySTL{
     struct Is_lvalue_reference<T&>:_true_type{};
 
     template<typename T>
+    struct Is_rvalue_reference :_false_type {};
+
+    template<typename T>
+    struct Is_rvalue_reference<T&&> :_true_type {};
+
+    template<typename T>
     constexpr bool Is_lvalue_reference_v=Is_lvalue_reference<T>::value;
 
     //SFINAE
@@ -326,7 +378,7 @@ namespace TinySTL{
         template<typename F,
                 typename =decltype(aux(declval<F>()))>
         static _true_type test(void*);
-        template<typename ,typename >
+        template<typename>
         static _false_type test(...);
     public:
         using type=decltype(test<from>(nullptr));
@@ -337,6 +389,29 @@ namespace TinySTL{
 
     template<typename from,typename to>
     constexpr bool Is_convertible_v=Is_convertible<from,to>::value;
+
+    //is_convertible continue
+
+    template<typename ,typename= Void_t<>>
+    class has_SizeType:public _false_type{
+    };
+
+    template<typename T>
+    class has_SizeType<T,Void_t<typename Remove_reference_t<T>::size_type>>: public _true_type {};
+
+    template<typename T>
+    using has_SizeType_t=typename has_SizeType<T>::type;
+
+    template<typename T>
+    constexpr bool has_SizeType_v=has_SizeType<T>::value;
+
+    struct size_type{};
+    struct sizeable:size_type{};
+    static_assert(has_SizeType_v<sizeable>,
+                    "Compiler bug:Injected class name missing");
+
+    template<typename T>
+    struct Is_reference:_or_<Is_lvalue_reference<T>,Is_rvalue_reference<T>>::type{};
 
 }
 
