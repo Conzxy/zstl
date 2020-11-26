@@ -2,9 +2,9 @@
 #define TINYSTL_STL_ITERATOR_H
 
 //该文件提供迭代器,traits,operation
-//待补充。。。
+
 #include <cstddef>
-#include "type_traits.h"
+#include <type_traits.h>
 
 namespace TinySTL{
     //以下提供五种迭代器的对应tag
@@ -18,62 +18,36 @@ namespace TinySTL{
     template<class Category,class T,class Distance=ptrdiff_t,
             class Pointer=T*,class Reference=T&>
     struct iterator{
-        typedef Category  iterator_category;
-        typedef T         value_type;
-        typedef Distance  difference_type;
-        typedef Pointer   pointer;
-        typedef Reference reference;
+        using iterator_category =Category;
+        using value_type        =T;
+        using difference_type   =Distance;
+        using pointer           =Pointer;
+        using reference         =Reference;
     };
 
-    template<typename T>
-    struct has_iterator_helper{
-    private:
-        template<typename U,typename =typename U::iterator_category>
-        static _true_type test(void*);
-        //fall back
-        template<typename>
-        static _false_type test(...);
-    public:
-        using type=decltype(test<T>(nullptr));
-    };
-
-    template<typename T>
-    struct has_iterator: has_iterator_helper<T>{};
-
-    template<typename T>
-    using has_iterator_t=typename has_iterator<T>::type;
-    template<typename T>
-    constexpr bool has_iterator_v=has_iterator_t<T>::value;
-
-    //iterator traits提取迭代器特性
-    template<typename iterator,bool>
-    struct iterator_traits_impl{
+    //SFINAE-friendly
+    //ensure iterator_traits<iterator> must be instantiated such that no hard error
+    template<typename iterator,typename =Void_t<>>
+    struct iterator_traits_helper{
     };
 
     template<typename iterator>
-    struct iterator_traits_impl<iterator,true>{
-        typedef typename iterator::iterator_catogory  iterator_category;
-        typedef typename iterator::value_type         value_type;
-        typedef typename iterator::difference_type    difference_type;
-        typedef typename iterator::pointer            pointer;
-        typedef typename iterator::reference          reference;
+    struct iterator_traits_helper<iterator,Void_t<
+            typename iterator::iterator_category,
+            typename iterator::value_type,
+            typename iterator::difference_type,
+            typename iterator::pointer,
+            typename iterator::reference>>{
+        using iterator_category        =typename iterator::iterator_category;
+        using value_type               =typename iterator::value_type;
+        using difference_type          =typename iterator::difference_type;
+        using pointer                  =typename iterator::pointer;
+        using reference                =typename iterator::reference;
     };
 
-    template<typename iterator,bool>
-    struct iterator_traits_aux{};
-
     template<typename iterator>
-    struct iterator_traits_aux<iterator,true>: iterator_traits_impl<
-            iterator,
-            TinySTL::Is_convertible_v<typename iterator::iterator_category,
-            Input_iterator_tag> ||
-            TinySTL::Is_convertible_v<typename iterator::iterator_category,
-            Output_iterator_tag>>{};
+    struct iterator_traits:iterator_traits_helper<iterator>{};
 
-    template<typename iterator>
-    struct iterator_traits: iterator_traits_aux<iterator,
-                                                has_iterator_v<iterator>>{
-    };
 
     //对内置指针的特化
     template<typename T>
@@ -94,34 +68,62 @@ namespace TinySTL{
         typedef T const&                   reference;
     };
 
-    template<typename T,typename U,bool=has_iterator_v<iterator_traits<T>>>
-    struct has_iterator_of:Bool_constant<TinySTL::Is_convertible_v<
-            typename iterator_traits<T>::iterator_catogory,U>>{
+    //SFINAE-friendly
+    //ensure iterator_traits<iterator>::iterator_category must be instantiated such that no hard error
+    template<typename iter,typename= Void_t<>>
+    struct has_iterator_helper:_false_type {
     };
 
-    template<typename T,typename U>
-    struct has_iterator_of<T,U,false>:_false_type{
+    template<typename iter>
+    struct has_iterator_helper<iter,Void_t<
+            typename iterator_traits<iter>::iterator_category>>:_true_type {
     };
 
-    //iterator Predicate:
     template<typename iter>
-    struct is_input_iterator:has_iterator_of<iter,Input_iterator_tag>{};
+    struct has_iterator:has_iterator_helper<iter>::type{};
 
     template<typename iter>
-    struct is_output_iterator:has_iterator_of<iter,Output_iterator_tag>{};
+    constexpr bool has_iterator_v=has_iterator<iter>::value;
+
+    /*template<typename iter,typename U,bool =has_iterator_v<iter>>
+    struct has_iterator_of:Bool_constant<
+            Is_convertible_v<typename iterator_traits<iter>::iterator_category,
+                             U>>{};
+
+    template<typename iter,typename U>
+    struct has_iterator_of<iter,U,false>:_false_type{};*/
+
+    template<typename iter,typename U,typename =Void_t<>>
+    struct has_iterator_of:_false_type{};
+
+    template<typename iter,typename U>
+    struct has_iterator_of<iter,U,Void_t<Is_convertible<
+            typename iterator_traits<iter>::iterator_category,U>>>:_true_type{};
+
+    //iterator predicate:
+    template<typename iter>
+    constexpr bool is_input_iterator
+    =has_iterator_of<iter,Input_iterator_tag>::value;
 
     template<typename iter>
-    struct is_forward_iterator:has_iterator_of<iter,Forward_iterator_tag>{};
+    constexpr bool is_output_iterator
+    =has_iterator_of<iter,Output_iterator_tag>::value;
 
     template<typename iter>
-    struct is_bidirectional_iterator:has_iterator_of<iter,Bidirectional_iterator_tag>{};
+    constexpr bool is_forward_iterator
+    =has_iterator_of<iter,Forward_iterator_tag>::value;
 
     template<typename iter>
-    struct is_random_access_iterator:has_iterator_of<iter,Random_access_iterator_tag>{};
+    constexpr bool is_bidirectional_iterator
+    =has_iterator_of<iter,Bidirectional_iterator_tag>::value;
 
     template<typename iter>
-    struct is_iterator:Bool_constant<is_input_iterator<iter>::value ||
-                                     is_output_iterator<iter>::value>{};
+    constexpr bool is_random_access_iterator
+    =has_iterator_of<iter,Random_access_iterator_tag>::value;
+
+    template<typename iter>
+    constexpr bool is_iterator
+    =is_input_iterator<iter> || is_output_iterator<iter>;
 
     //以下函数用于方便提取迭代器的category,difference_type,value_type
     template<class Iterator>
@@ -163,7 +165,7 @@ namespace TinySTL{
     template<class InputIterator>
     inline typename iterator_traits<InputIterator>::difference_type
     distance(InputIterator first,InputIterator last){
-        return _distance(first,last,category(first));
+        return _distance(first,last,iterator_category(first));
     }
 
     //以下函数用于迭代器的前进
@@ -203,7 +205,7 @@ namespace TinySTL{
     //1.Iterator需满足Bidirectional的所有要求
     //2.对于operator+，operator-，operator+=，operator-=，
     //operator[]，operator<,operator>,operator<=,operator>=,
-    //operator-,operator+(global，欲使用需满足Random Access Iterator的要求
+    //operator-,operator+(global)，欲使用需满足Random Access Iterator的要求
     template<class Iterator>
     class reverse_iterator:public
         iterator<typename iterator_traits<Iterator>::iterator_category,
@@ -244,7 +246,7 @@ namespace TinySTL{
 
         reverse_iterator& operator++(){
             --current;
-            *this;
+            return *this;
         }
 
         reverse_iterator  operator++(int){
@@ -285,7 +287,7 @@ namespace TinySTL{
     protected:
         Iterator current;
     private:
-        Iterator deref_tmp; //exposition only
+        mutable Iterator deref_tmp; //exposition only
         //dereference temporary
     };
 
@@ -293,7 +295,7 @@ namespace TinySTL{
     bool operator==(
             reverse_iterator<Iterator1> const& x,
             reverse_iterator<Iterator2> const& y){
-        return x.current==y.current;
+        return x.base()==y.base();
     }
 
     template<class Iterator1,class Iterator2>
@@ -309,14 +311,14 @@ namespace TinySTL{
     bool operator<(
             reverse_iterator<Iterator1> const& x,
             reverse_iterator<Iterator2> const& y){
-        return x.current<y.current;
+        return x.base()<y.base();
     }
 
     template<class Iterator1,class Iterator2>
     bool operator>(
             reverse_iterator<Iterator1> const& x,
             reverse_iterator<Iterator2> const& y){
-        return x.current>y.current;
+        return x.base()>y.base();
     }
 
     template<class Iterator1,class Iterator2>
@@ -337,7 +339,7 @@ namespace TinySTL{
     auto operator-(
             reverse_iterator<Iterator1> const& x,
             reverse_iterator<Iterator2> const& y)/*->decltype(y.current-x.current)*/{
-                return y.current-x.current;     //C++14支持编译器推断auto
+                return y.base()-x.base();     //C++14支持编译器推断auto
             }
 
     //与成员版的不同在于操作数的位置不同
@@ -345,7 +347,7 @@ namespace TinySTL{
     reverse_iterator<Iterator> operator+(
             typename reverse_iterator<Iterator>::difference_type n,
             reverse_iterator<Iterator>& x){
-        return reverse_iterator<Iterator>(x.current-n);
+        return reverse_iterator<Iterator>(x.base()-n);
     }
 }
 #endif //TINYSTL_STL_ITERATOR_H

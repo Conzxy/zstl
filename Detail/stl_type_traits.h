@@ -4,10 +4,44 @@
 //该文件实现了一部分标准库traits（×），templates练习（√）
 #include <cstddef>
 #include <type_traits>
-#include "stl_type_traits_base.h"
+#include <stl_type_traits_base.h>
 
 namespace TinySTL{
+    //检查任意member type name
+#define DEFINE_HAS_TYPE(Memtype)						            \
+	template<typename,typename =Void_t<>>				            \
+	struct HasTypeT_##Memtype							            \
+	:_false_type{};										            \
+	template<typename T>								            \
+	struct HasTypeT_##Memtype<T,Void_t<typename T::Memtype>>		\
+	:_true_type{};                                                  \
 
+	//检查成员和single成员函数
+#define DEFINE_HAS_MEMBER(Member)                                   \
+	template<typename,typename =Void_t<>>                           \
+	struct HasMemberT_##Member                                      \
+	:_false_type{};                                                 \
+	template<typename T>                                            \
+	struct HasMemberT_##Member<T,Void_t<decltype(&T::Member)>>      \
+	:_true_type{};                                                  \
+
+    template<typename T1,typename T2>
+    struct Is_same;
+
+    template<typename T>
+    struct Remove_reference;
+
+    template<typename T>
+    struct Is_void_helper
+            :public _false_type{};
+
+    template<>
+    struct Is_void_helper<void>
+            :public _true_type {};
+
+    template<typename T>
+    struct Is_void
+            :public Is_void_helper<typename Remove_reference<T>::type>::type{};
     //if condition bool value is true,select the second template parameter
     //otherwise,select the third template parameter
     template<bool cond,typename if_true,typename if_false>
@@ -53,6 +87,49 @@ namespace TinySTL{
 
     template<typename T>
     struct _not_:Bool_constant<!bool(T::value)>{};
+
+    //conjunction,disjunction,negation
+    template<typename...Tn>
+    struct Conjunction:_and_<Tn...>{};
+
+    template<typename...Tn>
+    struct Disjunction:_or_<Tn...>{};
+
+    template<typename T>
+    struct Negation:_not_<T>{};
+
+    template<typename...Tn>
+    inline constexpr bool Conjunction_v=Conjunction<Tn...>::value;
+
+    template<typename...Tn>
+    inline constexpr bool Disjunction_v=Disjunction<Tn...>::value;
+
+    template<typename T>
+    inline constexpr bool Negation_v=Negation<T>::value;
+
+    //以下模板用于去除指针
+    template<typename T>
+    struct Remove_pointer{
+        using type=T;
+    };
+
+    template<typename T>
+    struct Remove_pointer<T*>{
+        using type=T;
+    };
+
+    template<typename T>
+    struct Remove_pointer<T *const>{
+        using type=T;
+    };
+
+    template<typename T>
+    struct Remove_pointer<T *volatile>{
+        using type=T;
+    };
+
+    template<typename T>
+    using Remove_pointer_t=typename Remove_pointer<T>::type;
 
     //以下模板用于去除引用
     template<typename T>
@@ -291,8 +368,8 @@ namespace TinySTL{
         using type=T;
     };
 
-    template<bool B,typename T=void>
-    using Enable_if_t=typename Enable_if<B,T>::type;
+    template<bool Cond,typename T=void>
+    using Enable_if_t=typename Enable_if<Cond,T>::type;
 
     template<typename...>
     using Void_t=void;

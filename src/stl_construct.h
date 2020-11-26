@@ -5,9 +5,9 @@
 //construct：负责对象的构造
 //destroy：负责对象的析构
 #include <new>
-#include "type_traits.h"
-#include "stl_iterator.h"
-#include "_move.h"
+#include <type_traits.h>
+#include <stl_iterator.h>
+#include <_move.h>
 
 namespace TinySTL {
     template<typename T1, typename T2>
@@ -33,20 +33,20 @@ namespace TinySTL {
     inline void destroy_single(T *ptr, _true_type) {
     }
 
+    template<typename T>
+    inline void destroy(T *ptr) {
+        destroy_single(ptr, typename _type_traits<T>::has_trivially_destructor{});
+    }
+
     template<class ForwardIterator>
     inline void destroy_cat(ForwardIterator first, ForwardIterator last, _false_type) {//cat:catenate
         for (; first != last; ++first) {
-            destory(&*first);
+            destroy(&*first);
         }
     }
 
     template<typename ForwardIterator>
     inline void destroy_cat(ForwardIterator first, ForwardIterator last, _true_type) {
-    }
-
-    template<typename T>
-    inline void destroy(T *ptr) {
-        destroy_single(ptr, typename _type_traits<T>::has_trivially_destructor{});
     }
 
     template<class ForwardIterator>

@@ -2,8 +2,8 @@
 #define TINYSTL_VECTOR_IMPL_H
 
 
-#include "../stl_vector.h"
-#include "../stl_exception.h"
+#include <stl_vector.h>
+#include <stl_exception.h>
 
 namespace TinySTL{
     //dtor
@@ -341,7 +341,7 @@ namespace TinySTL{
             iterator old_finish=finish;
             if(elems_after>=need){
                 finish=TinySTL::uninitialized_copy(finish-need,finish,finish);
-                finish=TinySTL::copy_backward(position,old_finish-need,old_finish);
+                TinySTL::copy_backward(position,old_finish-need,old_finish);
                 TinySTL::copy(first,last,position);
             }
             else{
@@ -378,6 +378,10 @@ namespace TinySTL{
     }
 
     //获取更大的容量
+    //alloc policy:
+    //if required size(let len) more than old_capacity,new_capacity=old_capacity+len
+    //otherwise,new_capacity=old_capacity*2
+    //But,if old_capacity=0,new_capacity=len
     template<typename T,class Alloc>
     typename vector<T,Alloc>::size_type
     vector<T,Alloc>::getNewCapacity(size_type len)const{

@@ -2,11 +2,12 @@
 #define TINYSTL_STL_ALGORITHM_H
 
 #include <cstring>
-#include "_move.h"
-#include "stl_iterator.h"
-#include "type_traits.h"
+#include <_move.h>
+#include <stl_iterator.h>
+#include <type_traits.h>
 
 namespace TinySTL{
+    /*********************************max**************************************/
     template<typename T1,typename T2>
     auto max(T1 const& x,T2 const& y){
         return x<y?y:x;
@@ -109,12 +110,13 @@ namespace TinySTL{
         //内置指针本身就是一种Random access iterator
         return copy_distance(first,last,result,(ptrdiff_t*)nullptr);
     }
-    //tag dispatch
+
+    //tag dispatching
     template<class InputIterator,class OutputIterator>
     struct copy_dispatch{
         OutputIterator operator()(InputIterator first,InputIterator last,
                                   OutputIterator result){
-            return copy_iterator(result,first,iterator_category(first));
+            return copy_iterator(first,last,result,iterator_category(first));
         }
     };
 
@@ -182,11 +184,12 @@ namespace TinySTL{
     }
 
     template<typename BI_1,typename BI_2,typename Distance>
-    BI_2 copy_b_distance(BI_1 first,BI_2 last,
+    BI_2 copy_b_distance(BI_1 first,BI_1 last,
                          BI_2 result,Distance*){
         for(Distance n=last-first;n>0;--n){
             *--result=*--last;
         }
+        return result;
     }
 
     template<typename BI_1,typename BI_2>
@@ -358,10 +361,10 @@ namespace TinySTL{
         }
         return true;
     }
-    /*****************************lexicographical*********************************/
+    /*****************************lexicographical_compare*********************************/
     template<typename II_1,typename II_2>
-    bool lexicographical(II_1 first1,II_1 last1,
-                         II_2 first2,II_2 last2){
+    bool lexicographical_compare(II_1 first1, II_1 last1,
+                                 II_2 first2, II_2 last2){
         for(;first1!=last1&&first2!=last2;++first1,++first2){
             if(*first1<*first2)
                 return true;
@@ -374,8 +377,8 @@ namespace TinySTL{
 
     template<typename II_1,typename II_2,
             typename BP>
-    bool lexicographical(II_1 first1,II_2 last1,
-                         II_2 first2,II_2 last2,BP binary_pred){
+    bool lexicographical_compare(II_1 first1, II_2 last1,
+                                 II_2 first2, II_2 last2, BP binary_pred){
         for(;first1!=last1&&first2!=last2;++first1,++first2){
             if(binary_pred(*first1,*first2))
                 return true;

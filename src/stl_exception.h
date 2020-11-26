@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 #include <cassert>
-#include "type_traits.h"
+#include <type_traits.h>
 #define TINYSTL_DEBUG(expr) \
         assert(expr)
 

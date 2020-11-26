@@ -1,12 +1,12 @@
 #ifndef TINYSTL_STL_VECTOR_H
 #define TINYSTL_STL_VECTOR_H
 
-#include "Allocator.h"
+#include <Allocator.h>
 #include <initializer_list>
-#include "type_traits"
-#include "stl_uninitialized.h"
-#include "stl_iterator.h"
-#include "stl_algorithm.h"
+#include <type_traits.h>
+#include <stl_uninitialized.h>
+#include <stl_iterator.h>
+#include <stl_algorithm.h>
 #include <climits>
 
 namespace TinySTL{
@@ -32,18 +32,18 @@ namespace TinySTL{
         iterator end_of_storage;
     public:
         //construct/copy/destroy:
-        explicit vector(Allocator const& =Allocator()):start(nullptr),finish(nullptr),end_of_storage(nullptr){}
+        explicit vector():start(nullptr),finish(nullptr),end_of_storage(nullptr){}
         explicit vector(const size_type n){
             fill_initialize(n,T{});
         }
 
-        vector(size_type n,T const& value,Allocator const& =Allocator()){
+        vector(size_type n,T const& value){
             fill_initialize(n,value);
         }
 
-        template<class InputIterator>
-        vector(InputIterator first,InputIterator last,
-               Allocator const& =Allocator()){
+        template<class InputIterator,typename =Enable_if_t<
+                 is_input_iterator<InputIterator>>>
+        vector(InputIterator first,InputIterator last){
             range_initialize(first, last);
         }
 
@@ -62,8 +62,8 @@ namespace TinySTL{
         vector& operator=(vector&&) noexcept;
         vector& operator=(std::initializer_list<T>);
 
-        template<class InputIterator,typename =
-                TinySTL::Enable_if_t<TinySTL::is_input_iterator<InputIterator>::value>>
+        template<class InputIterator,typename =Enable_if_t<
+                is_input_iterator<InputIterator>>>
         void assign(InputIterator first,InputIterator last);
         void assign(size_type n,T const& t);
 
@@ -188,14 +188,14 @@ namespace TinySTL{
 
     template<typename T,class Allocator>
     inline bool operator==(vector<T,Allocator> const& x,vector<T,Allocator> const& y)
-    { return x.size()==x.size()&&TinySTL::equal(x.begin(),y.end(),y.begin()); }
+    { return x.size()==x.size()&&TinySTL::equal(x.begin(),x.end(),y.begin()); }
     template<typename T,class Allocator>
     inline bool operator!=(vector<T,Allocator> const& x,vector<T,Allocator> const& y)
     { return !(x==y); }
     template<typename T,class Allocator>
     inline bool operator <(vector<T,Allocator> const& x,vector<T,Allocator> const& y)
-    { return TinySTL::lexicographical(x.begin(),x.end(),
-                                      y.begin(),y.end()); }
+    { return TinySTL::lexicographical_compare(x.begin(), x.end(),
+                                              y.begin(), y.end()); }
     template<typename T,class Allocator>
     inline bool operator>=(vector<T,Allocator> const& x,vector<T,Allocator> const& y)
     { return !(x<y); };

@@ -1,26 +1,38 @@
 #ifndef TINYSTL_UNIQUE_PTR_H
 #define TINYSTL_UNIQUE_PTR_H
 
-#include "../stl_utility.h"
-#include "../type_traits"
+#include <stl_utility.h>
+#include <type_traits.h>
+
 namespace TinySTL{
     template<typename T>
     struct default_delete{
         constexpr default_delete()noexcept=default;
 
         //allow U* is implicitly convertible to T*
+        //but doesn't ensure this is safe
         template<typename U,typename =typename
                 Enable_if<Is_convertible<U*,T*>::value>::type>
         default_delete(default_delete<U> const& other)noexcept{}
 
-        void operator()(T* ptr){if(ptr) delete ptr;}
+        void operator()(T* ptr){
+            static_assert(!Is_void<T>::value,
+                          "can't delete pointer to incomplete type!");
+            static_assert(sizeof(T)>0,
+                          "can't delete pointer to incomplete type!");
+            if(ptr) delete ptr;
+        }
     };
 
     template<typename T>
     struct default_delete<T[]>{
         constexpr default_delete()noexcept=default;
 
-        void operator()(T* ptr){if(ptr) delete[]ptr;}
+        void operator()(T* ptr){
+            static_assert(sizeof(T)>0,
+                          "can't delete pointer to incomplete type!");
+            if(ptr) delete[]ptr;
+        }
 
         //if U is derived from T,delete[](U*) is unsafe
         template<typename U> void operator()(U*)const=delete;
@@ -140,7 +152,7 @@ namespace TinySTL{
             return *this;
         }
 
-        unique_ptr& operator=(std::nullptr_t){
+        unique_ptr& operator=(std::nullptr_t)noexcept{
             reset();
             return *this;
         }
@@ -224,22 +236,22 @@ namespace TinySTL{
     }
 
     template<typename T,typename D>
-    inline bool operator==(unique_ptr<T,D> const& x,std::nullptr_t){
+    inline bool operator==(unique_ptr<T,D> const& x,std::nullptr_t)noexcept{
         return !x;
     }
 
     template<typename T,typename D>
-    inline bool operator==(std::nullptr_t,unique_ptr<T,D> const& x){
+    inline bool operator==(std::nullptr_t,unique_ptr<T,D> const& x)noexcept{
         return !x;
     }
 
     template<typename T,typename D>
-    inline bool operator!=(unique_ptr<T,D> const& x,std::nullptr_t){
+    inline bool operator!=(unique_ptr<T,D> const& x,std::nullptr_t)noexcept{
         return (bool)x;
     }
 
     template<typename T,typename D>
-    inline bool operator!=(std::nullptr_t,unique_ptr<T,D> const& x){
+    inline bool operator!=(std::nullptr_t,unique_ptr<T,D> const& x)noexcept{
         return (bool)x;
     }
 

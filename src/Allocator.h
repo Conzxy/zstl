@@ -3,9 +3,10 @@
 
 //空间配置器
 //以变量为单元进行分配
-#include "alloc.h"
-#include "stl_construct.h"
-#include "stl_utility.h"
+#include <alloc.h>
+#include <stl_construct.h>
+#include <stl_utility.h>
+#include <type_traits.h>
 
 namespace TinySTL{
     template<typename T>
@@ -31,8 +32,8 @@ namespace TinySTL{
 
         static void construct(T* ptr,T const& value);
 
-        /*template<typename...Args>
-        static void construct(T* ptr,Args&&... args);*/
+        template<typename...Args>
+        static void construct(T* ptr,Args&&... args);
 
         static void destroy(T* ptr);
         static void destroy(T* first,T* last);
@@ -68,11 +69,11 @@ namespace TinySTL{
         TinySTL::construct(ptr,value);              //作用域限定以防递归
     }
 
-    /*template<typename T>
+    template<typename T>
     template<typename...Args>
     void allocator<T>::construct(T* ptr,Args&&... args){
         TinySTL::construct(ptr,TinySTL::forward<Args>(args)...);
-    }*/
+    }
 
     template<typename T>
     void allocator<T>::destroy(T *ptr) {
@@ -84,15 +85,28 @@ namespace TinySTL{
         TinySTL::destroy(first,last);
     }
 
-    template<typename T>
-    struct allocator_traits{
-        using value_type        =typename allocator<T>::value_type;
-        using pointer           =typename allocator<T>::pointer;
-        using reference         =typename allocator<T>::reference;
-        using const_pointer     =typename allocator<T>::const_pointer;
-        using const_reference   =typename allocator<T>::const_reference;
-        using difference_type   =typename allocator<T>::difference_type;
-        using size_type         =typename allocator<T>::size_type;
+    //SFINAE-friendly
+    template<typename allocator,typename =TinySTL::Void_t<>>
+    struct allocator_traits {
+    };
+
+    template<typename allocator>
+    struct allocator_traits < allocator, TinySTL::Void_t<
+                                                        typename allocator::value_type,
+                                                        typename allocator::pointer,
+                                                        typename allocator::reference,
+                                                        typename allocator::const_pointer,
+                                                        typename allocator::const_reference,
+                                                        typename allocator::difference_type,
+                                                        typename allocator::size_type>>
+    {
+        using value_type        =typename allocator::value_type;
+        using pointer           =typename allocator::pointer;
+        using reference         =typename allocator::reference;
+        using const_pointer     =typename allocator::const_pointer;
+        using const_reference   =typename allocator::const_reference;
+        using difference_type   =typename allocator::difference_type;
+        using size_type         =typename allocator::size_type;
     };
 }
 

@@ -6,8 +6,8 @@ namespace TinySTL{
     template<typename T,T val>
     struct Integral_constant{
         static constexpr T value=val;
-        typedef T value_type;
-        using type=Integral_constant<T,val>;
+        using value_type=T;
+        using type=Integral_constant;
         constexpr operator value_type()const noexcept{
             return value;
         }
