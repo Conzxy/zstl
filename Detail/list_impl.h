@@ -192,8 +192,8 @@ namespace TinySTL {
 	template<typename T,typename Alloc>
 	void inline list<T,Alloc>::pop_bacK(){erase(--end()); }
 
-    template<typename T,typename Alloc>
-    void list<T,Alloc>::clear()noexcept{
+    	template<typename T,typename Alloc>
+    	void list<T,Alloc>::clear()noexcept{
 		if (node) {
 			auto cur=node->next;
 			while(cur!=node) {
@@ -204,7 +204,7 @@ namespace TinySTL {
 			node->prev=node;
 			node->next=node;
 		}
-    }
+    	}
 
 	//list operations:
 	//remove:
@@ -235,7 +235,7 @@ namespace TinySTL {
 		}
 	}
 
-	//ɾ����������ͬԪ�أ�ֻ����һ��
+	
 	template<typename T,typename Alloc>
 	void list<T, Alloc>::unique() {
 		auto first=begin();
