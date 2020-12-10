@@ -35,8 +35,6 @@ struct Is_floating_point_<TYPE>:_true_type{};						\
 	
 
 namespace TinySTL{
-	//检查任意member type name
-
 	template<typename T>
 	struct Remove_reference;
 
@@ -137,8 +135,9 @@ namespace TinySTL{
 	template<typename T>
 	inline constexpr bool Negation_v=Negation<T>::value;
 
-
-	///Check the Primary Type Category
+	//////////////////////////////////////
+	///Check the Primary Type Category////
+	//////////////////////////////////////
 	namespace detail {
 		template<typename T>
 		struct Is_void_helper
@@ -234,419 +233,18 @@ namespace TinySTL{
 
 	namespace detail {
 		template<typename T>
-		struct Is_member_object_pointer :_false_type {
+		struct Is_member_object_pointer_ :_false_type {
 		};
 
 		template<typename C, typename T>
-		struct Is_member_object_pointer<T C::*> :_true_type {
+		struct Is_member_object_pointer_<T C::*> :_true_type {
 			using Member=T;
 			using Class=C;
 		};
 	}
 
 	template<typename T>
-	using Is_member_object_pointer=typename detail::Is_member_object_pointer<typename Remove_cv<T>::type>::type;
-	
-	namespace detail {
-		template<typename T>
-		struct remove_function_const{
-			using type=T;
-		};
-
-		//total 24 partial specialization
-		//regular
-		template<typename R,typename ...Paras>
-		struct remove_function_const<R(Paras...) const>{
-			using type=R(Paras...);
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_function_const<R(Paras...) const volatile> {
-			using type=R(Paras...) volatile;
-		};
-
-		//&
-		template<typename R,typename ...Paras>
-		struct remove_function_const<R(Paras...) const &> {
-			using type=R(Paras...) &;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_function_const<R(Paras...) const volatile&> {
-			using type=R(Paras...) volatile &;
-		};
-
-		//&&
-		template<typename R,typename ...Paras>
-		struct remove_function_const<R(Paras...) const &&> {
-			using type=R(Paras...) &&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...) const volatile&&> {
-			using type=R(Paras...) volatile &&;
-		};
-
-		//noexcept:
-		template<typename R,typename ...Paras>
-		struct remove_function_const<R(Paras...) const noexcept> {
-			using type=R(Paras...) noexcept;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_function_const<R(Paras...) const volatile noexcept> {
-			using type=R(Paras...) volatile noexcept;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_function_const<R(Paras...) const & noexcept> {
-			using type=R(Paras...) & noexcept;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_function_const<R(Paras...) const volatile & noexcept> {
-			using type=R(Paras...) volatile & noexcept;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_function_const<R(Paras...) const && noexcept> {
-			using type=R(Paras...) && noexcept;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_function_const<R(Paras...) const volatile&& noexcept> {
-			using type=R(Paras...) volatile && noexcept;
-		};
-
-		//c-style variadic
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const> {
-			using type=R(Paras...,...);
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const volatile> {
-			using type=R(Paras...,...) volatile;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const &> {
-			using type=R(Paras...,...) &;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const volatile &> {
-			using type=R(Paras...,...) volatile&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const &&> {
-			using type=R(Paras...,...) &&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const volatile &&> {
-			using type=R(Paras...,...) volatile &&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const noexcept> {
-			using type=R(Paras...,...) noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const volatile noexcept> {
-			using type=R(Paras...,...) volatile noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const & noexcept> {
-			using type=R(Paras...,...) & noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const volatile & noexcept> {
-			using type=R(Paras..., ...) volatile & noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const && noexcept> {
-			using type=R(Paras...,...) && noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_const<R(Paras...,...) const volatile && noexcept> {
-			using type=R(Paras...,...) volatile && noexcept;
-		};
-
-
-		
-		template<typename T>
-		struct remove_function_volatile {
-			using type=T;
-		};
-
-		//total 24 partial specialization
-		//regular
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) volatile> {
-			using type=R(Paras...);
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) const volatile> {
-			using type=R(Paras...) const;
-		};
-
-		//&
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) volatile&> {
-			using type=R(Paras...)&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) const volatile&> {
-			using type=R(Paras...) const &;
-		};
-
-		//&&
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) volatile&&> {
-			using type=R(Paras...)&&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) const volatile&&> {
-			using type=R(Paras...) const&&;
-		};
-
-		//noexcept:
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) volatile noexcept> {
-			using type=R(Paras...) noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) const volatile noexcept> {
-			using type=R(Paras...) const noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) volatile& noexcept> {
-			using type=R(Paras...) & noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) const volatile& noexcept> {
-			using type=R(Paras...) const & noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) volatile&& noexcept> {
-			using type=R(Paras...)&&noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras...) const volatile&& noexcept> {
-			using type=R(Paras...) const&& noexcept;
-		};
-
-		//c-style variadic
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) volatile> {
-			using type=R(Paras..., ...);
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) const volatile> {
-			using type=R(Paras..., ...) const;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) volatile&> {
-			using type=R(Paras..., ...)&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) const volatile&> {
-			using type=R(Paras..., ...) const&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) volatile&&> {
-			using type=R(Paras..., ...)&&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) const volatile&&> {
-			using type=R(Paras..., ...) const&&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) volatile noexcept> {
-			using type=R(Paras..., ...) noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) const volatile noexcept> {
-			using type=R(Paras..., ...) const noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) volatile& noexcept> {
-			using type=R(Paras..., ...) & noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) const volatile& noexcept> {
-			using type=R(Paras..., ...) const& noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) volatile&& noexcept> {
-			using type=R(Paras..., ...)&&noexcept;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_function_volatile<R(Paras..., ...) const volatile&& noexcept> {
-			using type=R(Paras..., ...) const&& noexcept;
-		};
-
-		template<typename T>
-		using remove_function_cv=typename remove_function_const<
-									typename remove_function_volatile<T
-												>::type
-											>::type;
-
-		template<typename T>
-		struct remove_noexcept {
-			using type=T;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_noexcept <R(Paras...) noexcept> {
-			using type=R(Paras...);
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_noexcept<R(Paras...) const noexcept>{
-			using type=R(Paras...) const;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_noexcept <R(Paras...) volatile noexcept> {
-			using type=R(Paras...) volatile;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_noexcept<R(Paras...) const volatile noexcept> {
-			using type=R(Paras...) const volatile;
-		};
-		
-		template<typename R,typename ...Paras>
-		struct remove_noexcept<R(Paras...) & noexcept> {
-			using type=R(Paras...)&;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_noexcept<R(Paras...) const & noexcept> {
-			using type=R(Paras...)&&;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_noexcept<R(Paras...) volatile& noexcept> {
-			using type=R(Paras...) volatile&;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_noexcept<R(Paras...) const volatile& noexcept> {
-			using type=R(Paras...) const volatile&;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_noexcept<R(Paras...)&&noexcept> {
-			using type=R(Paras...)&&;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_noexcept<R(Paras...) const&& noexcept> {
-			using type=R(Paras...) const&&;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_noexcept<R(Paras...) volatile&& noexcept> {
-			using type=R(Paras...) volatile&&;
-		};
-
-		template<typename R,typename ...Paras>
-		struct remove_noexcept<R(Paras...) const volatile&& noexcept> {
-			using type=R(Paras...) const volatile&&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept <R(Paras...,...) noexcept> {
-			using type=R(Paras...,...);
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept<R(Paras...,...) const noexcept> {
-			using type=R(Paras...,...) const;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept <R(Paras...,...) volatile noexcept> {
-			using type=R(Paras...,...) volatile;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept<R(Paras...,...) const volatile noexcept> {
-			using type=R(Paras...,...) const volatile;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept<R(Paras...,...) & noexcept> {
-			using type=R(Paras...,...)&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept<R(Paras...,...) const& noexcept> {
-			using type=R(Paras...,...)&&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept<R(Paras...,...) volatile& noexcept> {
-			using type=R(Paras...,...) volatile&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept<R(Paras...,...) const volatile& noexcept> {
-			using type=R(Paras...,...) const volatile&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept<R(Paras...,...)&&noexcept> {
-			using type=R(Paras...,...)&&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept<R(Paras...,...) const&& noexcept> {
-			using type=R(Paras...,...) const&&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept<R(Paras...,...) volatile&& noexcept> {
-			using type=R(Paras...,...) volatile&&;
-		};
-
-		template<typename R, typename ...Paras>
-		struct remove_noexcept<R(Paras...,...) const volatile&& noexcept> {
-			using type=R(Paras...,...) const volatile&&;
-		};
-
-		template<typename T>
-		using remove_function_noexcept=typename remove_noexcept<T>::type;
-	}
-
+	using Is_member_object_pointer=typename detail::Is_member_object_pointer_<typename Remove_cv<T>::type>::type;
 	
 	namespace detail {
 
@@ -719,300 +317,6 @@ namespace TinySTL{
 		template<typename T>
 		struct Is_function_ :_false_type {};
 
-		//total 48 partial specializations
-		//regular 
-		template<typename R,typename ...Paras>
-		struct Is_function_<R(Paras...)> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...)> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		
-
-		//cv
-		template<typename R,typename ...Paras>
-		struct Is_function_<R(Paras...) const> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-		template<typename R,typename ...Paras>
-		struct Is_function_<R(Paras...) volatile>:_true_type{
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R,typename ...Paras>
-		struct Is_function_<R(Paras...) const volatile> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-	
-		template<typename R,typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) volatile> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const volatile> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		//&/&&
-		template<typename R,typename ...Paras>
-		struct Is_function_<R(Paras...) &>:_true_type{
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) const &> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) volatile &> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) const volatile &> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...,...) &> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const &> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) volatile &> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const volatile &> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) &&> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) const &&> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) volatile &&> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) const volatile &&> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...,...) &&> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const &&> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) volatile &&> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const volatile &&> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		//noexcept
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) const noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) volatile noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) const volatile noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...,...) noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) volatile noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const volatile noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) & noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) const & noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) volatile & noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) const volatile & noexcept>:_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) & noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const & noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) volatile & noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const volatile & noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) && noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) const && noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) volatile && noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...) const volatile && noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=false;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras...,...) && noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const && noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) volatile && noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
-		template<typename R, typename ...Paras>
-		struct Is_function_<R(Paras..., ...) const volatile &&noexcept> :_true_type {
-			using Return=R;
-			static constexpr bool variadic=true;
-		};
-
 	}
 
 	template<typename T>
@@ -1028,7 +332,66 @@ namespace TinySTL{
 	struct function_traits<T, false> {
 	};
 
-	//Type construction:
+	namespace detail {
+		template<typename T>
+		using Is_enum_=Disjunction<Is_void<T>, Is_null_pointer<T>, Is_integral<T>, Is_floating_point<T>,
+								  Is_array<T>, Is_pointer<T>, Is_class<T>,
+								  Is_lvalue_reference<T>,Is_rvalue_reference<T>,
+								  Is_member_object_pointer<T>, Is_member_function_pointer<T>,
+								  Is_function<T>>;
+	}
+
+	template<typename T>
+	using Is_enum=typename Negation<detail::Is_enum_<T>>::type;
+
+	/////////////////////////////////////
+	///Composite type categories/////////
+	/////////////////////////////////////
+	template<typename T>
+	using Is_arithmetic=typename Disjunction<Is_integral<T>, Is_floating_point<T>>::type;
+
+	template<typename T>
+	using Is_fundamental=typename Disjunction<Is_arithmetic<T>, Is_void<T>, Is_null_pointer<T>>::type;
+
+	template<typename T>
+	using Is_member_pointer=typename Disjunction<Is_member_object_pointer<T>, Is_member_function_pointer<T>>::type;
+	
+	template<typename T>
+	using Is_scalar=typename Disjunction<Is_arithmetic<T>, Is_pointer<T>, Is_member_pointer<T>,
+										 Is_enum<T>, Is_null_pointer<T>>::type;
+	
+	template<typename T>
+	using Is_reference=typename Disjunction<Is_lvalue_reference<T>, Is_rvalue_reference<T>>::type;
+
+
+	//template<typename T>
+	//using Is_object=typename Disjunction<Is_scalar<T>, Is_array<T>, Is_class<T>>::type;
+
+	//why I use this version as following?
+	//just because I can't write the "Is_union" though there are instantiations of Is_function...
+	namespace detail {
+		template<typename T>
+		using Is_object_=typename Conjunction<Is_void<T>, Is_reference<T>, Is_function<T>>::type;
+	}
+
+	template<typename T>
+	using Is_object=typename Negation<detail::Is_object_<T>>::type;
+	
+	//fundamemtal include arithmetic,null_pointer,void
+	//others are compound types
+	//this is,array,function,union,reference,pointer,pointer to member,class,union,enumeration
+	template<typename T>
+	using Is_compound=typename Negation<Is_fundamental<T>>::type;
+	
+	////////////////////////
+	///Type properties//////
+	////////////////////////
+	template<typename T>
+	struct Is_const;
+
+	////////////////////////
+	///Type construction////
+	////////////////////////
 	template<typename T>
 	struct Remove_pointer{
 		using type=T;
@@ -1134,6 +497,7 @@ namespace TinySTL{
 
 
 	//以下模板用于去除cv
+	//t
 	template<typename T>
 	struct Remove_const{
 		using type=T;
@@ -1430,9 +794,704 @@ namespace TinySTL{
 	static_assert(has_SizeType_v<sizeable>,
 					"Compiler bug:Injected class name missing");
 
-	template<typename T>
-	struct Is_reference:_or_<Is_lvalue_reference<T>,Is_rvalue_reference<T>>::type{};
+	
+	namespace detail {
+		/*template<typename T>
+		struct remove_function_const{
+			using type=T;
+		};
 
+		//total 24 partial specialization
+		//regular
+		template<typename R,typename ...Paras>
+		struct remove_function_const<R(Paras...) const>{
+			using type=R(Paras...);
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_function_const<R(Paras...) const volatile> {
+			using type=R(Paras...) volatile;
+		};
+
+		//&
+		template<typename R,typename ...Paras>
+		struct remove_function_const<R(Paras...) const &> {
+			using type=R(Paras...) &;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_function_const<R(Paras...) const volatile&> {
+			using type=R(Paras...) volatile &;
+		};
+
+		//&&
+		template<typename R,typename ...Paras>
+		struct remove_function_const<R(Paras...) const &&> {
+			using type=R(Paras...) &&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...) const volatile&&> {
+			using type=R(Paras...) volatile &&;
+		};
+
+		//noexcept:
+		template<typename R,typename ...Paras>
+		struct remove_function_const<R(Paras...) const noexcept> {
+			using type=R(Paras...) noexcept;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_function_const<R(Paras...) const volatile noexcept> {
+			using type=R(Paras...) volatile noexcept;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_function_const<R(Paras...) const & noexcept> {
+			using type=R(Paras...) & noexcept;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_function_const<R(Paras...) const volatile & noexcept> {
+			using type=R(Paras...) volatile & noexcept;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_function_const<R(Paras...) const && noexcept> {
+			using type=R(Paras...) && noexcept;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_function_const<R(Paras...) const volatile&& noexcept> {
+			using type=R(Paras...) volatile && noexcept;
+		};
+
+		//c-style variadic
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const> {
+			using type=R(Paras...,...);
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const volatile> {
+			using type=R(Paras...,...) volatile;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const &> {
+			using type=R(Paras...,...) &;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const volatile &> {
+			using type=R(Paras...,...) volatile&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const &&> {
+			using type=R(Paras...,...) &&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const volatile &&> {
+			using type=R(Paras...,...) volatile &&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const noexcept> {
+			using type=R(Paras...,...) noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const volatile noexcept> {
+			using type=R(Paras...,...) volatile noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const & noexcept> {
+			using type=R(Paras...,...) & noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const volatile & noexcept> {
+			using type=R(Paras..., ...) volatile & noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const && noexcept> {
+			using type=R(Paras...,...) && noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_const<R(Paras...,...) const volatile && noexcept> {
+			using type=R(Paras...,...) volatile && noexcept;
+		};
+
+
+
+		template<typename T>
+		struct remove_function_volatile {
+			using type=T;
+		};
+
+		//total 24 partial specialization
+		//regular
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) volatile> {
+			using type=R(Paras...);
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) const volatile> {
+			using type=R(Paras...) const;
+		};
+
+		//&
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) volatile&> {
+			using type=R(Paras...)&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) const volatile&> {
+			using type=R(Paras...) const &;
+		};
+
+		//&&
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) volatile&&> {
+			using type=R(Paras...)&&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) const volatile&&> {
+			using type=R(Paras...) const&&;
+		};
+
+		//noexcept:
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) volatile noexcept> {
+			using type=R(Paras...) noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) const volatile noexcept> {
+			using type=R(Paras...) const noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) volatile& noexcept> {
+			using type=R(Paras...) & noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) const volatile& noexcept> {
+			using type=R(Paras...) const & noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) volatile&& noexcept> {
+			using type=R(Paras...)&&noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras...) const volatile&& noexcept> {
+			using type=R(Paras...) const&& noexcept;
+		};
+
+		//c-style variadic
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) volatile> {
+			using type=R(Paras..., ...);
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) const volatile> {
+			using type=R(Paras..., ...) const;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) volatile&> {
+			using type=R(Paras..., ...)&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) const volatile&> {
+			using type=R(Paras..., ...) const&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) volatile&&> {
+			using type=R(Paras..., ...)&&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) const volatile&&> {
+			using type=R(Paras..., ...) const&&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) volatile noexcept> {
+			using type=R(Paras..., ...) noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) const volatile noexcept> {
+			using type=R(Paras..., ...) const noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) volatile& noexcept> {
+			using type=R(Paras..., ...) & noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) const volatile& noexcept> {
+			using type=R(Paras..., ...) const& noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) volatile&& noexcept> {
+			using type=R(Paras..., ...)&&noexcept;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_function_volatile<R(Paras..., ...) const volatile&& noexcept> {
+			using type=R(Paras..., ...) const&& noexcept;
+		};
+
+		template<typename T>
+		using remove_function_cv=typename remove_function_const<
+									typename remove_function_volatile<T
+												>::type
+											>::type;
+
+		template<typename T>
+		struct remove_noexcept {
+			using type=T;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept <R(Paras...) noexcept> {
+			using type=R(Paras...);
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept<R(Paras...) const noexcept>{
+			using type=R(Paras...) const;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept <R(Paras...) volatile noexcept> {
+			using type=R(Paras...) volatile;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept<R(Paras...) const volatile noexcept> {
+			using type=R(Paras...) const volatile;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept<R(Paras...) & noexcept> {
+			using type=R(Paras...)&;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept<R(Paras...) const & noexcept> {
+			using type=R(Paras...)&&;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept<R(Paras...) volatile& noexcept> {
+			using type=R(Paras...) volatile&;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept<R(Paras...) const volatile& noexcept> {
+			using type=R(Paras...) const volatile&;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept<R(Paras...)&&noexcept> {
+			using type=R(Paras...)&&;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept<R(Paras...) const&& noexcept> {
+			using type=R(Paras...) const&&;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept<R(Paras...) volatile&& noexcept> {
+			using type=R(Paras...) volatile&&;
+		};
+
+		template<typename R,typename ...Paras>
+		struct remove_noexcept<R(Paras...) const volatile&& noexcept> {
+			using type=R(Paras...) const volatile&&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept <R(Paras...,...) noexcept> {
+			using type=R(Paras...,...);
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept<R(Paras...,...) const noexcept> {
+			using type=R(Paras...,...) const;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept <R(Paras...,...) volatile noexcept> {
+			using type=R(Paras...,...) volatile;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept<R(Paras...,...) const volatile noexcept> {
+			using type=R(Paras...,...) const volatile;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept<R(Paras...,...) & noexcept> {
+			using type=R(Paras...,...)&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept<R(Paras...,...) const& noexcept> {
+			using type=R(Paras...,...)&&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept<R(Paras...,...) volatile& noexcept> {
+			using type=R(Paras...,...) volatile&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept<R(Paras...,...) const volatile& noexcept> {
+			using type=R(Paras...,...) const volatile&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept<R(Paras...,...)&&noexcept> {
+			using type=R(Paras...,...)&&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept<R(Paras...,...) const&& noexcept> {
+			using type=R(Paras...,...) const&&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept<R(Paras...,...) volatile&& noexcept> {
+			using type=R(Paras...,...) volatile&&;
+		};
+
+		template<typename R, typename ...Paras>
+		struct remove_noexcept<R(Paras...,...) const volatile&& noexcept> {
+			using type=R(Paras...,...) const volatile&&;
+		};
+
+		template<typename T>
+		using remove_function_noexcept=typename remove_noexcept<T>::type;*/
+
+		//romove_function_lvalue_reference
+		//remove_function_rvalue_reference
+		//five restriction total 120 partial specialization!
+	}
+
+	namespace detail {
+		//total 48 partial specializations
+		//regular 
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...)> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...)> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		//cv
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) volatile> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const volatile> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) volatile> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const volatile> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		//&/&&
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...)&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) volatile&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const volatile&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...)&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) volatile&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const volatile&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...)&&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const&&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) volatile&&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const volatile&&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...)&&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const&&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) volatile&&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const volatile&&> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		//noexcept
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) volatile noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const volatile noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) volatile noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const volatile noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) & noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) volatile& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const volatile& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) & noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) volatile& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const volatile& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...)&&noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const&& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) volatile&& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras...) const volatile&& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=false;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...)&&noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const&& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) volatile&& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+
+		template<typename R, typename ...Paras>
+		struct Is_function_<R(Paras..., ...) const volatile&& noexcept> :_true_type {
+			using Return=R;
+			static constexpr bool variadic=true;
+		};
+	}
 	
 }
 
