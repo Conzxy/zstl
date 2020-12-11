@@ -4,6 +4,7 @@
 //该文件实现了一部分标准库traits（×），templates练习（√）
 #include <cstddef>
 #include <type_traits>
+#include <cstdint>
 #include <stl_type_traits_base.h>
 
 #define DEFINE_HAS_TYPE(Memtype)						            \
@@ -35,11 +36,30 @@ struct Is_floating_point_<TYPE>:_true_type{};						\
 	
 
 namespace TinySTL{
+	
+	namespace detail {
+		using int_=std::intmax_t;
+
+		template<typename T>
+		struct Remove_const_;
+
+		template<typename T>
+		struct Remove_volatile_;
+	}
+
+	using int_=detail::int_;
+
 	template<typename T>
 	struct Remove_reference;
 
 	template<typename T>
-	struct Remove_cv;
+	using Remove_const_t=typename detail::Remove_const_<T>::type;
+
+	template<typename T>
+	using Remove_volatile_t=typename detail::Remove_volatile_<T>::type;
+
+	template<typename T>
+	using Remove_cv_t=Remove_const_t<Remove_volatile_t<T>>;
 
 	template<typename T>
 	struct Add_rvalue_reference;
@@ -51,36 +71,13 @@ namespace TinySTL{
 	template<typename...>
 	using Void_t=void;
 	
-	//if condition bool value is true,select the second template parameter
-	//otherwise,select the third template parameter
-	/*template<bool ,typename T,typename F>
-	struct Conditional {
-		using type=T;
-	};
-
-	template<typename T,typename F>
-	struct Conditional<false, T, F> {
-		using type=F;
-	};
+	namespace detail {
+		template<bool>
+		struct Conditional_;
+	}
 
 	template<bool Cond,typename T,typename F>
-	using Conditional_t=typename Conditional<Cond, T, F>::type;*/
-
-	//according to the rule of chiel,use alias template to optimize conditional<>
-	template<bool>
-	struct Conditional {
-		template<typename T,typename F>
-		using type=T;
-	};
-
-	template<>
-	struct Conditional<false> {
-		template<typename T,typename F>
-		using type=F;
-	};
-
-	template<bool Cond,typename T,typename F>
-	using Conditional_t= typename Conditional<Cond>::template type<T,F>;
+	using Conditional_t= typename detail::Conditional_<Cond>::template type<T,F>;
 
 	//_or_,_and_可用于组合谓词
 	template<typename ...>
@@ -150,7 +147,7 @@ namespace TinySTL{
 	}
 
 	template<typename T>
-	using Is_void=typename detail::Is_void_helper<typename Remove_cv<T>::type>::type;
+	using Is_void=typename detail::Is_void_helper<Remove_cv_t<T>>::type;
 
 	namespace detail {
 		template<typename T>
@@ -175,7 +172,7 @@ namespace TinySTL{
 	}
 
 	template<typename T>
-	using Is_integral=typename detail::Is_integral_<typename Remove_cv<T>::type>::type;
+	using Is_integral=typename detail::Is_integral_<Remove_cv_t<T>>::type;
 
 	namespace detail {
 		template<typename T>
@@ -187,7 +184,7 @@ namespace TinySTL{
 	}
 
 	template<typename T>
-	using Is_floating_point=typename detail::Is_floating_point_<typename Remove_cv<T>::type>::type;
+	using Is_floating_point=typename detail::Is_floating_point_<Remove_cv_t<T>>::type;
 
 	
 	namespace detail {
@@ -197,7 +194,7 @@ namespace TinySTL{
 		template<typename T>
 		struct Is_array_<T[]> :_true_type {};
 
-		template<typename T, std::size_t sz>
+		template<typename T, int_ sz>
 		struct Is_array_<T[sz]> :_true_type {};
 	}
 
@@ -217,7 +214,7 @@ namespace TinySTL{
 	}
 
 	template<typename T>
-	using Is_pointer=typename detail::Is_pointer_<typename Remove_cv<T>::type>::type;
+	using Is_pointer=typename detail::Is_pointer_<Remove_cv_t<T>>::type;
 
 	namespace detail {
 		template<typename T>
@@ -229,7 +226,7 @@ namespace TinySTL{
 	}
 		
 	template<typename T>
-	using Is_null_pointer=typename detail::Is_null_pointer_<typename Remove_cv<T>::type>::type;
+	using Is_null_pointer=typename detail::Is_null_pointer_<Remove_cv_t<T>>::type;
 
 	namespace detail {
 		template<typename T>
@@ -244,7 +241,7 @@ namespace TinySTL{
 	}
 
 	template<typename T>
-	using Is_member_object_pointer=typename detail::Is_member_object_pointer_<typename Remove_cv<T>::type>::type;
+	using Is_member_object_pointer=typename detail::Is_member_object_pointer_<Remove_cv_t<T>>::type;
 	
 	namespace detail {
 
@@ -264,10 +261,7 @@ namespace TinySTL{
 	}
 
 	template<typename T>
-	using Is_member_function_pointer=typename detail::Is_member_function_pointer_<
-																		typename Remove_cv<T
-																							>::type
-																						>::type;
+	using Is_member_function_pointer=typename detail::Is_member_function_pointer_<Remove_cv_t<T>>::type;
 
 	template<typename T,bool =Is_member_function_pointer<T>::value>
 	struct member_function_pointer_traits {
@@ -386,12 +380,216 @@ namespace TinySTL{
 	////////////////////////
 	///Type properties//////
 	////////////////////////
+	namespace detail {
+		template<typename T>
+		struct Is_const_ :_false_type {
+		};
+
+		template<typename T>
+		struct Is_const_ <T const> :_true_type{
+		};
+
+		template<typename T>
+		struct Is_const_<T const*> :_true_type{
+		};
+	}
+
 	template<typename T>
-	struct Is_const;
+	using Is_const=typename detail::Is_const_<T>::type;
+
+	namespace detail {
+		template<typename T>
+		struct Is_volatile_:_false_type{};
+
+		template<typename T>
+		struct Is_volatile_<T volatile>:_true_type{};
+
+		template<typename T>
+		struct Is_volatile_<T volatile*>:_true_type{};
+	}
+
+	template<typename T>
+	using Is_volatile=typename detail::Is_volatile_<T>::type;
+
+	//Is_trivial
+	//Is_trivially_copyable
+	//Is_standard_layout
+	//Is_literal_type
+
+	template<typename T>
+	using Is_pod=typename _type_traits<T>::is_POD_type;
+
+	template<typename T>
+	using Is_trivially_default_constructible=typename _type_traits<T>::has_trivially_default_constructor;;
+
+	template<typename T>
+	using Is_trivially_copy_constructible=typename _type_traits<T>::has_trivially_copy_constructble;
+
+	template<typename T>
+	using Is_trivially_assigment=typename _type_traits<T>::has_trivially_assigment_operator;
+
+	template<typename T>
+	using Is_trivially_destructible=typename _type_traits<T>::has_trivially_destructor;
+
+	namespace detail {
+		template<typename T,typename =Void_t<>>
+		struct Is_empty_:_false_type{};
+
+		template<typename T>
+		struct Is_empty_<T, Void_t<decltype(sizeof(T)==1)>> :_true_type {};
+	}
+
+	template<typename T>
+	using Is_empty=typename detail::Is_empty_<T>::type;
+
+	namespace detail {
+		//use the property of dynamic_cast
+		template<typename T>
+		_true_type Is_polymorphic_(
+			decltype(dynamic_cast<const volatile void*>(static_cast<T*>(nullptr)))
+		);
+
+		template<typename T>
+		_false_type Is_polymorphic_(...);
+	}
+
+	template<typename T>
+	using Is_polymorphic=decltype(detail::Is_polymorphic_<T>(nullptr));
+	
+	namespace detail {
+		template<typename T,typename =Conjunction<Is_class<T>,Is_polymorphic<T>>>
+		struct Is_abstract_ :_true_type{};
+
+		template<typename T>
+		struct Is_abstract_<T, _false_type>:_false_type{};
+	}
+
+	template<typename T>
+	using Is_abstract=typename detail::Is_abstract_<T>::type;
+
+	//Is_aggregate
+	//Is_fianl
+
+	namespace detail {
+		template<typename T,bool =Is_arithmetic<T>::value>
+		struct Is_signed_:Bool_constant<(bool)(T{-1}<T{0})>{};
+
+		template<typename T>
+		struct Is_signed_<T, false> :_false_type{};
+	}
+
+	template<typename T>
+	using Is_signed=typename detail::Is_signed_<T>::type;
+
+	namespace detail {
+		template<typename T,bool =Is_arithmetic<T>::value>
+		struct Is_unsigned_ :Bool_constant<(bool)(T{0}<T{-1})> {};
+		
+		template<typename T>
+		struct Is_unsigned_<T, false> :_false_type {};
+	}
+
+	template<typename T>
+	using Is_unsigned=typename detail::Is_unsigned_<T>::type;
+
+	namespace detail {
+		template<typename T>
+		struct Is_bounded_array_ :_false_type {};
+
+		template<typename T,int_ sz>
+		struct Is_bounded_array_<T[sz]> :_true_type{
+		};
+
+		template<typename T>
+		struct Is_unbounded_array_ :_false_type {};
+
+		template<typename T>
+		struct Is_unbounded_array_<T[]> :_true_type {};
+	}
+
+	template<typename T>
+	using Is_bounded_array=typename detail::Is_bounded_array_<T>::type;
+
+	template<typename T>
+	using Is_unbounded_array=typename detail::Is_unbounded_array_<T>::type;
+
+	/*namespace detail {
+		template<typename T,bool =Is_enum<T>::value>
+		struct Is_scoped_enum:Bool_constant<Is_convertible<T,std::underling_type_t<T>>::value>{};
+
+		template<typename T>
+		struct Is_scoped_enum<T, false> :_false_type {};
+	}*/
 
 	////////////////////////
-	///Type construction////
+	///Property quries//////
 	////////////////////////
+	
+
+
+
+
+
+
+	////////////////////////
+	///Type relationships///
+	////////////////////////
+
+	namespace detail {
+		/*template<typename T1, typename T2>
+		struct Is_same :_false_type {
+		};
+
+		template<typename T>
+		struct Is_same<T, T> :_true_type {
+		};
+		
+		template<typename T1,typename T2>
+		inline constexpr bool Is_same_v=Is_same<T1,T2>::value;*/
+	
+		//Based on the rule of chiel
+		template<typename T1,typename T2>
+		inline constexpr bool Is_same_=false;
+
+		template<typename T>
+		inline constexpr bool Is_same_<T,T> =true;
+	}
+
+	template<typename T1,typename T2>
+	inline constexpr bool Is_same=detail::Is_same_<T1, T2>;
+	
+	
+	
+	////////////////////////
+	///Type modifications///
+	////////////////////////
+
+
+	//remove cv specifiers:
+	namespace detail {
+		template<typename T>
+		struct Remove_const_ {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_const_ <T const> {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_volatile_ {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_volatile_<T volatile> {
+			using type=T;
+		};
+	}
+	
+
+	//pointers:
 	template<typename T>
 	struct Remove_pointer{
 		using type=T;
@@ -496,48 +694,11 @@ namespace TinySTL{
 	=typename Add_rvalue_reference<T>::type;
 
 
-	//以下模板用于去除cv
-	//t
-	template<typename T>
-	struct Remove_const{
-		using type=T;
-	};
-
-	template<typename T>
-	struct Remove_const<T const>{
-		using type=T;
-	};
-
-	template<typename T>
-	using Remove_const_t=typename Remove_const<T>::type;
-
-	template<typename T>
-	struct Remove_volatile{
-		using type=T;
-	};
-
-	template<typename T>
-	struct Remove_volatile<T volatile>{
-		using type=T;
-	};
-
-	template<typename T>
-	using Remove_volatile_t=typename Remove_volatile<T>::type;
-
-	template<typename T>
-	struct Remove_cv: Remove_const<Remove_volatile_t<T>>
-	{};
-
-	//template<typename T>
-	//using Remove_cv_t=typename Remove_cv<T>::type;
-
-	template<typename T>
-	using Remove_cv_t=Remove_const_t<Remove_volatile_t<T>>;
-
+	
 	//以下模板用于退化（decay）
 	//注意，这里必须先去引用再去cv，不然低层const去不掉（不针对指针）
 	template<typename T>
-	struct Decay:Remove_cv<Remove_reference_t<T>>{
+	struct Decay:Remove_cv_t<Remove_reference_t<T>>{
 	};
 
 	template<typename T>
@@ -551,12 +712,12 @@ namespace TinySTL{
 	};
 
 	//数组特化
-	template<typename T,std::size_t N>
+	template<typename T,int_ N>
 	struct Decay<T[N]>{
 		using type=T*;
 	};
 
-	template<typename T,std::size_t N>
+	template<typename T,int_ N>
 	struct Decay<T(&)[N]>{
 		using type=T*;
 	};
@@ -576,50 +737,45 @@ namespace TinySTL{
 	template<typename T>
 	using Decay_t=typename Decay<T>::type;
 
-	/*template<typename T1,typename T2>
-	struct Is_same{
-		static constexpr bool value=false;
-	};
+	
+	//array:
+	namespace detail {
+		template<typename T>
+		struct Remove_extent_ {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_extent_<T[]> {
+			using type=T;
+		};
+
+		template<typename T, int_ sz>
+		struct Remove_extent_<T[sz]> {
+			using type=T;
+		};
+		template<typename T>
+		struct Remove_all_extents_ {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_all_extents_<T[]> {
+			using type=typename Remove_all_extents_<T>::type;
+		};
+
+		template<typename T, int_ sz>
+		struct Remove_all_extents_<T[sz]> {
+			using type=typename Remove_all_extents_<T>::type;
+		};
+	}
+
 
 	template<typename T>
-	struct Is_same<T,T>{
-		static constexpr bool value=true;
-	};
-
-	template<typename T1,typename T2>
-	constexpr bool Is_same_v=Is_same<T1,T2>::value;*/
+	using Remove_extent_t=typename detail::Remove_extent_<T>::type;
 
 	template<typename T>
-	struct Remove_all_extents :_false_type {
-		using type=T;
-	};
-
-	template<typename T>
-	struct Remove_all_extents<T[]> :_true_type {
-		using type=typename Remove_all_extents<T>::type;
-	};
-
-	template<typename T, std::size_t sz>
-	struct Remove_all_extents<T[sz]> :_true_type {
-		using type=typename Remove_all_extents<T>::type;
-	};
-
-
-	//predicate
-	//以下用于判断类型是否相同
-	template<typename T1,typename T2>
-	struct Is_same:_false_type{
-	};
-
-	template<typename T>
-	struct Is_same<T,T>:_true_type{
-	};
-
-	template<typename T1,typename T2>
-	using Is_same_t=typename Is_same<T1,T2>::type;
-
-	template<typename T1,typename T2>
-	constexpr bool Is_same_v=Is_same<T1,T2>::value;
+	using Remove_all_extents_t=typename detail::Remove_all_extents_<T>::type;
 
 	
 
@@ -643,18 +799,75 @@ namespace TinySTL{
 	template<typename T>
 	constexpr bool Is_default_constructible_v=Is_default_constructible<T>::value;
 	*/
-	template<bool B,typename T=void>
-	struct Enable_if;
+	
+	namespace detail {
+		template<bool B, typename T=void>
+		struct Enable_if_;
 
-	template<typename T>
-	struct Enable_if<true,T>{
-		using type=T;
-	};
+		template<typename T>
+		struct Enable_if_ <true, T> {
+			using type=T;
+		};
+	}
 
 	template<bool Cond,typename T=void>
-	using Enable_if_t=typename Enable_if<Cond,T>::type;
+	using Enable_if_t=typename detail::Enable_if_<Cond,T>::type;
 
+	namespace detail {
+		//if condition bool value is true,select the second template parameter
+		//otherwise,select the third template parameter
+		/*template<bool ,typename T,typename F>
+		struct Conditional {
+			using type=T;
+		};
+
+		template<typename T,typename F>
+		struct Conditional<false, T, F> {
+			using type=F;
+		};
+
+		template<bool Cond,typename T,typename F>
+		using Conditional_t=typename Conditional<Cond, T, F>::type;*/
+
+		//according to the rule of chiel,use alias template to optimize conditional<>
+		template<bool>
+		struct Conditional {
+			template<typename T, typename F>
+			using type=T;
+		};
+
+		template<>
+		struct Conditional<false> {
+			template<typename T, typename F>
+			using type=F;
+		};
+	}
 	
+	namespace detail {
+		//common_type
+		template<typename... Types>
+		struct Common_type_;
+
+		
+		template<typename T>
+		struct Common_type_<T> {
+			using type=Decay_t<T>;
+		};
+
+		template<typename T1, typename T2>
+		struct Common_type_<T1, T2> {
+			using type=Decay_t<decltype(true?TinySTL::declval<T1>():
+				TinySTL::declval<T2>())>;
+		};
+
+		template<typename T1, typename T2, typename... Ts>
+		struct Common_type_<T1, T2, Ts...> {
+			using type=typename Common_type_<typename Common_type_<T1, T2>::type, Ts...>::type;
+		};
+	}
+
+	template<typename... Ts>
+	using Common_type_t=typename detail::Common_type_<Ts...>::type;
 
 	template<typename T>
 	struct Is_destructible_Helper{
@@ -751,28 +964,7 @@ namespace TinySTL{
 
 	//is_convertible continue
 
-	//common_type
-	template<typename... Types>
-	struct Common_type;
-
-	template<typename... Ts>
-	using Common_type_t=typename Common_type<Ts...>::type;
-
-	template<typename T>
-	struct Common_type<T> {
-		using type=Decay_t<T>;
-	};
-
-	template<typename T1,typename T2>
-	struct Common_type<T1, T2> {
-		using type=Decay_t<decltype(true?TinySTL::declval<T1>():
-										 TinySTL::declval<T2>())>;
-	};
-
-	template<typename T1,typename T2,typename... Ts>
-	struct Common_type<T1, T2, Ts...> {
-		using type=Common_type_t<Common_type_t<T1,T2>,Ts...>;
-	};
+	
 
 	
 
