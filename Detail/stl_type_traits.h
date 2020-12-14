@@ -1,7 +1,8 @@
 #ifndef TINYSTL_STL_TYPE_TRAITS_H
 #define TINYSTL_STL_TYPE_TRAITS_H
 
-//该文件实现了一部分标准库traits（×），templates练习（√）
+//该文件实现了标准库type_traits（×），templates练习（√）
+//其中需要借助于编译器的语义traits目前无法实现(e.g.  trivially's)
 #include <cstddef>
 #include <cstdint>
 #include <stl_type_traits_base.h>
