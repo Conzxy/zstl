@@ -1,8 +1,20 @@
 #ifndef TINYSTL_STL_TYPE_TRAITS_BASE_H
 #define TINYSTL_STL_TYPE_TRAITS_BASE_H
 
+//helper of _type_traits<>
+#define DEFINE_TYPE_TRAITS(TYPE)                            \
+template<>                                                  \
+struct _type_traits<TYPE> {                                 \
+    using has_trivially_default_constructor  =_true_type;   \
+    using has_trivially_copy_constructor     =_true_type;   \
+    using has_trivially_assignment_operator  =_true_type;   \
+    using has_trivially_destructor           =_true_type;   \
+    using is_POD_type                        =_true_type;   \
+};                                                          \
+
+
 namespace TinySTL{
-    //以下是供predicate用的基类
+    
     template<typename T,T val>
     struct Integral_constant{
         static constexpr T value=val;
@@ -22,167 +34,34 @@ namespace TinySTL{
     using _true_type=Bool_constant<true>;
     using _false_type=Bool_constant<false>;
 
-    //以下用于类型特性过滤
+
     template<typename T>
     struct _type_traits{
-        typedef _false_type has_trivially_default_constructor;
-        typedef _false_type has_trivially_copy_constructor;
-        typedef _false_type has_trivially_assignment_operator;
-        typedef _false_type has_trivially_destructor;
-        typedef _false_type is_POD_type;
+        using has_trivially_default_constructor     =_false_type;   
+        using has_trivially_copy_constructor        =_false_type;   
+        using has_trivially_assignment_operator     =_false_type;   
+        using has_trivially_destructor              =_false_type;   
+        using is_POD_type                           =_false_type;   
     };
 
-    template<>
-    struct _type_traits<int>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
+    DEFINE_TYPE_TRAITS(char)
+    DEFINE_TYPE_TRAITS(signed char)
+    DEFINE_TYPE_TRAITS(unsigned char)
+    DEFINE_TYPE_TRAITS(char16_t)
+    DEFINE_TYPE_TRAITS(char32_t)
+    DEFINE_TYPE_TRAITS(bool)
+    DEFINE_TYPE_TRAITS(wchar_t)
+    DEFINE_TYPE_TRAITS(signed int)
+    DEFINE_TYPE_TRAITS(unsigned int)
+    DEFINE_TYPE_TRAITS(signed short)
+    DEFINE_TYPE_TRAITS(unsigned short)
+    DEFINE_TYPE_TRAITS(signed long)
+    DEFINE_TYPE_TRAITS(unsigned long)
+    DEFINE_TYPE_TRAITS(signed long long)
+    DEFINE_TYPE_TRAITS(unsigned long long)
 
-    template<>
-    struct _type_traits<unsigned int>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<short>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<unsigned short>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<double>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<float>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<char>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<unsigned char>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<long>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<unsigned long>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<long long>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<long double>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<wchar_t>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<typename T>
-    struct _type_traits<T*>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<typename T>
-    struct _type_traits<T const*>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<char*>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
-
-    template<>
-    struct _type_traits<char const*>{
-        typedef _true_type has_trivially_default_constructor;
-        typedef _true_type has_trivially_copy_constructor;
-        typedef _true_type has_trivially_assignment_operator;
-        typedef _true_type has_trivially_destructor;
-        typedef _true_type is_POD_type;
-    };
+    DEFINE_TYPE_TRAITS(double)
+    DEFINE_TYPE_TRAITS(float)
+    DEFINE_TYPE_TRAITS(double long)
 }
 #endif //TINYSTL_STL_TYPE_TRAITS_BASE_H
