@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <stl_type_traits_base.h>
+#include <type_list.h>
 
 //check if a given type member exists
 #define DEFINE_HAS_TYPE(Memtype)						        \
@@ -42,6 +43,7 @@ struct Is_floating_point_<TYPE>:_true_type{};						\
 template<typename R, typename ...Paras>								\
 struct Is_function_<R(Paras...) TYPE> :_true_type {					\
 	using Return=R;													\
+	using Parameter=mpl::Typelist<Paras...>;						\
 	static constexpr bool variadic=false;							\
 };																	\
 
@@ -50,6 +52,7 @@ struct Is_function_<R(Paras...) TYPE> :_true_type {					\
 template<typename R, typename ...Paras>								\
 struct Is_function_<R(Paras..., ...) TYPE> :_true_type {			\
 	using Return=R;													\
+	using Parameter=mpl::Typelist<Paras...>;						\
 	static constexpr bool variadic=true;							\
 };																	\
 
