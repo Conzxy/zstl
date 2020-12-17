@@ -187,5 +187,4 @@ int main() {
         static_assert(!Is_Empty<cl>, "");
         TL_PRINTS<Push_Back<cl,int>>(std::cout);
         using ttt=typename FrontT<vl>::type;
-        cout<<"hello";
 }
