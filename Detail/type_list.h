@@ -251,7 +251,7 @@ namespace TinySTL {
 
 				template<typename List, typename T>
 				struct Push_Back_ 
-					:Type_identity<Push_Back_Rec<List, T>>{};
+					:Push_Back_Rec<List, T>{};
 
 				template<typename ...Elems, typename New>
 				struct Push_Back_<Typelist<Elems...>, New> {

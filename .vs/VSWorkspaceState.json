@@ -1,9 +1,7 @@
 {
   "ExpandedNodes": [
     "",
-    "\\cmake-build-debug",
-    "\\Detail",
-    "\\src"
+    "\\Detail"
   ],
   "SelectedNode": "\\CMakeLists.txt",
   "PreviewInSolutionExplorer": false
