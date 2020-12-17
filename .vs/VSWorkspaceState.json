@@ -1,9 +1,10 @@
 {
   "ExpandedNodes": [
     "",
+    "\\cmake-build-debug",
     "\\Detail",
     "\\src"
   ],
-  "SelectedNode": "\\src\\Iterator.h",
+  "SelectedNode": "\\CMakeLists.txt",
   "PreviewInSolutionExplorer": false
 }
