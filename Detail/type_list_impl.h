@@ -346,36 +346,23 @@ namespace TinySTL{
 ///////////////////////////////////////////////////////////
 
 			namespace detail {
-				template<typename TL, typename T/*,
-						 bool =Is_Empty<TL>*/>
+				template<typename TL, typename T,
+						 bool =Is_Empty<TL>>
 				struct Index_Of_ {
 					static constexpr int_ temp=Index_Of_<Pop_Front<TL>, T>::value;
 					static constexpr int_ value=(temp==-1?-1:1+temp);
 				};
 
 				template<typename TL>
-				struct Index_Of_ <TL, FrontT<TL>/*,false*/> {
+				struct Index_Of_ <TL, Front<TL>,false> {
 					static constexpr int_ value=0;
 				};
 
-				template<typename T>
-				struct Index_Of_<Typelist<>, T> {
+				template<typename TL,typename T>
+				struct Index_Of_<TL, T, true> {
 					static constexpr int_ value=-1;
 				};
 
-				template<typename T,typename U>
-				struct Index_Of_<Valuelist<T>, U> {
-					static constexpr int_ value=-1;
-				};
-
-				template<typename T>
-				struct Index_Of_<Nil, T> {
-					static constexpr int_ value=-1;
-				};
-				/*template<typename TL,typename T>
-				struct Index_Of_ <TL, T, true> {
-					static constexpr int_ value=-1;
-				};*/
 
 			}
 
