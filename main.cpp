@@ -15,7 +15,6 @@
 using namespace TinySTL;
 using namespace mpl;
 using namespace TL;
-using namespace VL;
 using namespace std;
 
 struct test_1 {
@@ -157,7 +156,12 @@ int main() {
         Is_same_v<Type_At<tl, 2>,vector<int>>;
         Is_same_v<Type_At<tl, 3>, float>;
         static_assert(!Is_Empty<tl>, "");
-        using SignedInt=Typelist<bool, char, signed char, short, int, long, long long>;
+        using SignedInt=Typelist<bool, char, signed char, short, int, long, long long,int,double,int,int,long>;
+        TL_PRINTS<Pick<SignedInt, Valuelist<int_, 3, 4, 5, 6, 2, 1>>>(std::cout);
+        TL_PRINTS<Erase_All<SignedInt, float>>(std::cout);
+        TL_PRINTS<Unique<SignedInt>>(std::cout);
+        TL_PRINTS<Replace_All<SignedInt, int, unsigned char>>(std::cout);
+        Index_Of<SignedInt,vector<int>>;
         static_assert(Is_same_v<Largest_Type<SignedInt>,long long>,"");
         using emptyList=Typelist<>;
         using tl1=Push_Back<SignedInt, unsigned int>;
@@ -168,23 +172,37 @@ int main() {
         using constL=Transform<reverL, Add_const>;
         static_assert(Is_same_v<Front<constL>,const unsigned int>,"");
         TL_PRINTS<constL>(std::cout);
-        static_assert(Length<reverL> ==8,"");
-        static_assert(Is_same_v<Accumulate<SignedInt, Larger_Type, char>, long long>,"");
+        //static_assert(Length<reverL> ==10, ""); 
+        static_assert(Is_same_v<Accumulate<SignedInt, Larger_Type, char>, double>,"");
         TL_PRINTS<Sort<tl1, Larger_pred>>(std::cout);
         
-        using vl=Valuelist<int,1, 2,3,6, 5,4>;
-        VL::Length<vl>;
-        using evl=Valuelist<int>;
+
+
+        
+        using vl=Valuelist<int,1, 2,3,6, 5,4,2,6,22,33,44,2>;
+        Length<vl>;
+       // using evl=Valuelist<int>;
         Front<vl>;
-        static_assert(Is_Empty<evl>, "");
+        //static_assert(Is_Empty<evl>, "");
         TL_PRINTS<typename Push_FrontT<vl, CValueT<int,5>>::type>(std::cout);
         TL_PRINTS<Push_Back<vl, CValueT<int,99>>>(std::cout);
         TL_PRINTS<Sort<vl, Larger_pred_v>>(std::cout);
-        using cl=Cons<int, Cons<double, Cons<char, Cons<unsigned int>>>>;
+        TL_PRINTS<Erase<vl, CValueT<int,2>>>(std::cout);
+        TL_PRINTS<Unique<vl>>(std::cout);
+        Index_Of<vl, CValueT<int,229>>;
+        
+        using cl=Cons<int, Cons<double, Cons<char, Cons<unsigned int,Cons<int,Cons<unsigned char,Cons<long,
+            Cons<long long,Cons<double,Cons<float>>>>>>>>>>;
+        Index_Of<cl, char>;
         Front<cl>;
         Length<cl>;
         Is_same_v<Type_At<cl, 3>, unsigned int>;
         static_assert(!Is_Empty<cl>, "");
+        TL_PRINTS<Erase<cl, int>>(std::cout);
+        TL_PRINTS<Erase_All<cl, int>>(std::cout);
+        TL_PRINTS<Replace<cl, double, char>>(std::cout);
+        TL_PRINTS<Replace_All<cl, int, unsigned char>>(std::cout);
+        TL_PRINTS<Unique<cl>>(std::cout);
         TL_PRINTS<Push_Back<cl,int>>(std::cout);
         using ttt=typename FrontT<vl>::type;
 }

@@ -1,0 +1,4 @@
+# ninja log v5
+0	83	629962189	CMakeFiles/TinySTL.dir/Detail/_alloc.cpp.obj	66fa6f4c3dd9014
+6	507	629962190	CMakeFiles/TinySTL.dir/main.cpp.obj	b49e7000e92d88f5
+508	836	629962190	TinySTL.exe	2eb0cd004844823a

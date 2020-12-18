@@ -1,12 +1,6 @@
 # ninja log v5
 1	96	629913070	CMakeFiles/TinySTL.dir/Detail/_alloc.cpp.obj	66fa6f4c3dd9014
-6	582	629913071	CMakeFiles/TinySTL.dir/main.cpp.obj	b49e7000e92d88f5
-582	889	629913071	TinySTL.exe	2eb0cd004844823a
-1	1025	629913260	CMakeFiles/TinySTL.dir/main.cpp.obj	b49e7000e92d88f5
-1025	1280	629913260	TinySTL.exe	2eb0cd004844823a
-1	958	629913844	CMakeFiles/TinySTL.dir/main.cpp.obj	b49e7000e92d88f5
-958	1225	629913844	TinySTL.exe	2eb0cd004844823a
-0	619	629914195	CMakeFiles/TinySTL.dir/main.cpp.obj	b49e7000e92d88f5
-619	885	629914196	TinySTL.exe	2eb0cd004844823a
-1	630	629914621	CMakeFiles/TinySTL.dir/main.cpp.obj	b49e7000e92d88f5
-630	838	629914622	TinySTL.exe	2eb0cd004844823a
+1	752	629984619	CMakeFiles/TinySTL.dir/main.cpp.obj	b49e7000e92d88f5
+752	1037	629984620	TinySTL.exe	2eb0cd004844823a
+0	779	629985349	CMakeFiles/TinySTL.dir/main.cpp.obj	b49e7000e92d88f5
+779	1060	629985349	TinySTL.exe	2eb0cd004844823a
