@@ -13,7 +13,7 @@ namespace TinySTL{
 // class template Select
 // reuse the TinySTL::Conditional
 // because TinySTL::Is_function has used the typelist
-// Invocation(Cond is a pridicate ,T and F are types):
+// Invocation(Cond is a predicate ,T and F are types):
 // Select<Cond,T,F>
 ///////////////////////////////////////////////////////////
 
