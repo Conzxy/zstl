@@ -363,11 +363,10 @@ namespace TinySTL{
 					static constexpr int_ value=-1;
 				};
 
-
 			}
 
 			template<typename TL, typename T>
-			inline constexpr int_ Index_Of=detail::Index_Of_<TL, T>::value;
+			inline constexpr auto Index_Of=detail::Index_Of_<TL, T>::value;
 
 ///////////////////////////////////////////////////////////////////
 // class template Erase
