@@ -145,8 +145,8 @@ namespace TinySTL{
         iterator emplace(const_iterator position,Args&&... args);
         iterator insert(const_iterator position,T const& x);
         iterator insert(const_iterator position,size_type n,T const& x);
-        template<class InputIterator,class =typename Enable_if<
-                                                is_input_iterator<InputIterator>>::type>
+        template<class InputIterator,class =Enable_if_t<
+                                                is_input_iterator<InputIterator>>>
         iterator insert(const_iterator position,
                         InputIterator first,InputIterator last);
         iterator insert(const_iterator position,std::initializer_list<T> il);

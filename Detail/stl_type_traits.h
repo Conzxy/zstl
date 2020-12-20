@@ -415,13 +415,15 @@ namespace TinySTL {
 		//regular
 		template<typename R, typename ...Paras>
 		struct Is_function_<R(Paras...)> :_true_type {
-			using Return=R;
+            using Return=R;
+            using Parameter=mpl::Typelist<Paras...>;
 			static constexpr bool variadic=false;
 		};
 
 		template<typename R, typename ...Paras>
 		struct Is_function_<R(Paras..., ...)> :_true_type {
 			using Return=R;
+            using Parameter=mpl::Typelist<Paras...>;
 			static constexpr bool variadic=true;
 		};
 
@@ -468,7 +470,7 @@ namespace TinySTL {
 		DEFINE_IS_FUNCTION_VARG(noexcept)
 		DEFINE_IS_FUNCTION_VARG(const noexcept)
 		DEFINE_IS_FUNCTION_VARG(volatile noexcept)
-		DEFINE_IS_FUNCTION_VARG(const volatile noexcept)
+        DEFINE_IS_FUNCTION_VARG(const volatile noexcept)
 		DEFINE_IS_FUNCTION_VARG(&noexcept)
 		DEFINE_IS_FUNCTION_VARG(const& noexcept)
 		DEFINE_IS_FUNCTION_VARG(volatile& noexcept)
@@ -488,6 +490,7 @@ namespace TinySTL {
 	template<typename T, bool=Is_function<T>::value>
 	struct function_traits {
 		using Return=typename detail::Is_function_<T>::Return;
+        using Parameter=typename detail::Is_function_<T>::Parameter;
 		static constexpr bool variadic=detail::Is_function_<T>::variadic;
 	};
 
@@ -821,12 +824,12 @@ namespace TinySTL {
 
 		template<typename T>
 		struct Rank_<T[]> {
-			static constexpr int_ value=Rank<T>::value+1;
+			static constexpr int_ value=Rank_<T>::value+1;
 		};
 
 		template<typename T, int_ sz>
 		struct Rank_<T[sz]> {
-			static constexpr int_ value=Rank<T>::value+1;
+			static constexpr int_ value=Rank_<T>::value+1;
 		};
 	}
 
@@ -849,7 +852,7 @@ namespace TinySTL {
 
 		template<typename T, int_ N>
 		struct Extent_<T[], N> {
-			static constexpr int_ value=extent<T, N-1>::value;
+			static constexpr int_ value=Extent_<T, N-1>::value;
 		};
 		template<typename T, int_ sz>
 		struct Extent_<T[sz], 0> {
@@ -858,7 +861,7 @@ namespace TinySTL {
 
 		template<typename T, int_ N, int_ sz>
 		struct Extent_<T[sz], N> {
-			static constexpr int_ value=extent<T, N-1>::value;
+			static constexpr int_ value=Extent_<T, N-1>::value;
 		};
 	}
 
@@ -917,11 +920,10 @@ namespace TinySTL {
 				valueT(x))()) {
 				});
 
-
-		constexpr auto Is_destructible_
+		/*constexpr auto Is_destructible_
 			=Is_valid([](auto x)->decltype((void)(declval<decltype(
 				valueT(x))>().~decltype(valueT(x))())) {
-				});
+				});*/
 
 		constexpr auto Is_constructible_
 			=Is_valid([](auto x,auto ...args)->decltype((void)(decltype(
@@ -938,6 +940,21 @@ namespace TinySTL {
 				swap(declval<decltype(valueT(x))>(), declval<decltype(valueT(y))>()),
 				swap(declval<decltype(valueT(y))>(), declval<decltype(valueT(x))>()))) {
 				});
+
+
+		template<typename T>
+		struct Is_destructible_Helper {
+		private:
+			//declval<U&>().~U()
+			//express p->~U(),i.e. (*p).~U() requiring p is a lvalue
+			template<typename U, typename=decltype(declval<U&>().~U())>
+			static _true_type test(void*);
+			template<typename>
+			static _false_type test(...);
+		public:
+			using type=decltype(test<T>(nullptr));
+		};
+
 	}
 	//type
 	template<typename T>
@@ -971,7 +988,7 @@ namespace TinySTL {
 
 	template<typename T>
 	using Is_destructible
-		=decltype(detail::Is_destructible_(detail::type<T>));
+		=typename detail::Is_destructible_Helper<T>::type;
 
 	template<typename T,typename U>
 	using Is_swappable_with
@@ -1002,24 +1019,25 @@ namespace TinySTL {
 	struct Is_nothrow_destructible<T,_false_type>
 		:_false_type {};
 
-	namespace detail {
-		template<typename T, typename ...Types>
-		struct Is_nothrow_constructible_helper {
-		private:
-			template<typename =Is_constructible<T>>
-			struct test :Bool_constant<noexcept(T(declval<Types>()...))> {};
 
-			template<>
-			struct test <_false_type> :_false_type {};
-		public:
-			using type=test<>;
+    namespace detail{
+        template<bool ,typename T,typename ...Types>
+        struct Is_nothrow_constructible_:_false_type{
+        };
 
-		};
-	}
+        template<typename T,typename ...Types>
+        struct Is_nothrow_constructible_<true,T,Types...>
+            :Bool_constant<noexcept(T(declval<Types>()...))>{};
+
+        template<typename T,typename ...Types>
+        struct Is_nothrow_constructible_helper
+            :Is_nothrow_constructible_<Is_constructible<T,Types...>::value,T,Types...>{
+        };
+    }
 
 	template<typename T,typename ...Types>
-	struct Is_nothrow_constructible 
-		: detail::Is_nothrow_constructible_helper<T, Types...>::type {};
+	using Is_nothrow_constructible
+        =typename detail::Is_nothrow_constructible_helper<T, Types...>::type;
 
 	template<typename T,typename =Is_copy_constructible<T>>
 	struct Is_nothrow_copy_constructible
@@ -1071,7 +1089,7 @@ namespace TinySTL {
 	struct Is_nothrow_swappable_with<T,_false_type>
 		:_false_type {};
 
-	template<typename T, typename =Is_swappable<T>::type>
+	template<typename T, typename =typename Is_swappable<T>::type>
 	struct Is_nothrow_swappable :
 		Bool_constant<noexcept(swap(declval<T&>(), declval<T&>()))> {};
 
@@ -1085,9 +1103,9 @@ namespace TinySTL {
 		=Is_default_constructible<T>::value;
 
 
-	template<typename ...Types>
+	template<typename T,typename ...Types>
 	inline constexpr bool Is_constructible_v
-		=Is_constructible<Types...>::value;
+		=Is_constructible<T,Types...>::value;
 
 	template<typename T>
 	inline constexpr bool Is_copy_constructible_v
@@ -1120,6 +1138,7 @@ namespace TinySTL {
 	template<typename T>
 	inline constexpr bool Is_swappable_v
 		=Is_swappable<T>::value;
+
 	//nothrow-variable
 	template<typename T>
 	inline constexpr bool Is_nothrow_default_constructible_v
@@ -1160,31 +1179,6 @@ namespace TinySTL {
 	template<typename T>
 	inline constexpr bool Is_nothrow_swappable_v
 		=Is_nothrow_swappable<T>::value;
-
-
-	/*namespace detail {
-		template<typename T>
-		struct Is_destructible_Helper {
-		private:
-			//declval<U&>().~U()
-			//express p->~U(),i.e. (*p).~U() requiring p is a lvalue
-			template<typename U, typename=decltype(declval<U&>().~U())>
-			static _true_type test(void*);
-			template<typename>
-			static _false_type test(...);
-		public:
-			using type=decltype(test<T>(nullptr));
-		};
-	}
-
-	template<typename T>
-	struct Is_destructible : detail::Is_destructible_Helper<T>::type {};
-
-	template<typename T>
-	constexpr bool Is_destructible_v=Is_destructible<T>::value;*/
-
-
-
 
 
 	////////////////////////

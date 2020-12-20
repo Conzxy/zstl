@@ -49,8 +49,8 @@ void TL_PRINTS(std::ostream& ostr) {
 }*/
 
 template<typename TL>
-void TL_PRINTS(std::ostream& os) {
-    os<<typeid(TL).name()<<'\n';
+std::ostream& TL_PRINTS(std::ostream& os=std::cout) {
+    return os<<typeid(TL).name()<<'\n';
 }
 
 template<typename T,typename U>
@@ -58,14 +58,9 @@ struct Larger_Type {
     using type=TinySTL::Conditional_t<(sizeof(T)<sizeof(U)),U,T>;
 };
 
-template<typename T,typename U,bool =(sizeof(T) > sizeof(U))>
-struct Larger_pred {
-    static constexpr bool value=true;
-};
-
 template<typename T,typename U>
-struct Larger_pred<T, U, false> {
-    static constexpr bool value=false;
+struct Larger_pred {
+    static constexpr bool value=sizeof(T) > sizeof(U);
 };
 
 template<typename T,typename U>

@@ -8,7 +8,7 @@
 #include <algorithm.h>
 #include <Memory.h>
 #include <list.h>
-#include <type_traits.h>
+//#include <type_traits.h>
 #include <iterator>
 #include <MPL.h>
 
@@ -74,7 +74,7 @@ int main() {
 
     
     
-    /*cout<<"test_1:\n"
+    cout<<"test_1:\n"
         <<Is_default_constructible_v<test_1><<'\n'
         <<Is_constructible_v<test_1, int, int><<'\n'
         <<Is_destructible_v<test_1><<'\n'
@@ -150,11 +150,11 @@ int main() {
             <<Is_empty_v<empty_><<'\n';
 
         cout<<"Common_type:\n"
-            <<Is_same_v<int, Common_type_t<int, const int>><<'\n';*/      
+            <<Is_same_v<int, Common_type_t<int, const int>><<'\n';
         
         using tl=Typelist<int, double,vector<int>,float>;
         Is_same_v<Type_At<tl, 2>,vector<int>>;
-        Is_same_v<Type_At<tl, 3>, float>;
+        Is_same_v<Type_At<tl, 1>, float>;
         static_assert(!Is_Empty<tl>, "");
         using SignedInt=Typelist<bool, char, signed char, short, int, long, long long,int,double,int,int,long>;
         TL_PRINTS<Pick<SignedInt, Valuelist<int_, 3, 4, 5, 6, 2, 1>>>(std::cout);
@@ -182,7 +182,7 @@ int main() {
         using vl=Valuelist<int,1, 2,3,6, 5,4,2,6,22,33,44,2>;
         Length<vl>;
        // using evl=Valuelist<int>;
-        Front<vl>;
+        //Front<vl>;
         //static_assert(Is_Empty<evl>, "");
         TL_PRINTS<typename Push_FrontT<vl, CValueT<int,5>>::type>(std::cout);
         TL_PRINTS<Push_Back<vl, CValueT<int,99>>>(std::cout);
@@ -194,7 +194,7 @@ int main() {
         using cl=Cons<int, Cons<double, Cons<char, Cons<unsigned int,Cons<int,Cons<unsigned char,Cons<long,
             Cons<long long,Cons<double,Cons<float>>>>>>>>>>;
         Index_Of<cl, char>;
-        Front<cl>;
+        //Front<cl>;
         Length<cl>;
         Is_same_v<Type_At<cl, 3>, unsigned int>;
         static_assert(!Is_Empty<cl>, "");

@@ -416,7 +416,7 @@ namespace TinySTL{
     /***************************find_if*******************************************/
     template<typename II,typename Pred>
     II find_if(II first, II last, Pred pred) {
-        while (firts!=last&&!pred(*first, val)) ++first;
+        while (first!=last&&!pred(*first)) ++first;
         return first;
     }
 

@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "D:/Clion/TinySTL/Detail/_alloc.cpp" "D:/Clion/TinySTL/cmake-build-debug/CMakeFiles/TinySTL.dir/Detail/_alloc.cpp.obj"
-  "D:/Clion/TinySTL/main.cpp" "D:/Clion/TinySTL/cmake-build-debug/CMakeFiles/TinySTL.dir/main.cpp.obj"
+  "D:/GitHub/TinySTL/Detail/_alloc.cpp" "D:/GitHub/TinySTL/cmake-build-debug/CMakeFiles/TinySTL.dir/Detail/_alloc.cpp.obj"
+  "D:/GitHub/TinySTL/main.cpp" "D:/GitHub/TinySTL/cmake-build-debug/CMakeFiles/TinySTL.dir/main.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

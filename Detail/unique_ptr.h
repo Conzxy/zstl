@@ -12,8 +12,8 @@ namespace TinySTL{
 
         //allow U* is implicitly convertible to T*
         //but doesn't ensure this is safe
-        template<typename U,typename =typename
-                Enable_if<Is_convertible<U*,T*>::value>::type>
+        template<typename U,typename =
+                Enable_if_t<Is_convertible<U*,T*>::value>>
         default_delete(default_delete<U> const& other)noexcept{}
 
         void operator()(T* ptr){
@@ -105,7 +105,7 @@ namespace TinySTL{
         //signature:unique_ptr(pointer p,D&)
         //if deleter_type=A const&/non-ref
         //signature:unique_ptr(pointer p,D const&)
-        unique_ptr(pointer p,typename Conditional_t<
+        unique_ptr(pointer p,Conditional_t<
                     Is_reference<deleter_type>::value,
                     deleter_type,deleter_type const&> d)noexcept
             :M_t(p, d) {

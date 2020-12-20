@@ -1,3 +1,6 @@
+#ifndef LIST_IMPL_H
+#define LIST_IMPL_H
+
 #include <stl_list.h>
 #include <Functional.h>
 
@@ -431,3 +434,5 @@ namespace TinySTL {
 		TinySTL::swap(node,other.node);
 	}
 }
+
+#endif  //LIST_IMPL_H

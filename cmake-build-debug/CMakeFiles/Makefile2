@@ -54,19 +54,19 @@ cmake_force:
 SHELL = cmd.exe
 
 # The CMake executable.
-CMAKE_COMMAND = "C:\Program Files\JetBrains\CLion 2020.2.4\bin\cmake\win\bin\cmake.exe"
+CMAKE_COMMAND = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe"
 
 # The command to remove a file.
-RM = "C:\Program Files\JetBrains\CLion 2020.2.4\bin\cmake\win\bin\cmake.exe" -E rm -f
+RM = "C:\Program Files\JetBrains\CLion 2020.3\bin\cmake\win\bin\cmake.exe" -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = D:\Clion\TinySTL
+CMAKE_SOURCE_DIR = D:\GitHub\TinySTL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = D:\Clion\TinySTL\cmake-build-debug
+CMAKE_BINARY_DIR = D:\GitHub\TinySTL\cmake-build-debug
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -93,14 +93,14 @@ clean: CMakeFiles/TinySTL.dir/clean
 CMakeFiles/TinySTL.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\Clion\TinySTL\cmake-build-debug\CMakeFiles --progress-num=1,2,3 "Built target TinySTL"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles --progress-num=1,2,3 "Built target TinySTL"
 .PHONY : CMakeFiles/TinySTL.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/TinySTL.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\Clion\TinySTL\cmake-build-debug\CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles 3
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/TinySTL.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\Clion\TinySTL\cmake-build-debug\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles 0
 .PHONY : CMakeFiles/TinySTL.dir/rule
 
 # Convenience name for target.

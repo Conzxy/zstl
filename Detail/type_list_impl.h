@@ -2,6 +2,7 @@
 #define TYPE_LIST_IMPL_H
 
 #include <type_list.h>
+#include <type_traits.h>
 
 namespace TinySTL{
 	namespace mpl{
@@ -309,26 +310,14 @@ namespace TinySTL{
 			namespace detail {
 
 				template<typename List, int_ N>
-				struct Type_At_ {
+				struct Type_At_ 
+					:Type_At_<Pop_Front<List>,N-1>{
 					static_assert(!Is_Empty<List>, "Typelist is empty!");
-
-					using type=typename Type_At_<Pop_Front<List>, N-1>::type;
 				};
 
 				template<typename List>
 				struct Type_At_<List, 0>
 					:Type_identity<Front<List>> {};
-
-				/*template<typename Head, typename ...Tail>
-				struct Type_At_ <Typelist<Head, Tail...>, 0> {
-					using type=Head;
-				};
-
-				template<typename Head, typename ...Tail, int_ N>
-				struct Type_At_<Typelist<Head, Tail...>, N> {
-					using type=typename Type_At_<Typelist<Tail...>, N-1>::type;
-				};*/
-
 
 			}
 
@@ -347,18 +336,18 @@ namespace TinySTL{
 
 			namespace detail {
 				template<typename TL, typename T,
-						 bool =Is_Empty<TL>>
+						bool=Is_Empty<TL>>
 				struct Index_Of_ {
 					static constexpr int_ temp=Index_Of_<Pop_Front<TL>, T>::value;
 					static constexpr int_ value=(temp==-1?-1:1+temp);
 				};
 
 				template<typename TL>
-				struct Index_Of_ <TL, Front<TL>,false> {
+				struct Index_Of_ <TL, Front<TL>, false> {
 					static constexpr int_ value=0;
 				};
 
-				template<typename TL,typename T>
+				template<typename TL, typename T>
 				struct Index_Of_<TL, T, true> {
 					static constexpr int_ value=-1;
 				};
