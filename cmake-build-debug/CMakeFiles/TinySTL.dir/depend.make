@@ -4,9 +4,10 @@
 CMakeFiles/TinySTL.dir/Detail/_alloc.cpp.obj: ../Detail/_alloc.cpp
 CMakeFiles/TinySTL.dir/Detail/_alloc.cpp.obj: ../src/alloc.h
 
+CMakeFiles/TinySTL.dir/main.cpp.obj: ../Detail/Tuple.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../Detail/Vector_impl.h
+CMakeFiles/TinySTL.dir/main.cpp.obj: ../Detail/config.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../Detail/list_impl.h
-CMakeFiles/TinySTL.dir/main.cpp.obj: ../Detail/stl_algorithm.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../Detail/stl_iterator.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../Detail/stl_numeric.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../Detail/stl_type_traits.h
@@ -20,12 +21,19 @@ CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/Iterator.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/MPL.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/Memory.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/Prints.h
+CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/Typelist.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/_move.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/algorithm.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/alloc.h
+CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/deque.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/list.h
+CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/priority_queue.h
+CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/queue.h
+CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/stl_algobase.h
+CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/stl_algorithm.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/stl_construct.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/stl_exception.h
+CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/stl_heap.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/stl_list.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/stl_uninitialized.h
 CMakeFiles/TinySTL.dir/main.cpp.obj: ../src/stl_utility.h

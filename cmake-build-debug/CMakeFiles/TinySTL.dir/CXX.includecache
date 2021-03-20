@@ -6,26 +6,32 @@
 
 #IncludeRegexTransform: 
 
+../Detail/Tuple.h
+_move.h
+-
+config.h
+-
+type_traits.h
+-
+type_traits
+-
+Typelist.h
+-
+
 ../Detail/Vector_impl.h
 stl_vector.h
 -
 stl_exception.h
 -
 
+../Detail/config.h
+cstdlib
+-
+
 ../Detail/list_impl.h
 stl_list.h
 -
 Functional.h
--
-
-../Detail/stl_algorithm.h
-cstring
--
-_move.h
--
-stl_iterator.h
--
-type_traits.h
 -
 
 ../Detail/stl_iterator.h
@@ -91,9 +97,7 @@ stl_iterator.h
 -
 
 ../src/MPL.h
-type_list.h
--
-type_list_impl.h
+Typelist.h
 -
 
 ../src/Memory.h
@@ -116,6 +120,12 @@ type_list.h
 type_traits.h
 -
 
+../src/Typelist.h
+type_list.h
+-
+type_list_impl.h
+-
+
 ../src/_move.h
 type_traits.h
 -
@@ -132,10 +142,66 @@ cstddef
 cstdlib
 -
 
+../src/deque.h
+config.h
+-
+stl_iterator.h
+-
+stl_algorithm.h
+-
+stl_uninitialized.h
+-
+Allocator.h
+-
+stl_utility.h
+-
+initializer_list
+-
+stl_exception.h
+-
+
 ../src/list.h
 stl_list.h
 -
 list_impl.h
+-
+
+../src/priority_queue.h
+vector.h
+-
+config.h
+-
+Functional.h
+-
+stl_heap.h
+-
+
+../src/queue.h
+deque
+-
+config.h
+-
+
+../src/stl_algobase.h
+cstring
+-
+_move.h
+-
+stl_iterator.h
+-
+type_traits.h
+-
+
+../src/stl_algorithm.h
+cstring
+-
+_move.h
+-
+stl_iterator.h
+-
+type_traits.h
+-
+stl_algobase.h
 -
 
 ../src/stl_construct.h
@@ -154,6 +220,16 @@ stdexcept
 cassert
 -
 type_traits.h
+-
+
+../src/stl_heap.h
+config.h
+-
+stl_iterator.h
+-
+stl_algorithm.h
+-
+Functional.h
 -
 
 ../src/stl_list.h
@@ -208,10 +284,6 @@ stl_vector.h
 Vector_impl.h
 -
 
-D:/GitHub/TinySTL/Detail/_alloc.cpp
-../src/alloc.h
-D:/GitHub/TinySTL/src/alloc.h
-
 D:/GitHub/TinySTL/main.cpp
 iostream
 -
@@ -237,10 +309,18 @@ iterator
 -
 MPL.h
 -
-
-D:/GitHub/TinySTL/src/alloc.h
-cstddef
+Tuple.h
 -
-cstdlib
+tuple
+-
+priority_queue.h
+-
+deque
+-
+stl_heap.h
+-
+deque.h
+-
+queue.h
 -
 

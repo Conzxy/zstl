@@ -72,46 +72,141 @@ CMAKE_BINARY_DIR = D:\GitHub\TinySTL\cmake-build-debug
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/TinySTL.dir/all
+all: TinySTL/all
+all: test/all
 
 .PHONY : all
 
 # The main recursive "preinstall" target.
-preinstall:
+preinstall: TinySTL/preinstall
+preinstall: test/preinstall
 
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/TinySTL.dir/clean
+clean: TinySTL/clean
+clean: test/clean
 
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/TinySTL.dir
+# Directory level rules for directory TinySTL
+
+# Recursive "all" directory target.
+TinySTL/all: TinySTL/CMakeFiles/TinySTL.dir/all
+
+.PHONY : TinySTL/all
+
+# Recursive "preinstall" directory target.
+TinySTL/preinstall:
+
+.PHONY : TinySTL/preinstall
+
+# Recursive "clean" directory target.
+TinySTL/clean: TinySTL/CMakeFiles/TinySTL.dir/clean
+
+.PHONY : TinySTL/clean
+
+#=============================================================================
+# Directory level rules for directory test
+
+# Recursive "all" directory target.
+test/all: test/CMakeFiles/test_queue.dir/all
+test/all: test/CMakeFiles/test_vector.dir/all
+
+.PHONY : test/all
+
+# Recursive "preinstall" directory target.
+test/preinstall:
+
+.PHONY : test/preinstall
+
+# Recursive "clean" directory target.
+test/clean: test/CMakeFiles/test_queue.dir/clean
+test/clean: test/CMakeFiles/test_vector.dir/clean
+
+.PHONY : test/clean
+
+#=============================================================================
+# Target rules for target TinySTL/CMakeFiles/TinySTL.dir
 
 # All Build rule for target.
-CMakeFiles/TinySTL.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles --progress-num=1,2,3 "Built target TinySTL"
-.PHONY : CMakeFiles/TinySTL.dir/all
+TinySTL/CMakeFiles/TinySTL.dir/all:
+	$(MAKE) $(MAKESILENT) -f TinySTL\CMakeFiles\TinySTL.dir\build.make TinySTL/CMakeFiles/TinySTL.dir/depend
+	$(MAKE) $(MAKESILENT) -f TinySTL\CMakeFiles\TinySTL.dir\build.make TinySTL/CMakeFiles/TinySTL.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles --progress-num=1,2 "Built target TinySTL"
+.PHONY : TinySTL/CMakeFiles/TinySTL.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/TinySTL.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles 3
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/TinySTL.dir/all
+TinySTL/CMakeFiles/TinySTL.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 TinySTL/CMakeFiles/TinySTL.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles 0
-.PHONY : CMakeFiles/TinySTL.dir/rule
+.PHONY : TinySTL/CMakeFiles/TinySTL.dir/rule
 
 # Convenience name for target.
-TinySTL: CMakeFiles/TinySTL.dir/rule
+TinySTL: TinySTL/CMakeFiles/TinySTL.dir/rule
 
 .PHONY : TinySTL
 
 # clean rule for target.
-CMakeFiles/TinySTL.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/clean
-.PHONY : CMakeFiles/TinySTL.dir/clean
+TinySTL/CMakeFiles/TinySTL.dir/clean:
+	$(MAKE) $(MAKESILENT) -f TinySTL\CMakeFiles\TinySTL.dir\build.make TinySTL/CMakeFiles/TinySTL.dir/clean
+.PHONY : TinySTL/CMakeFiles/TinySTL.dir/clean
+
+#=============================================================================
+# Target rules for target test/CMakeFiles/test_queue.dir
+
+# All Build rule for target.
+test/CMakeFiles/test_queue.dir/all:
+	$(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_queue.dir\build.make test/CMakeFiles/test_queue.dir/depend
+	$(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_queue.dir\build.make test/CMakeFiles/test_queue.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles --progress-num=3,4 "Built target test_queue"
+.PHONY : test/CMakeFiles/test_queue.dir/all
+
+# Build rule for subdir invocation for target.
+test/CMakeFiles/test_queue.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 test/CMakeFiles/test_queue.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles 0
+.PHONY : test/CMakeFiles/test_queue.dir/rule
+
+# Convenience name for target.
+test_queue: test/CMakeFiles/test_queue.dir/rule
+
+.PHONY : test_queue
+
+# clean rule for target.
+test/CMakeFiles/test_queue.dir/clean:
+	$(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_queue.dir\build.make test/CMakeFiles/test_queue.dir/clean
+.PHONY : test/CMakeFiles/test_queue.dir/clean
+
+#=============================================================================
+# Target rules for target test/CMakeFiles/test_vector.dir
+
+# All Build rule for target.
+test/CMakeFiles/test_vector.dir/all: TinySTL/CMakeFiles/TinySTL.dir/all
+	$(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_vector.dir\build.make test/CMakeFiles/test_vector.dir/depend
+	$(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_vector.dir\build.make test/CMakeFiles/test_vector.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles --progress-num=5,6 "Built target test_vector"
+.PHONY : test/CMakeFiles/test_vector.dir/all
+
+# Build rule for subdir invocation for target.
+test/CMakeFiles/test_vector.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles 4
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 test/CMakeFiles/test_vector.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles 0
+.PHONY : test/CMakeFiles/test_vector.dir/rule
+
+# Convenience name for target.
+test_vector: test/CMakeFiles/test_vector.dir/rule
+
+.PHONY : test_vector
+
+# clean rule for target.
+test/CMakeFiles/test_vector.dir/clean:
+	$(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_vector.dir\build.make test/CMakeFiles/test_vector.dir/clean
+.PHONY : test/CMakeFiles/test_vector.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

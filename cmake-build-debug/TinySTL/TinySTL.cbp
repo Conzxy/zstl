@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="TinySTL"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\TinySTL\;CMake Files\test\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="D:/GitHub/TinySTL/cmake-build-debug/TinySTL"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="TinySTL">
+				<Option output="D:/GitHub/TinySTL/cmake-build-debug/TinySTL/libTinySTL.dll" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/GitHub/TinySTL/cmake-build-debug/TinySTL"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++"/>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32"/>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward"/>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include"/>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include-fixed"/>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/../../../../x86_64-w64-mingw32/include"/>
+					<Add directory="C:\MinGW\include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 TinySTL"/>
+					<CompileFile command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="TinySTL/fast">
+				<Option output="D:/GitHub/TinySTL/cmake-build-debug/TinySTL/libTinySTL.dll" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/GitHub/TinySTL/cmake-build-debug/TinySTL"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++"/>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32"/>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward"/>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include"/>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include-fixed"/>
+					<Add directory="C:/Program Files/MinGW/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/../../../../x86_64-w64-mingw32/include"/>
+					<Add directory="C:\MinGW\include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 TinySTL/fast"/>
+					<CompileFile command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~1/MinGW/bin/mingw32-make.exe -f &quot;D:/GitHub/TinySTL/cmake-build-debug/TinySTL/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="D:/GitHub/TinySTL/TinySTL/src/_alloc.cpp">
+			<Option target="TinySTL"/>
+		</Unit>
+		<Unit filename="D:/GitHub/TinySTL/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="D:/GitHub/TinySTL/TinySTL/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\TinySTL\"/>
+		</Unit>
+		<Unit filename="D:/GitHub/TinySTL/test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\test\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

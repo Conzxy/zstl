@@ -5,9 +5,10 @@ CMakeFiles/TinySTL.dir/Detail/_alloc.cpp.obj
  D:/GitHub/TinySTL/Detail/_alloc.cpp
  D:/GitHub/TinySTL/src/alloc.h
 CMakeFiles/TinySTL.dir/main.cpp.obj
+ ../Detail/Tuple.h
  ../Detail/Vector_impl.h
+ ../Detail/config.h
  ../Detail/list_impl.h
- ../Detail/stl_algorithm.h
  ../Detail/stl_iterator.h
  ../Detail/stl_numeric.h
  ../Detail/stl_type_traits.h
@@ -21,12 +22,19 @@ CMakeFiles/TinySTL.dir/main.cpp.obj
  ../src/MPL.h
  ../src/Memory.h
  ../src/Prints.h
+ ../src/Typelist.h
  ../src/_move.h
  ../src/algorithm.h
  ../src/alloc.h
+ ../src/deque.h
  ../src/list.h
+ ../src/priority_queue.h
+ ../src/queue.h
+ ../src/stl_algobase.h
+ ../src/stl_algorithm.h
  ../src/stl_construct.h
  ../src/stl_exception.h
+ ../src/stl_heap.h
  ../src/stl_list.h
  ../src/stl_uninitialized.h
  ../src/stl_utility.h

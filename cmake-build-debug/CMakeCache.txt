@@ -162,7 +162,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=TinySTL
+CMAKE_PROJECT_NAME:STATIC=TinySTL_
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=C:/Program Files/MinGW/bin/ranlib.exe
@@ -245,10 +245,22 @@ CMAKE_STRIP:FILEPATH=C:/Program Files/MinGW/bin/strip.exe
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Value Computed by CMake
-TinySTL_BINARY_DIR:STATIC=D:/GitHub/TinySTL/cmake-build-debug
+TinySTL_BINARY_DIR:STATIC=D:/GitHub/TinySTL/cmake-build-debug/TinySTL
 
 //Value Computed by CMake
-TinySTL_SOURCE_DIR:STATIC=D:/GitHub/TinySTL
+TinySTL_SOURCE_DIR:STATIC=D:/GitHub/TinySTL/TinySTL
+
+//Value Computed by CMake
+TinySTL__BINARY_DIR:STATIC=D:/GitHub/TinySTL/cmake-build-debug
+
+//Value Computed by CMake
+TinySTL__SOURCE_DIR:STATIC=D:/GitHub/TinySTL
+
+//Value Computed by CMake
+test_BINARY_DIR:STATIC=D:/GitHub/TinySTL/cmake-build-debug/test
+
+//Value Computed by CMake
+test_SOURCE_DIR:STATIC=D:/GitHub/TinySTL/test
 
 
 ########################
@@ -266,7 +278,7 @@ CMAKE_CACHE_MAJOR_VERSION:INTERNAL=3
 //Minor version of cmake used to create the current loaded cache
 CMAKE_CACHE_MINOR_VERSION:INTERNAL=17
 //Patch version of cmake used to create the current loaded cache
-CMAKE_CACHE_PATCH_VERSION:INTERNAL=3
+CMAKE_CACHE_PATCH_VERSION:INTERNAL=5
 //ADVANCED property for variable: CMAKE_COLOR_MAKEFILE
 CMAKE_COLOR_MAKEFILE-ADVANCED:INTERNAL=1
 //Path to CMake executable.
@@ -363,7 +375,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=1
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=3
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

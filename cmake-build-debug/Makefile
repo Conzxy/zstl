@@ -139,62 +139,34 @@ TinySTL: cmake_check_build_system
 
 # fast build rule for target.
 TinySTL/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/build
+	$(MAKE) $(MAKESILENT) -f TinySTL\CMakeFiles\TinySTL.dir\build.make TinySTL/CMakeFiles/TinySTL.dir/build
 .PHONY : TinySTL/fast
 
-Detail/_alloc.obj: Detail/_alloc.cpp.obj
+#=============================================================================
+# Target rules for targets named test_queue
 
-.PHONY : Detail/_alloc.obj
+# Build rule for target.
+test_queue: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 test_queue
+.PHONY : test_queue
 
-# target to build an object file
-Detail/_alloc.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/Detail/_alloc.cpp.obj
-.PHONY : Detail/_alloc.cpp.obj
+# fast build rule for target.
+test_queue/fast:
+	$(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_queue.dir\build.make test/CMakeFiles/test_queue.dir/build
+.PHONY : test_queue/fast
 
-Detail/_alloc.i: Detail/_alloc.cpp.i
+#=============================================================================
+# Target rules for targets named test_vector
 
-.PHONY : Detail/_alloc.i
+# Build rule for target.
+test_vector: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 test_vector
+.PHONY : test_vector
 
-# target to preprocess a source file
-Detail/_alloc.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/Detail/_alloc.cpp.i
-.PHONY : Detail/_alloc.cpp.i
-
-Detail/_alloc.s: Detail/_alloc.cpp.s
-
-.PHONY : Detail/_alloc.s
-
-# target to generate assembly for a file
-Detail/_alloc.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/Detail/_alloc.cpp.s
-.PHONY : Detail/_alloc.cpp.s
-
-main.obj: main.cpp.obj
-
-.PHONY : main.obj
-
-# target to build an object file
-main.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/main.cpp.obj
-.PHONY : main.cpp.obj
-
-main.i: main.cpp.i
-
-.PHONY : main.i
-
-# target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/main.cpp.i
-.PHONY : main.cpp.i
-
-main.s: main.cpp.s
-
-.PHONY : main.s
-
-# target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\TinySTL.dir\build.make CMakeFiles/TinySTL.dir/main.cpp.s
-.PHONY : main.cpp.s
+# fast build rule for target.
+test_vector/fast:
+	$(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_vector.dir\build.make test/CMakeFiles/test_vector.dir/build
+.PHONY : test_vector/fast
 
 # Help Target
 help:
@@ -205,12 +177,8 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... TinySTL
-	@echo ... Detail/_alloc.obj
-	@echo ... Detail/_alloc.i
-	@echo ... Detail/_alloc.s
-	@echo ... main.obj
-	@echo ... main.i
-	@echo ... main.s
+	@echo ... test_queue
+	@echo ... test_vector
 .PHONY : help
 
 
