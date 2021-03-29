@@ -76,28 +76,28 @@ include test/CMakeFiles/test_queue.dir/progress.make
 # Include the compile flags for this target's objects.
 include test/CMakeFiles/test_queue.dir/flags.make
 
-test/CMakeFiles/test_queue.dir/queue_test.cpp.obj: test/CMakeFiles/test_queue.dir/flags.make
-test/CMakeFiles/test_queue.dir/queue_test.cpp.obj: test/CMakeFiles/test_queue.dir/includes_CXX.rsp
-test/CMakeFiles/test_queue.dir/queue_test.cpp.obj: ../test/queue_test.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/CMakeFiles/test_queue.dir/queue_test.cpp.obj"
-	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\test_queue.dir\queue_test.cpp.obj -c D:\GitHub\TinySTL\test\queue_test.cpp
+test/CMakeFiles/test_queue.dir/test_queue.cpp.obj: test/CMakeFiles/test_queue.dir/flags.make
+test/CMakeFiles/test_queue.dir/test_queue.cpp.obj: test/CMakeFiles/test_queue.dir/includes_CXX.rsp
+test/CMakeFiles/test_queue.dir/test_queue.cpp.obj: ../test/test_queue.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/CMakeFiles/test_queue.dir/test_queue.cpp.obj"
+	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\test_queue.dir\test_queue.cpp.obj -c D:\GitHub\TinySTL\test\test_queue.cpp
 
-test/CMakeFiles/test_queue.dir/queue_test.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test_queue.dir/queue_test.cpp.i"
-	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E D:\GitHub\TinySTL\test\queue_test.cpp > CMakeFiles\test_queue.dir\queue_test.cpp.i
+test/CMakeFiles/test_queue.dir/test_queue.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test_queue.dir/test_queue.cpp.i"
+	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E D:\GitHub\TinySTL\test\test_queue.cpp > CMakeFiles\test_queue.dir\test_queue.cpp.i
 
-test/CMakeFiles/test_queue.dir/queue_test.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test_queue.dir/queue_test.cpp.s"
-	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S D:\GitHub\TinySTL\test\queue_test.cpp -o CMakeFiles\test_queue.dir\queue_test.cpp.s
+test/CMakeFiles/test_queue.dir/test_queue.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test_queue.dir/test_queue.cpp.s"
+	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S D:\GitHub\TinySTL\test\test_queue.cpp -o CMakeFiles\test_queue.dir\test_queue.cpp.s
 
 # Object files for target test_queue
 test_queue_OBJECTS = \
-"CMakeFiles/test_queue.dir/queue_test.cpp.obj"
+"CMakeFiles/test_queue.dir/test_queue.cpp.obj"
 
 # External object files for target test_queue
 test_queue_EXTERNAL_OBJECTS =
 
-test/test_queue.exe: test/CMakeFiles/test_queue.dir/queue_test.cpp.obj
+test/test_queue.exe: test/CMakeFiles/test_queue.dir/test_queue.cpp.obj
 test/test_queue.exe: test/CMakeFiles/test_queue.dir/build.make
 test/test_queue.exe: test/CMakeFiles/test_queue.dir/linklibs.rsp
 test/test_queue.exe: test/CMakeFiles/test_queue.dir/objects1.rsp

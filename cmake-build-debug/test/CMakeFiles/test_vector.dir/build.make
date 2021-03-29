@@ -76,28 +76,28 @@ include test/CMakeFiles/test_vector.dir/progress.make
 # Include the compile flags for this target's objects.
 include test/CMakeFiles/test_vector.dir/flags.make
 
-test/CMakeFiles/test_vector.dir/vector_test.cpp.obj: test/CMakeFiles/test_vector.dir/flags.make
-test/CMakeFiles/test_vector.dir/vector_test.cpp.obj: test/CMakeFiles/test_vector.dir/includes_CXX.rsp
-test/CMakeFiles/test_vector.dir/vector_test.cpp.obj: ../test/vector_test.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/CMakeFiles/test_vector.dir/vector_test.cpp.obj"
-	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\test_vector.dir\vector_test.cpp.obj -c D:\GitHub\TinySTL\test\vector_test.cpp
+test/CMakeFiles/test_vector.dir/test_vector.cpp.obj: test/CMakeFiles/test_vector.dir/flags.make
+test/CMakeFiles/test_vector.dir/test_vector.cpp.obj: test/CMakeFiles/test_vector.dir/includes_CXX.rsp
+test/CMakeFiles/test_vector.dir/test_vector.cpp.obj: ../test/test_vector.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=D:\GitHub\TinySTL\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/CMakeFiles/test_vector.dir/test_vector.cpp.obj"
+	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\test_vector.dir\test_vector.cpp.obj -c D:\GitHub\TinySTL\test\test_vector.cpp
 
-test/CMakeFiles/test_vector.dir/vector_test.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test_vector.dir/vector_test.cpp.i"
-	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E D:\GitHub\TinySTL\test\vector_test.cpp > CMakeFiles\test_vector.dir\vector_test.cpp.i
+test/CMakeFiles/test_vector.dir/test_vector.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test_vector.dir/test_vector.cpp.i"
+	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E D:\GitHub\TinySTL\test\test_vector.cpp > CMakeFiles\test_vector.dir\test_vector.cpp.i
 
-test/CMakeFiles/test_vector.dir/vector_test.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test_vector.dir/vector_test.cpp.s"
-	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S D:\GitHub\TinySTL\test\vector_test.cpp -o CMakeFiles\test_vector.dir\vector_test.cpp.s
+test/CMakeFiles/test_vector.dir/test_vector.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test_vector.dir/test_vector.cpp.s"
+	cd /d D:\GitHub\TinySTL\cmake-build-debug\test && C:\PROGRA~1\MinGW\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S D:\GitHub\TinySTL\test\test_vector.cpp -o CMakeFiles\test_vector.dir\test_vector.cpp.s
 
 # Object files for target test_vector
 test_vector_OBJECTS = \
-"CMakeFiles/test_vector.dir/vector_test.cpp.obj"
+"CMakeFiles/test_vector.dir/test_vector.cpp.obj"
 
 # External object files for target test_vector
 test_vector_EXTERNAL_OBJECTS =
 
-test/test_vector.exe: test/CMakeFiles/test_vector.dir/vector_test.cpp.obj
+test/test_vector.exe: test/CMakeFiles/test_vector.dir/test_vector.cpp.obj
 test/test_vector.exe: test/CMakeFiles/test_vector.dir/build.make
 test/test_vector.exe: TinySTL/libTinySTL.dll.a
 test/test_vector.exe: test/CMakeFiles/test_vector.dir/linklibs.rsp

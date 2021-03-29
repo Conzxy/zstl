@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "D:/GitHub/TinySTL/test/queue_test.cpp" "D:/GitHub/TinySTL/cmake-build-debug/test/CMakeFiles/test_queue.dir/queue_test.cpp.obj"
+  "D:/GitHub/TinySTL/test/test_queue.cpp" "D:/GitHub/TinySTL/cmake-build-debug/test/CMakeFiles/test_queue.dir/test_queue.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

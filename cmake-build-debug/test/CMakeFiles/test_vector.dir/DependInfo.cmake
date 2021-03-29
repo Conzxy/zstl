@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "D:/GitHub/TinySTL/test/vector_test.cpp" "D:/GitHub/TinySTL/cmake-build-debug/test/CMakeFiles/test_vector.dir/vector_test.cpp.obj"
+  "D:/GitHub/TinySTL/test/test_vector.cpp" "D:/GitHub/TinySTL/cmake-build-debug/test/CMakeFiles/test_vector.dir/test_vector.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

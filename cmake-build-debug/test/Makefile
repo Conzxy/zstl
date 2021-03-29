@@ -159,59 +159,59 @@ test_vector/fast:
 	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_vector.dir\build.make test/CMakeFiles/test_vector.dir/build
 .PHONY : test_vector/fast
 
-queue_test.obj: queue_test.cpp.obj
+test_queue.obj: test_queue.cpp.obj
 
-.PHONY : queue_test.obj
-
-# target to build an object file
-queue_test.cpp.obj:
-	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_queue.dir\build.make test/CMakeFiles/test_queue.dir/queue_test.cpp.obj
-.PHONY : queue_test.cpp.obj
-
-queue_test.i: queue_test.cpp.i
-
-.PHONY : queue_test.i
-
-# target to preprocess a source file
-queue_test.cpp.i:
-	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_queue.dir\build.make test/CMakeFiles/test_queue.dir/queue_test.cpp.i
-.PHONY : queue_test.cpp.i
-
-queue_test.s: queue_test.cpp.s
-
-.PHONY : queue_test.s
-
-# target to generate assembly for a file
-queue_test.cpp.s:
-	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_queue.dir\build.make test/CMakeFiles/test_queue.dir/queue_test.cpp.s
-.PHONY : queue_test.cpp.s
-
-vector_test.obj: vector_test.cpp.obj
-
-.PHONY : vector_test.obj
+.PHONY : test_queue.obj
 
 # target to build an object file
-vector_test.cpp.obj:
-	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_vector.dir\build.make test/CMakeFiles/test_vector.dir/vector_test.cpp.obj
-.PHONY : vector_test.cpp.obj
+test_queue.cpp.obj:
+	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_queue.dir\build.make test/CMakeFiles/test_queue.dir/test_queue.cpp.obj
+.PHONY : test_queue.cpp.obj
 
-vector_test.i: vector_test.cpp.i
+test_queue.i: test_queue.cpp.i
 
-.PHONY : vector_test.i
+.PHONY : test_queue.i
 
 # target to preprocess a source file
-vector_test.cpp.i:
-	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_vector.dir\build.make test/CMakeFiles/test_vector.dir/vector_test.cpp.i
-.PHONY : vector_test.cpp.i
+test_queue.cpp.i:
+	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_queue.dir\build.make test/CMakeFiles/test_queue.dir/test_queue.cpp.i
+.PHONY : test_queue.cpp.i
 
-vector_test.s: vector_test.cpp.s
+test_queue.s: test_queue.cpp.s
 
-.PHONY : vector_test.s
+.PHONY : test_queue.s
 
 # target to generate assembly for a file
-vector_test.cpp.s:
-	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_vector.dir\build.make test/CMakeFiles/test_vector.dir/vector_test.cpp.s
-.PHONY : vector_test.cpp.s
+test_queue.cpp.s:
+	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_queue.dir\build.make test/CMakeFiles/test_queue.dir/test_queue.cpp.s
+.PHONY : test_queue.cpp.s
+
+test_vector.obj: test_vector.cpp.obj
+
+.PHONY : test_vector.obj
+
+# target to build an object file
+test_vector.cpp.obj:
+	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_vector.dir\build.make test/CMakeFiles/test_vector.dir/test_vector.cpp.obj
+.PHONY : test_vector.cpp.obj
+
+test_vector.i: test_vector.cpp.i
+
+.PHONY : test_vector.i
+
+# target to preprocess a source file
+test_vector.cpp.i:
+	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_vector.dir\build.make test/CMakeFiles/test_vector.dir/test_vector.cpp.i
+.PHONY : test_vector.cpp.i
+
+test_vector.s: test_vector.cpp.s
+
+.PHONY : test_vector.s
+
+# target to generate assembly for a file
+test_vector.cpp.s:
+	cd /d D:\GitHub\TinySTL\cmake-build-debug && $(MAKE) $(MAKESILENT) -f test\CMakeFiles\test_vector.dir\build.make test/CMakeFiles/test_vector.dir/test_vector.cpp.s
+.PHONY : test_vector.cpp.s
 
 # Help Target
 help:
@@ -223,12 +223,12 @@ help:
 	@echo ... rebuild_cache
 	@echo ... test_queue
 	@echo ... test_vector
-	@echo ... queue_test.obj
-	@echo ... queue_test.i
-	@echo ... queue_test.s
-	@echo ... vector_test.obj
-	@echo ... vector_test.i
-	@echo ... vector_test.s
+	@echo ... test_queue.obj
+	@echo ... test_queue.i
+	@echo ... test_queue.s
+	@echo ... test_vector.obj
+	@echo ... test_vector.i
+	@echo ... test_vector.s
 .PHONY : help
 
 

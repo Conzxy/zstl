@@ -114,10 +114,10 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="D:/GitHub/TinySTL/test/queue_test.cpp">
+		<Unit filename="D:/GitHub/TinySTL/test/test_queue.cpp">
 			<Option target="test_queue"/>
 		</Unit>
-		<Unit filename="D:/GitHub/TinySTL/test/vector_test.cpp">
+		<Unit filename="D:/GitHub/TinySTL/test/test_vector.cpp">
 			<Option target="test_vector"/>
 		</Unit>
 		<Unit filename="D:/GitHub/TinySTL/CMakeLists.txt">

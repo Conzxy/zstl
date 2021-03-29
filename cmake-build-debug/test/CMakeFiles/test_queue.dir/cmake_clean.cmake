@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/test_queue.dir/queue_test.cpp.obj"
+  "CMakeFiles/test_queue.dir/test_queue.cpp.obj"
   "libtest_queue.dll.a"
   "test_queue.exe"
   "test_queue.exe.manifest"
