@@ -16,4 +16,11 @@ std::ostream& print_container(Container const& cont,std::string const& message="
     os<<std::endl;
     return os;
 }
+
+auto getRandom(long long f,long long l){
+    static std::uniform_int_distribution<long long> u(f,l);
+    static std::default_random_engine e;
+    return u(e);
+}
+
 #endif //TINYSTL__TOOL_H

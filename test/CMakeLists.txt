@@ -1,29 +1,13 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 project(test)
 
 set(CMAKE_CXX_STANDARD 17)
 
-
-# 引入头文件目录
-include_directories(${CMAKE_SOURCE_DIR}/TinySTL/incl)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR})
-message(${CMAKE_SOURCE_DIR})
+aux_source_directory(${CMAKE_SOURCE_DIR}/src LIB_SRC)
 
-#link_directories(${CMAKE_SOURCE_DIR}/cmake-build-debug/TinySTL)
-#add_executable(test)
-add_executable(test_queue test_queue.cpp)
-add_executable(test_vector test_vector.cpp)
-
-# 引入实现，即静态库或动态库
-# TinySTL对应TinySTL project
-target_link_libraries(test_vector PUBLIC
-        TinySTL
-        )
-
-#target_include_directories(test PUBLIC
-#        ${CMAKE_SOURCE_DIR}/TinySTL/incl
-#        )
-#target_include_directories(test PUBLIC
-#        "${PROJECT_BINARY_DIR}"
-#        "${PROJECT_SOURCE_DIR}/incl"
-#        )
+add_executable(test_queue test_queue.cpp ${LIB_SRC})
+add_executable(test_vector test_vector.cpp ${LIB_SRC})
+add_executable(test_algo test_algo.cpp ${LIB_SRC})
