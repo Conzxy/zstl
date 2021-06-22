@@ -12,6 +12,8 @@ namespace TinySTL{
     std::size_t alloc::heap_size=0;
 
     void* alloc::refill(std::size_t n){
+        if(n == 0) return nullptr;
+
         int nobjs=20;
         char* chunk=chunk_alloc(n,nobjs);
 

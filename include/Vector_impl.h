@@ -1,50 +1,33 @@
 #ifndef TINYSTL_VECTOR_IMPL_H
 #define TINYSTL_VECTOR_IMPL_H
 
+#include "stl_vector.h"
+#include "stl_exception.h"
 #include <iostream>
-#include <stl_vector.h>
-#include <stl_exception.h>
 
 namespace TinySTL{ 
-    //dtor
-    template<typename T,class Alloc>
-    vector<T,Alloc>::~vector(){
-            destroy_and_deallocate(begin(),end());
-    }
-
-    //ctor
-    template<typename T,class Alloc>
-    vector<T,Alloc>:: vector(std::initializer_list<T> il)
-    :start(nullptr),finish(nullptr),end_of_storage(nullptr){
-        insert(end(),il.begin(),il.end());
-    }
-
     //assignment              
     template<typename T,class Alloc>
     vector<T,Alloc>& vector<T,Alloc>::operator=(vector const& rhs){
         if(this!=&rhs){                 
             auto r_size=rhs.size();
+            //容量不够=>扩容
             if(r_size>capacity()){
-                vector tmp(rhs.begin(),rhs.end());
-                swap(tmp);
+                vector tmp(rhs);
+                this->swap(tmp);
+                return *this;
             }
+            //容量足够时根据元素数量进行copy
             else if(r_size<=size()){
                 auto i=TinySTL::copy(rhs.begin(),rhs.end(),begin());
-                destroy(i,finish);
-                finish=start+r_size;
+                destroy(i,end());
             }else{//size()<rhs.size()<=capacity()
-                TinySTL::copy(rhs.begin(),rhs.begin()+size(),start);
-                TinySTL::uninitialized_copy(rhs.begin()+size(),rhs.end(),finish);
-                finish=start+r_size;
+                TinySTL::copy(rhs.begin(),rhs.begin()+size(),begin());
+                TinySTL::uninitialized_copy(rhs.begin()+size(),rhs.end(),end());
             }
+            vb.last_=vb.first_+r_size;
         }
         return *this;
-    }
-
-    template<typename T,class Alloc>
-    vector<T,Alloc>& vector<T,Alloc>::operator=(vector&& rhs) noexcept{
-        swap(*this,rhs);
-        rhs.start=rhs.finish=rhs.end_of_storage=nullptr;
     }
 
     template<typename T,class Alloc>
@@ -71,24 +54,26 @@ namespace TinySTL{
 
     //at:
     template<typename T,class Alloc>
-    typename vector<T,Alloc>::reference vector<T,Alloc>::at(size_type n){
+    typename vector<T,Alloc>::reference vector<T,Alloc>::at(size_type n) noexcept {
         STL_TRY{
             THROW_RANGE_ERROR_IF(n>=size(),"The location is not exist!");
             return *(begin()+n);
         }
         catch(const std::range_error &e){
             std::cerr<<"RANGE_ERROR:"<<e.what()<<std::endl;
+            RETHROW
         }
     }
 
     template<typename T,class Alloc>
-    typename vector<T,Alloc>::const_reference vector<T,Alloc>::at(size_type n)const{
+    typename vector<T,Alloc>::const_reference vector<T,Alloc>::at(size_type n) const noexcept{
         STL_TRY{
             THROW_RANGE_ERROR_IF(n>=size(),"The location is not exist!");
             return *(cbegin()+n);
         }
         catch(const std::range_error &e){
             std::cerr<<"RANGE_ERROR:"<<e.what()<<std::endl;
+            RETHROW
         }
     }
 
@@ -115,29 +100,23 @@ namespace TinySTL{
     //如果容量不足，扩大
     template<typename T,class Alloc>
     void vector<T,Alloc>::reserve(size_type n){
-        if(n<=capacity())
+        using TinySTL::swap;
+        if(n <= capacity())
             return ;
         THROW_LENGTH_ERROR_IF(n>max_size(),
                               "The requirement is greater than maximum number of elements!");
-        iterator new_start=Alloc::allocate(n);
-        iterator new_finish=TinySTL::uninitialized_copy(begin(),end(),new_start);
-        destroy_and_deallocate();
-
-        start=new_start;
-        finish=new_finish;
-        end_of_storage=new_start+n;
+        base new_vb(n);
+        new_vb.last_=TinySTL::uninitialized_move(begin(),end(),new_vb.first_);
+        swap(vb,new_vb);
     }
 
     //缩减容量以适应元素个数
     template<typename T,class Alloc>
     void vector<T,Alloc>::shrink_to_fit(){
-        iterator new_start=Alloc::allocate(size());
-        iterator new_finish=TinySTL::uninitialized_copy(begin(),end(),new_start);
-        destroy_and_deallocate(begin(),end());
-
-        start=new_start;
-        finish=new_finish;
-        end_of_storage=start+size();
+        using TinySTL::swap;
+        base new_vb(size());
+        uninitialized_move(begin(),end(),new_vb.first_);
+        swap(vb,new_vb);
     }
 
     //modifiers:
@@ -145,50 +124,52 @@ namespace TinySTL{
     template<typename...Args>
     typename vector<T,Alloc>::iterator
     vector<T,Alloc>::emplace(const_iterator position,Args&&...args){
-        iterator pos=const_cast<iterator>(position);
-        if(finish<end_of_storage&&pos==end()){
-            Alloc::construct(&*end(),TinySTL::forward<Args>(args)...);
-            ++finish;
-        }
-        else if(finish<end_of_storage){
-            Alloc::construct(&*end(),*(end()-1));
-            ++finish;
-            TinySTL::copy_backward(pos,finish-2,finish-1);
-            *pos=value_type(TinySTL::forward<Args>(args)...);
+        if(vb.last_ < vb.capa_ ){
+            if(position == end())
+                emplace_back(TinySTL::forward<Args>(args)...);
+            else{
+                Alloc::construct(end(),back());
+                copy_backward(position,const_iterator(vb.last_-1),vb.last_);
+                *position=value_type(TinySTL::forward<Args>(args)...);
+            }
         }
         else{
-            reallocate_and_emplace(pos,TinySTL::forward<Args>(args)...);
+            reserve(getNewCapacity(1));
+            return emplace(position,TinySTL::forward<Args>(args)...);
         }
-        return begin()+(pos-begin());
+        return begin()+(position-begin());
     }
 
     template<typename T,class Alloc>
     template<typename...Args>
     void vector<T,Alloc>::emplace_back(Args&&... args){
-        if(finish<end_of_storage){
+        if(end()<vb.capa_){
             Alloc::construct(&*end(),TinySTL::forward<Args>(args)...);
-            ++finish;
+            ++vb.last_;
         }
         else{
-            reallocate_and_emplace(end(),TinySTL::forward<Args>(args)...);
+            reserve(getNewCapacity(1));
+            emplace_back(TinySTL::forward<Args>(args)...);
         }
     }
 
     template<typename T,class Alloc>
     void vector<T,Alloc>::push_back(T const& x){
-        if(finish!=end_of_storage){
-            Alloc::construct(finish,x);
-            ++finish;
+        if(vb.last_ != vb.capa_){
+            Alloc::construct(end(),x);
+            ++vb.last_;
         }
-        else
-            insert_aux(end(),x);
+        else{
+            reserve(getNewCapacity(1));
+            push_back(x);
+        }
     }
 
     template<typename T,class Alloc>
     void vector<T,Alloc>::pop_back(){
         TINYSTL_DEBUG(size());
-        --finish;
-        destroy(finish);
+        --vb.last_;
+        Alloc::destroy(vb.last_);
     }
 
     //insert:
@@ -241,66 +222,18 @@ namespace TinySTL{
         return erase_aux(begin()+(position-cbegin()));
     }
 
-
-    //helper function
-    //分配和创建对象：
-    //fill：变量个数
-    //copy：范围
-    //销毁和回收
-    template<typename T,class Alloc>
-    void vector<T,Alloc>::fill_initialize(size_type n,T const& value){
-        start=allocate_and_fill(n,value);
-        end_of_storage=finish=start+n;
-    }
-
-    template<typename T,class Alloc>
-    template<class InputIterator>
-    void vector<T,Alloc>::range_initialize(InputIterator first, InputIterator last){
-        start=allocate_and_copy(first,last);
-        end_of_storage=finish=start+(last-first);
-    }
-
-
-    template<typename T,class Alloc>
-    typename vector<T,Alloc>::iterator
-    vector<T,Alloc>::allocate_and_fill(size_type n,T const& x){
-        iterator result=Alloc::allocate(n);
-        TinySTL::uninitialized_fill_n(result,n,x);
-        return result;
-    }
-
-    template<typename T,class Alloc>
-    template<class InputIterator>
-    typename vector<T,Alloc>::iterator
-    vector<T,Alloc>::allocate_and_copy(InputIterator first, InputIterator last) {
-        size_type n=last-first;
-        iterator result=Alloc::allocate(n);
-        TinySTL::uninitialized_copy(first,last,result);
-        return result;
-    }
-
-
-    template<typename T,class Alloc>
-    void vector<T,Alloc>::destroy_and_deallocate(iterator first,iterator last){
-        if(capacity()) {
-            Alloc::destroy(first, last);
-            Alloc::deallocate(start,capacity());
-        }
-    }
-
     //insert_aux:
     //1.position
     //2.position,n
     //3.range
     template<typename T,class Alloc>
     void vector<T,Alloc>::insert_aux(iterator position,T const& x){
-        //有备用空间
-        if(finish!=end_of_storage){
-            construct(finish,*(finish-1));//创建一个尾元素的拷贝
-            ++finish;
-            T x_copy=x;
-            TinySTL::copy_backward(position,finish-2,finish-1);
-            *position=x_copy;
+        //将[position,end())往后面移一位，x占据position位置
+        if(vb.last_ != vb.capa_){
+            construct(end(),back());
+            TinySTL::copy_backward(position,vb.last_-1,vb.last_);
+            ++vb.last_;
+            *position=x;
         }else{
             insert_aux(position,size_type(1),x);
         }
@@ -310,70 +243,77 @@ namespace TinySTL{
     void vector<T,Alloc>::insert_aux(iterator position,size_type n,T const& x){
         if(n==0)
             return ;
-        size_type storage_left=end_of_storage-finish;
+        size_type storage_left=vb.capa_-vb.last_;
         if(storage_left>=n){    //剩余空间大于新增元素
-            T x_copy=x;
-            const size_type elems_after=finish-position;
-            iterator old_finish=finish;
-            if(elems_after>=n){ //插入点后元素大于等于新增元素
-                finish=uninitialized_copy(finish-n,finish,finish);
-                TinySTL::copy_backward(position,old_finish-n,old_finish);
-                TinySTL::fill(position,position+n,x_copy);
-            }
-            else{
-                finish=TinySTL::uninitialized_fill_n(finish,n-elems_after,x_copy);
-                finish=TinySTL::uninitialized_copy(position,old_finish,finish);
-                TinySTL::fill(position,old_finish,x_copy);
+            const size_type elems_after=vb.last_-position;
+            auto old_end=vb.last_;
+            if(elems_after <= n){
+                //此时last_后面有n-elems_after个未初始化空间，初始化为x并拷贝原来的到新last_后面
+                vb.last_=uninitialized_fill_n(end(),n-elems_after,x);
+                vb.last_=uninitialized_copy(position,old_end,vb.last_);
+                fill_n(position,elems_after,x);
+            }else{
+                //先将last_前n个元素往后移然后移动剩余elems_after-n个元素
+                vb.last_=uninitialized_copy(vb.last_-n,vb.last_,vb.last_);
+                copy_backward(position,old_end-n,old_end);
+                fill_n(position,n,x);
             }
         }
         else{
-            reallocate_and_fillN(position,n,x);
+            base newvb(getNewCapacity(n));
+            newvb.last_=uninitialized_move(begin(),position,newvb.first_);
+            newvb.last_=uninitialized_fill_n(newvb.last_,n,x);
+            newvb.last_=uninitialized_move(position,end(),newvb.last_);
+            vb.swap(newvb);
         }
     }
 
     template<typename T,class Alloc>
     template<typename II>
     void vector<T,Alloc>::insert_aux(iterator position,II first,II last){
-        const size_type storage_left=end_of_storage-finish;
-        const size_type need=last-first;
-        if(storage_left>=need){
-            const size_type elems_after=finish-position;
-            iterator old_finish=finish;
-            if(elems_after>=need){
-                finish=TinySTL::uninitialized_copy(finish-need,finish,finish);
-                TinySTL::copy_backward(position,old_finish-need,old_finish);
-                TinySTL::copy(first,last,position);
-            }
-            else{
-                finish=TinySTL::uninitialized_copy(first+elems_after,last,finish);
-                finish=TinySTL::uninitialized_copy(position,old_finish,finish);
-                TinySTL::copy(first,first+elems_after,position);
+        const size_type storage_left=vb.capa_-vb.last_;
+        const size_type n=last-first;
+        if(storage_left >= n){
+            const size_type elems_after=vb.last_-position;
+            iterator old_end=vb.last_;
+            if(elems_after < n){
+                vb.last_=uninitialized_copy(first+elems_after,last,vb.last_);
+                vb.last_=uninitialized_copy(position,old_end,vb.last_);
+                copy(first,first+elems_after,position);
+            }else{
+                vb.last_=uninitialized_copy(vb.last_-n,vb.last_,vb.last_);
+                copy_backward(position,old_end-n,old_end);
+                copy(first,last,position);
             }
         }
         else{
-            reallocate_and_copy(position,first,last);
+            base newvb(getNewCapacity(n));
+            newvb.last_=uninitialized_copy(begin(),position,newvb.first_);
+            newvb.last_=uninitialized_copy(first,last,newvb.last_);
+            newvb.last_=uninitialized_copy(position,end(),newvb.last_);
+            vb.swap(newvb);
         }
     }
 
-    //erase_aux
-    //@return 下一个元素的位置
+    //return:下一个元素的位置
     template<typename T,class Alloc>
     typename vector<T,Alloc>::iterator
     vector<T,Alloc>::erase_aux(iterator first,iterator last){
-        iterator i=TinySTL::copy(last,finish,first);
-        Alloc::destroy(i,finish);
-        finish=finish-(last-first);
+        iterator i=TinySTL::copy(last,end(),first);
+        Alloc::destroy(i,end());
+        vb.last_=end()-(last-first);
         return first;
     }
 
-    //@return 下一个元素的位置
+    //TO DO:删除末尾元素，若不是末尾元素=>转化成末尾元素i.e将后面的元素移前面去覆盖欲删除元素
+    //return:删除元素的下一个元素
     template<typename T,class Alloc>
     typename vector<T,Alloc>::iterator
     vector<T,Alloc>::erase_aux(iterator position){
-        if(position+1!=end())//不为尾元素，先拷贝
-            copy(position+1,finish,position);
-        --finish;
-        Alloc::destroy(finish);
+        if(position+1!=end())
+            copy(position+1,end(),position);
+        --vb.last_;
+        Alloc::destroy(end());
         return position;
     }
 
@@ -386,95 +326,9 @@ namespace TinySTL{
     typename vector<T,Alloc>::size_type
     vector<T,Alloc>::getNewCapacity(size_type len)const{
         size_type old_capacity=capacity();
-        auto res=TinySTL::max(old_capacity,len);
-        size_type new_capacity=old_capacity!=0?(old_capacity+res):len;
+        size_type res=TinySTL::max(old_capacity,len);
+        size_type new_capacity=old_capacity+res;
         return new_capacity;
-    }
-
-    //reallocate:
-    template<typename T,class Alloc>
-    template<typename II>
-    void vector<T,Alloc>::reallocate_and_copy(iterator position,II first,II last){
-        const size_type new_capacity=getNewCapacity(last-first);
-
-        iterator new_start=Alloc::allocate(new_capacity);
-        iterator new_finish=new_start;
-
-        STL_TRY{
-            new_finish=TinySTL::uninitialized_copy(begin(),position,new_start);
-            new_finish=TinySTL::uninitialized_copy(first,last,new_finish);
-            new_finish=TinySTL::uninitialized_copy(position,end(),new_finish);
-        }
-        catch(...){
-            Alloc::destroy(new_start,new_finish);
-            Alloc::deallocate(new_start,new_capacity);
-        }
-
-        destroy_and_deallocate(begin(),end());
-
-        start=new_start;
-        finish=new_finish;
-        end_of_storage=start+new_capacity;
-    }
-
-    template<typename T,class Alloc>
-    void vector<T,Alloc>::reallocate_and_fillN(iterator position,size_type n,T const& x){
-        const size_type new_capacity=getNewCapacity(n*sizeof(T));
-
-        iterator new_start=Alloc::allocate(new_capacity);
-        iterator new_finish=new_start;
-
-        STL_TRY{
-            new_finish=TinySTL::uninitialized_copy(begin(),position,new_start);
-            new_finish=TinySTL::uninitialized_fill_n(new_finish,n,x);
-            new_finish=TinySTL::uninitialized_copy(position,end(),new_finish);
-        }
-        catch(...){
-            destroy(new_start,new_finish);
-            Alloc::deallocate(new_start,new_capacity);
-        }
-
-        destroy_and_deallocate(start,finish);
-
-        start=new_start;
-        finish=new_finish;
-        end_of_storage=start+new_capacity;
-    }
-
-    template<typename T,class Alloc>
-    template<typename...Args>
-    void vector<T,Alloc>::reallocate_and_emplace(iterator position, Args &&...args) {
-        const size_type new_capacity=getNewCapacity(sizeof(T));
-
-        iterator new_start=Alloc::allocate(new_capacity);
-        iterator new_finish=new_start;
-
-        STL_TRY{
-            new_finish=TinySTL::uninitialized_move(begin(),position,new_start);
-            Alloc::construct(&*new_finish,TinySTL::forward<Args>(args)...);
-            ++new_finish;
-            new_finish=TinySTL::uninitialized_move(position,end(),new_finish);
-        }
-        catch(...){
-            destroy(new_start,new_finish);
-            Alloc::deallocate(new_start,new_capacity);
-            throw;
-        }
-
-        destroy_and_deallocate(begin(),end());
-
-        start=new_start;
-        finish=new_finish;
-        end_of_storage=new_start+new_capacity;
-    }
-
-    //swap
-    template<typename T,class Alloc>
-    void vector<T,Alloc>::swap(vector& rhs)noexcept{
-        using TinySTL::swap;
-        swap(start,rhs.start);
-        swap(finish,rhs.finish);
-        swap(end_of_storage,rhs.end_of_storage);
     }
 }
 #endif //TINYSTL_VECTOR_IMPL_H

@@ -41,22 +41,22 @@ namespace TinySTL{
 
     template<typename T>
     T* allocator<T>::allocate(){
-        return static_cast<T*>(alloc::allocate(sizeof(T)));
+        return static_cast<T*>(::operator new(sizeof(T)));
     }
 
     template<typename T>
     T* allocator<T>::allocate(size_t n){
-        return static_cast<T*>(alloc::allocate(sizeof(T)*n));
+        return static_cast<T*>(::operator new(sizeof(T)*n));
     }
 
     template<typename T>
     void allocator<T>::deallocate(T *ptr) {
-        alloc::deallocate(ptr,sizeof(T));
+        ::operator delete(ptr,sizeof(T));
     }
 
     template<typename T>
     void allocator<T>::deallocate(T* ptr,size_t n){
-        alloc::deallocate(ptr,sizeof(T)*n);
+        ::operator delete(ptr,sizeof(T)*n);
     }
 
     template<typename T>

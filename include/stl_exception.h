@@ -17,5 +17,7 @@
 #define TRY_BEGIN try{
 #define TRY_END }
 #define CATCH_ALL_BEGIN catch(...){
-#define CATCH_ALL_END   }
+#define CATCH_END   }
+#define CATCH_BEGIN(type) catch(type const&){
+#define RETHROW throw;
 #endif //TINYSTL_STL_EXCEPTION_H

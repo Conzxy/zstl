@@ -1,10 +1,21 @@
+/*
+ * @version: 0.1 2021-5-16
+ * @author: Conzxy
+ * @Description:
+ *   提供一些用到了迭代器的API可能需要的接口：
+ *   iterator_tag:can be used for tag dispatching
+ *   iterator_traits: can be used for extracting iterator type
+ *   is_XXXXX_iterator: predicate can be used for identifying iterator category
+ *   advance(): move iterator according to the given distance
+ *   distance(): caculate the distance between first and last iterator
+ *   reverse_iterator: iterator adapter
+ */
+
 #ifndef TINYSTL_STL_ITERATOR_H
 #define TINYSTL_STL_ITERATOR_H
 
-//该文件提供迭代器,traits,operation
-
 #include <cstddef>
-#include <type_traits.h>
+#include "type_traits.h"
 
 namespace TinySTL{
     //以下提供五种迭代器的对应tag
@@ -68,8 +79,8 @@ namespace TinySTL{
         typedef T const&                   reference;
     };
 
-    //SFINAE-friendly
-    //ensure iterator_traits<iterator>::iterator_category must be instantiated such that no hard error
+	
+    //SFINAE-friendly predicate
     template<typename iter,typename= Void_t<>>
     struct has_iterator_helper:_false_type {
     };
@@ -85,6 +96,8 @@ namespace TinySTL{
     template<typename iter>
     constexpr bool has_iterator_v=has_iterator<iter>::value;
 
+	//NOTE: typename iterator_traits<iter>::iterator_category is non-SFINAE context
+	//so provide has_iterator(SFINAE wrapper) predicate to avoid hard error
     /*template<typename iter,typename U,bool =has_iterator_v<iter>>
     struct has_iterator_of:Bool_constant<
             Is_convertible_v<typename iterator_traits<iter>::iterator_category,
@@ -93,6 +106,8 @@ namespace TinySTL{
     template<typename iter,typename U>
     struct has_iterator_of<iter,U,false>:_false_type{};*/
 
+	//Sure, you can use Void_t instead of has_iterator, because Void_t is SFINAE context
+	//more simple and elegent
     template<typename iter,typename U,typename =Void_t<>>
     struct has_iterator_of:_false_type{};
 
@@ -125,7 +140,8 @@ namespace TinySTL{
     constexpr bool is_iterator
     =is_input_iterator<iter> || is_output_iterator<iter>;
 
-//迭代器属性别名
+	//iterator_traits type interface:
+	//maybe you don't like use these...
     template<typename Iter>
     using Iter_value_type=typename iterator_traits<Iter>::value_type;
 
@@ -141,7 +157,7 @@ namespace TinySTL{
     template<typename Iter>
     using Iter_diff_type=typename iterator_traits<Iter>::differnece_type;
 
-    //以下函数用于方便提取迭代器的category,difference_type,value_type
+	//yep...you should use Iter_category, Iter_diff_type and Iter_value_type to get typename
     template<class Iterator>
     constexpr decltype(auto)
     iterator_category(Iterator const&){
@@ -161,7 +177,8 @@ namespace TinySTL{
         return static_cast<typename iterator_traits<Iterator>::value_type*>(nullptr);
     }
 
-    //以下函数提供迭代器之间的距离计算
+    //FUNCTION TEMPLATE distance
+	//@brief: calculate distance between first and last iterator
     template<class InputIterator>
     inline decltype(auto)
     _distance(InputIterator first,InputIterator last,Input_iterator_tag){
@@ -184,11 +201,12 @@ namespace TinySTL{
         return _distance(first,last,iterator_category(first));
     }
 
-    //以下函数用于迭代器的前进
+    //FUNCTION TEMPLATE 
+	//@brief: given a distance, move the iterator according to the distance
     template<class Input_iterator,typename Distance>
     inline void
     _advance(Input_iterator &i,Distance n,Input_iterator_tag){
-        while(n--){
+        while(n-- > 0){
             ++i;
         }
     }

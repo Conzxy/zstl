@@ -5,15 +5,59 @@
 #include <initializer_list>
 #include "type_traits.h"
 #include "stl_uninitialized.h"
-#include <stl_iterator.h>
+#include "stl_iterator.h"
 #include "stl_algorithm.h"
+#include "config.h"
 #include <climits>
 
 namespace TinySTL{
-    template<typename T,class Allocator=allocator<T>>
+    //使用vector_base作为底层结构，利用RAII特性来避免memory leak
+    //资源管理类
+    template<typename T,typename Allocator>
+    struct vector_base{
+    public:
+        vector_base()=default;
+        explicit vector_base(typename Allocator::size_type n)
+            :first_{Allocator::allocate(n)},last_{first_+n},capa_{first_+n}{}
+        vector_base(T const* first,T const* last)
+            :vector_base(last-first){}
+
+        ~vector_base(){ Allocator::deallocate(first_,capa_-last_); }
+
+        //从ownership角度看，copy是个麻烦
+        vector_base(vector_base const&)=delete;
+        vector_base& operator=(vector_base const&)=delete;
+        
+        //提供对应的move函数，并且标注noexcept
+        vector_base(vector_base&& base) noexcept
+            :first_{base.first_},last_{base.last_},capa_{base.capa_} 
+        { base.first_=base.last_=base.capa_=nullptr; }
+        vector_base& operator=(vector_base&& base) noexcept
+        { this->swap(base); return *this; }
+
+        //interface
+        void swap(vector_base &rhs) noexcept
+        {
+            STL_SWAP(first_,rhs.first_);
+            STL_SWAP(last_,rhs.last_);
+            STL_SWAP(capa_,rhs.capa_);
+        }
+
+    public:
+        T* first_;
+        T* last_;
+        T* capa_; 
+    };
+
+    template<typename T,typename A>
+    void swap(vector_base<T,A>& lhs,vector_base<T,A>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+    { lhs.swap(rhs); }
+
+
+    //vector
+    template<typename T,typename Allocator=allocator<T>>
     class vector{
     public:
-        //types:
         using value_type            =T;
         using pointer               =typename allocator_traits<Allocator>::pointer;
         using const_pointer         =typename allocator_traits<Allocator>::const_pointer;
@@ -25,42 +69,43 @@ namespace TinySTL{
         using const_reverse_iterator=TinySTL::reverse_iterator<const_iterator>;
         using allocator_type        =Allocator;
         using size_type             =std::size_t;
-        using differnece_type       =ptrdiff_t;
+        using difference_type       =ptrdiff_t;
+        using base                  =vector_base<T,Allocator>;
+
     protected:
-        iterator start;
-        iterator finish;
-        iterator end_of_storage;
+        base vb;
     public:
         //construct/copy/destroy:
-        explicit vector():start(nullptr),finish(nullptr),end_of_storage(nullptr){}
-        explicit vector(const size_type n){
-            fill_initialize(n,T{});
-        }                 
-
-        vector(size_type n,T const& value){
-            fill_initialize(n,value);
+        vector()=default;
+        vector(const size_type n,value_type const& val)
+            :vb(n)
+        {
+            uninitialized_fill_n(begin(),n,val);
         }
 
-        template<class InputIterator,typename =Enable_if_t<
-                 is_input_iterator<InputIterator>>>
-        vector(InputIterator first,InputIterator last){
-            range_initialize(first, last);
+        explicit vector(size_type n)
+            :vector(n,value_type{}){}
+
+        template<class InputIterator,Enable_if_t<is_input_iterator<InputIterator>,int> =0>
+        vector(InputIterator first,InputIterator last)
+            :vector(distance(first,last))
+        {
+            uninitialized_copy(first,last,begin());
         }
 
-        vector(vector const& rhs){
-            range_initialize(rhs.first, rhs.last);
-        }
+        vector(vector const& rhs)
+            :vector(rhs.begin(),rhs.end()){}
 
-        vector(vector&& rhs):start{rhs.start},finish{rhs.finish},
-                             end_of_storage{rhs.end_of_storage}{
-            rhs.start=rhs.finish=rhs.end_of_storage=nullptr;
-        }
+        vector(vector&& rhs)
+            :vb(STL_MOVE(rhs.vb)){}
+
+        vector(std::initializer_list<T> il)
+            :vector(il.begin(),il.end()){}
         
-        //vector(vector const&,Allocator const&);
-        vector(std::initializer_list<T>);
-        ~vector();
+        ~vector(){ destroy(begin(),end()); }
         vector& operator=(vector const&);
-        vector& operator=(vector&&) noexcept;
+        vector& operator=(vector&& rhs) noexcept
+        { this->swap(rhs); return *this; }
         vector& operator=(std::initializer_list<T>);
 
         template<class InputIterator,typename =Enable_if_t<
@@ -73,14 +118,14 @@ namespace TinySTL{
 
         //iterators:
         iterator                begin()                     noexcept
-        { return iterator(start); }
-        const_iterator          begin()             const   noexcept
-        { return const_iterator(start); }
+        { return iterator(vb.first_); }
         iterator                end()                       noexcept
-        { return iterator(finish); }
+        { return iterator(vb.last_); }
+        const_iterator          begin()             const   noexcept
+        { return const_iterator(vb.first_); }
         const_iterator          end()               const   noexcept
-        { return const_iterator(finish); }
-            reverse_iterator    rbegin()                    noexcept
+        { return const_iterator(vb.last_); }  
+        reverse_iterator        rbegin()                    noexcept
         { return reverse_iterator(end()); }
         const_reverse_iterator  rbegin()            const   noexcept
         { return const_reverse_iterator(end());}
@@ -101,39 +146,39 @@ namespace TinySTL{
 
         //capacity:
         size_type   size()               const   noexcept
-        { return finish-start;}
+        { return end()-begin();}
         size_type   max_size()           const   noexcept
         { return size_type(UINT_MAX/sizeof(T)); }
         void        resize(size_type sz);
         void        resize(size_type sz,T const& c);
         size_type   capacity()              const   noexcept
-        { return end_of_storage-start;}
+        { return vb.capa_-vb.first_;}
         bool        empty()                 const   noexcept
         {return begin()==end();}
         void        reserve(size_type n);
         void        shrink_to_fit();
 
         //element access:
-        reference           operator[](size_type n)
+        reference           operator[](size_type n) noexcept
         { return *(begin()+n); }
-        const_reference     operator[](size_type n)const
+        const_reference     operator[](size_type n)const noexcept
         { return *(cbegin()+n); }
-        reference           at(size_type n);
-        const_reference     at(size_type n)const;
-        reference           front()
+        reference           at(size_type n) noexcept;
+        const_reference     at(size_type n)const noexcept;
+        reference           front() noexcept
         { return *begin(); }
-        const_reference     front()const
+        const_reference     front() const noexcept
         { return *begin(); }
-        reference           back()
+        reference           back() noexcept
         { return *(end()-1); }
-        const_reference     back()const
+        const_reference     back()const noexcept
         { return *(end()-1); }
 
         //data access:
-        T*          data()noexcept
-        { return start; }
-        const T*    data()const noexcept
-        { return start;}
+        T*          data()  noexcept
+        { return vb.first_; }
+        T const*    data()  const noexcept
+        { return vb.first_; }
 
         //modifiers:
         template<typename...Args>
@@ -155,31 +200,14 @@ namespace TinySTL{
         iterator erase(const_iterator position);
         iterator erase(const_iterator first,const_iterator last);
 
-        void swap(vector& rhs)noexcept;
+        void swap(vector& rhs)noexcept
+        { using TinySTL::swap; swap(this->vb,rhs.vb); }
         void clear()noexcept
         { erase(begin(),end()); }
 
         //helper function
     private:
-        void fill_initialize(size_type n,T const& value);
-
-        template<class InputIterator>
-        void range_initialize(InputIterator first, InputIterator last);
-
-        template<typename InputIterator>
-        void reallocate_and_copy(iterator position,InputIterator first,InputIterator last);
-        void reallocate_and_fillN(iterator position,size_type n,T const& x);
-        template<typename...Args>
-        void reallocate_and_emplace(iterator position,Args&&...args);
         size_type getNewCapacity(size_type len)const;
-    protected:
-        iterator allocate_and_fill(size_type n,T const& x);
-
-        template<class InputIterator>
-        iterator allocate_and_copy(InputIterator first,InputIterator last);
-
-        void destroy_and_deallocate(iterator first,iterator last);
-
         void insert_aux(iterator position,T const& x);
         void insert_aux(iterator position,size_type n,T const& x);
         template<typename II>
@@ -210,6 +238,7 @@ namespace TinySTL{
 
     //specialized algorithm:
     template<typename T,class Allocator>
-    inline void swap(vector<T,Allocator>& x,vector<T,Allocator>& y){ x.swap(y);}
+    inline void swap(vector<T,Allocator>& x,vector<T,Allocator>& y) noexcept(noexcept(x.swap(y)))
+    { x.swap(y);}
 }
 #endif //TINYSTL_STL_VECTOR_H

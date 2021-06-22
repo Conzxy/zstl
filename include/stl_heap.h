@@ -2,8 +2,8 @@
 #define TINYSTL_STL_HEAP_H
 
 //该文件提供heap相关算法
-#include <config.h>
-#include <stl_iterator.h>
+#include "config.h"
+#include "stl_iterator.h"
 #include "stl_algorithm.h"
 #include "Functional.h"
 

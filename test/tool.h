@@ -6,6 +6,7 @@
 #define TINYSTL__TOOL_H
 
 #include <iostream>
+#include <random>
 
 template<typename Container>
 std::ostream& print_container(Container const& cont,std::string const& message="",

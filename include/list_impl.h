@@ -1,8 +1,8 @@
 #ifndef LIST_IMPL_H
 #define LIST_IMPL_H
 
-#include <stl_list.h>
-#include <Functional.h>
+#include "stl_list.h"
+#include "functional.h"
 
 namespace TinySTL {
 	//ctor:

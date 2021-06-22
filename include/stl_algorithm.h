@@ -1,11 +1,11 @@
 #ifndef TINYSTL_STL_ALGORITHM_H
 #define TINYSTL_STL_ALGORITHM_H
 
-#include <cstring>
 #include "_move.h"
-#include <stl_iterator.h>
+#include "stl_iterator.h"
 #include "type_traits.h"
 #include "stl_algobase.h"
+#include "functional.h"
 
 namespace TinySTL {
     /*****************************find********************************************/
@@ -65,5 +65,66 @@ namespace TinySTL {
             reverse(first,last);
         }
     }
+
+    //lower_bound
+    //返回第一个不小于给定值的位置（iterator）
+    //P.s.:这个适用于有序序列
+    template<typename FI,typename T>
+    FI lower_bound(FI first,FI last,T const& val){
+        using diff=typename iterator_traits<FI>::difference_type;
+
+        diff half;
+        diff len=distance(first,last);
+        FI middle;
+
+        //IDEA:binary search
+        //if middle value less than given value,go to (first,last)
+        //else go to [first,middle]
+        while(len > 0){
+            half=len/2;
+            middle=first;
+            advance(middle,half);
+
+            if(*middle < val){
+                first=middle;
+                ++first;
+                len=len-half-1;
+            }else{
+                len=half;
+            }
+        }
+        return first;
+    }
+
+    //FUNCITON TEMPLATE for_each
+    template<typename II,typename Func,typename ...Args>
+    Func for_each(II first,II last,Func func,Args... args)
+    {
+        while(first != last)
+        {
+            TinySTL::invoke(func,TinySTL::forward<Args>(args)...,*first);
+            ++first;
+        }
+        return func;
+    }
+
+	/*
+	 * Removing Algorithm
+	 * remove		| remove_if
+	 * remove_copy  | remove_copy_if
+	 * unique		| unique_if
+	 * unique_copy  | unique_copy_if
+	 */
+	
+	//FUNCTION TEMPLATE remove
+	//remove does not really remove some elements, just let these unremoved elements move forward,return new logical end
+	//you should use erase provided by correspending container to delete these elements after the logical end 
+	template<typename FI, typename T>
+	FI remove(FI first, FI last, T const& value){
+		static_assert(TinySTL::Is_same_v<typename iterator_traits<FI>::value_type, T>, 
+					  "remove assert: the value_type of the iterator differ from given value type");
+		
+	}
 }
+
 #endif //TINYSTL_STL_ALGORITHM_H

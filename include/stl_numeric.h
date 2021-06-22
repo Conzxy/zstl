@@ -1,8 +1,8 @@
 #ifndef STL_NUMERIC_H
 #define STL_NUMERIC_H
 
-#include <Functional.h>
-#include <Iterator.h>
+#include "functional.h"
+#include "Iterator.h"
 
 namespace TinySTL {
 	/************************accumulate************************/

@@ -329,7 +329,6 @@ namespace TinySTL {
 	struct member_object_pointer_traits <T,_false_type>{
 	};
 
-
 	//check if a type is a pointer-to-member function type
 	namespace detail {
 
@@ -340,11 +339,9 @@ namespace TinySTL {
 		struct Is_member_function_pointer_ :_false_type {};
 
 		template<typename F, typename C>
-		struct Is_member_function_pointer_<F C::*> :Is_function_<F> {
+		struct Is_member_function_pointer_<F C::*> : Is_function_<F> {
 			using Member=F;
 			using Class=C;
-			using Return=typename Is_function_<F>::Return;
-			static constexpr bool variadic=Is_function_<F>::variadic;
 		};
 	}
 
@@ -510,7 +507,6 @@ namespace TinySTL {
 
 	template<typename T>
 	using Is_enum=typename Negation<detail::Is_enum_<T>>::type;
-
 
 	//variable
 	template<typename T>

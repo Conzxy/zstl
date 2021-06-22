@@ -5,8 +5,8 @@
 #ifndef TINYSTL_PRIORITY_QUEUE_H
 #define TINYSTL_PRIORITY_QUEUE_H
 #include "vector.h"
-#include <config.h>
-#include "Functional.h"
+#include "config.h"
+#include "functional.h"
 #include "stl_heap.h"
 template<typename T,typename Container=STL_ vector<T>,
         typename Compare=STL_ less<typename Container::value_type>>
