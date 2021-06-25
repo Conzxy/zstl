@@ -2,10 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "D:/Conzxy/TinySTL/bin/test_other.exe"
-		},
-		{
-			"path" : "D:/Conzxy/TinySTL/bin/test_other.pdb"
+			"path" : "/home/conzxy/TinySTL/bin/test_algo"
 		}
 	],
 	"backtrace" : 1,
@@ -14,7 +11,6 @@
 		"commands" : 
 		[
 			"add_executable",
-			"target_link_libraries",
 			"include_directories"
 		],
 		"files" : 
@@ -29,29 +25,23 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 16,
+				"line" : 14,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 18,
-				"parent" : 0
-			},
-			{
-				"command" : 2,
-				"file" : 0,
 				"line" : 6,
 				"parent" : 0
 			},
 			{
-				"command" : 2,
+				"command" : 1,
 				"file" : 0,
 				"line" : 7,
 				"parent" : 0
 			},
 			{
-				"command" : 2,
+				"command" : 1,
 				"file" : 0,
 				"line" : 8,
 				"parent" : 0
@@ -64,7 +54,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g"
+					"fragment" : " "
 				},
 				{
 					"fragment" : "-std=gnu++17"
@@ -73,27 +63,19 @@
 			"includes" : 
 			[
 				{
+					"backtrace" : 2,
+					"path" : "/home/conzxy/TinySTL/include"
+				},
+				{
 					"backtrace" : 3,
-					"path" : "D:/Conzxy/TinySTL/include"
+					"path" : "/home/conzxy/TinySTL/test"
 				},
 				{
 					"backtrace" : 4,
-					"path" : "D:/Conzxy/TinySTL/test"
-				},
-				{
-					"backtrace" : 5,
-					"path" : "C:/lib/fmt/include"
+					"path" : "/home/conzxy/TinySTL/test/C:/lib/fmt/include"
 				}
 			],
 			"language" : "CXX",
-			"languageStandard" : 
-			{
-				"backtraces" : 
-				[
-					1
-				],
-				"standard" : "17"
-			},
 			"sourceIndexes" : 
 			[
 				0,
@@ -101,33 +83,20 @@
 			]
 		}
 	],
-	"id" : "test_other::@36f028580bb02cc8272a",
+	"id" : "test_algo::@36f028580bb02cc8272a",
 	"link" : 
 	{
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "-g",
-				"role" : "flags"
-			},
-			{
 				"fragment" : "",
 				"role" : "flags"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "C://lib//fmt//libfmt.a",
-				"role" : "libraries"
-			},
-			{
-				"fragment" : "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32",
-				"role" : "libraries"
 			}
 		],
 		"language" : "CXX"
 	},
-	"name" : "test_other",
-	"nameOnDisk" : "test_other.exe",
+	"name" : "test_algo",
+	"nameOnDisk" : "test_algo",
 	"paths" : 
 	{
 		"build" : "test",
@@ -149,7 +118,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "test/test_other.cpp",
+			"path" : "test/test_algo.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{

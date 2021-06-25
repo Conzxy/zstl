@@ -7,8 +7,8 @@
 #ifndef TINYSTL_DEQUE_H
 #define TINYSTL_DEQUE_H
 
-#include <config.h>
-#include <stl_iterator.h>
+#include "config.h"
+#include "stl_iterator.h"
 #include "stl_algorithm.h"
 #include "stl_uninitialized.h"
 #include "Allocator.h"
@@ -293,10 +293,10 @@ namespace TinySTL {
         void swap(deque& )noexcept;
         void clear();
     protected:
-        using buf                       =pointer;
-        using map_pointer               =buf*;
-        using map_allocator             =STL_ allocator<buf>;
-        using data_allocator            =Allocator;
+        using buf                       = pointer;
+        using map_pointer               = buf*;
+        using map_allocator             = typename Allocator::template rebind <buf>;
+        using data_allocator            = Allocator;
     private:
         void map_init(size_type numElem);
         void create_map(size_type mapSize);

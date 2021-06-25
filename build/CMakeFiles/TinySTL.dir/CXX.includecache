@@ -6,13 +6,13 @@
 
 #IncludeRegexTransform: 
 
-D:/Conzxy/TinySTL/include/alloc.h
+/home/conzxy/TinySTL/include/alloc.h
 cstddef
 -
 cstdlib
 -
 
-D:/Conzxy/TinySTL/src/_alloc.cpp
+/home/conzxy/TinySTL/src/_alloc.cpp
 ../include/alloc.h
-D:/Conzxy/TinySTL/include/alloc.h
+/home/conzxy/TinySTL/include/alloc.h
 

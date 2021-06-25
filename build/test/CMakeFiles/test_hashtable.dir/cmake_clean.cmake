@@ -1,12 +1,8 @@
 file(REMOVE_RECURSE
-  "../../bin/libtest_hashtable.dll.a"
-  "../../bin/test_hashtable.exe"
-  "../../bin/test_hashtable.exe.manifest"
+  "../../bin/test_hashtable"
   "../../bin/test_hashtable.pdb"
-  "CMakeFiles/test_hashtable.dir/__/src/_alloc.cpp.obj"
-  "CMakeFiles/test_hashtable.dir/__/src/_alloc.cpp.obj.d"
-  "CMakeFiles/test_hashtable.dir/test_hashtable.cpp.obj"
-  "CMakeFiles/test_hashtable.dir/test_hashtable.cpp.obj.d"
+  "CMakeFiles/test_hashtable.dir/__/src/_alloc.cpp.o"
+  "CMakeFiles/test_hashtable.dir/test_hashtable.cpp.o"
 )
 
 # Per-language clean rules from dependency scanning.

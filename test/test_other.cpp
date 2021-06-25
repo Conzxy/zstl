@@ -34,11 +34,5 @@ int main()
 {
     TinySTL::vector<int> primes{2,3,5,7,11,13,17,19};
     TinySTL::vector intv(10,2);
-    fm ff=&FunObj::f;
-    FunObj fo{};
-    TT x{11};
-    std::
-    print("{}",x.data_);
-    ::invoke(ff,&fo,2);
     
 }

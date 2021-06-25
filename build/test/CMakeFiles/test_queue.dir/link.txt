@@ -1,1 +1,1 @@
-/bin/g++-9  -g   CMakeFiles/test_queue.dir/test_queue.cpp.o CMakeFiles/test_queue.dir/__/src/_alloc.cpp.o  -o ../../bin/test_queue 
+/usr/bin/c++     CMakeFiles/test_queue.dir/test_queue.cpp.o CMakeFiles/test_queue.dir/__/src/_alloc.cpp.o  -o ../../bin/test_queue 

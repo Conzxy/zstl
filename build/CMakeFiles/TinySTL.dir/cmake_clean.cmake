@@ -1,10 +1,7 @@
 file(REMOVE_RECURSE
-  "../lib/libTinySTL.dll"
-  "../lib/libTinySTL.dll.a"
-  "../lib/libTinySTL.dll.manifest"
   "../lib/libTinySTL.pdb"
-  "CMakeFiles/TinySTL.dir/src/_alloc.cpp.obj"
-  "CMakeFiles/TinySTL.dir/src/_alloc.cpp.obj.d"
+  "../lib/libTinySTL.so"
+  "CMakeFiles/TinySTL.dir/src/_alloc.cpp.o"
 )
 
 # Per-language clean rules from dependency scanning.

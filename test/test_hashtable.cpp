@@ -7,10 +7,10 @@ using namespace TinySTL;
 
 class TestHashtable{
 public:
-    using HashTable=HashTable<int,int,hash<int>,identity<int>,equal_to<int>>;
-    HashTable* ht_;
+    using HT = HashTable<int,int,hash<int>,identity<int>,equal_to<int>>;
+    HT* ht_;
 public:
-    void caseBegin(){ ht_=new HashTable(); }
+    void caseBegin(){ ht_=new HT(); }
     void caseEnd(){ delete ht_; }
 
     void test_insert_unique(size_t n){

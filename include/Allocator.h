@@ -7,6 +7,7 @@
 #include "stl_construct.h"
 #include "stl_utility.h"
 #include "type_traits.h"
+#include <new>
 
 namespace TinySTL{
     template<typename T>
@@ -19,6 +20,14 @@ namespace TinySTL{
         typedef const T&    const_reference;
         typedef std::size_t size_type;
         typedef ptrdiff_t   difference_type;
+		
+		template<typename U>
+		struct Rebind{
+			using type = allocator<U>;
+		};
+
+		template<typename U>
+		using rebind = typename Rebind<U>::type;
     public:
         static T* allocate();
         static T* allocate(size_t n);
@@ -29,7 +38,7 @@ namespace TinySTL{
 
         /*template<typename T1,typename T2>
         static void construct(T1* ptr,T2 const& value);*/
-
+	
         static void construct(T* ptr,T const& value);
 
         template<typename...Args>
@@ -51,12 +60,12 @@ namespace TinySTL{
 
     template<typename T>
     void allocator<T>::deallocate(T *ptr) {
-        ::operator delete(ptr,sizeof(T));
+        ::operator delete(ptr);
     }
 
     template<typename T>
     void allocator<T>::deallocate(T* ptr,size_t n){
-        ::operator delete(ptr,sizeof(T)*n);
+        ::operator delete(ptr);
     }
 
     template<typename T>
@@ -85,13 +94,12 @@ namespace TinySTL{
         TinySTL::destroy(first,last);
     }
 
-    //SFINAE-friendly
     template<typename allocator,typename =TinySTL::Void_t<>>
     struct allocator_traits {
     };
 
     template<typename allocator>
-    struct allocator_traits < allocator, TinySTL::Void_t<
+    struct allocator_traits<allocator, TinySTL::Void_t<
                                                         typename allocator::value_type,
                                                         typename allocator::pointer,
                                                         typename allocator::reference,

@@ -1,12 +1,8 @@
 file(REMOVE_RECURSE
-  "../../bin/libtest_queue.dll.a"
-  "../../bin/test_queue.exe"
-  "../../bin/test_queue.exe.manifest"
+  "../../bin/test_queue"
   "../../bin/test_queue.pdb"
-  "CMakeFiles/test_queue.dir/__/src/_alloc.cpp.obj"
-  "CMakeFiles/test_queue.dir/__/src/_alloc.cpp.obj.d"
-  "CMakeFiles/test_queue.dir/test_queue.cpp.obj"
-  "CMakeFiles/test_queue.dir/test_queue.cpp.obj.d"
+  "CMakeFiles/test_queue.dir/__/src/_alloc.cpp.o"
+  "CMakeFiles/test_queue.dir/test_queue.cpp.o"
 )
 
 # Per-language clean rules from dependency scanning.

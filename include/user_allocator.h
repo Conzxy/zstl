@@ -1,10 +1,50 @@
 #ifndef _USER_ALLOCATOR_H
 #define _USER_ALLOCATOR_H
 
-#include <alloc.h>
+#include "alloc.h"
 
 namespace TinySTL{
-    template<typename T,typename Alloc=alloc>
+	/*
+	 * @class ByteAllocator
+	 * @brief a simple allocator in bytes
+	 */
+	class ByteAllocator{
+	public:
+		static void* allocate(size_t bytes){
+			return ::operator new(bytes);
+		}
+
+		static void deallocate(void* ptr){
+			::operator delete(ptr);
+		}
+	};
+	
+	/*
+	 * @class UserAllocator
+	 * @brief low level adapter of ByteAllocator
+	 *
+	 * @code
+	 * template<typename T, typename Alloc=<ByteAllocator>>
+	 * class deque{
+	 * //...
+	 * typedef UserAllocator<T, Alloc> node_allocator;
+	 * typedef UserAllocator<T*, Alloc> map_allocator;
+	 * //...
+	 * };
+	 * @endcode
+	 *
+	 * now, TinySTL::allocator have a member type alias template named "rebind"
+	 * @code
+	 * template<typename T, typename Alloc=STL_ allocator>
+	 * class deque{
+	 * //...
+	 * typedef Alloc data_allocator;
+	 * typedef typename Alloc::template rebind<T*> map_allocator;
+	 * //...
+	 * };
+	 * @endcode
+	 */
+    template<typename T, typename Alloc=ByteAllocator>
     class UserAllocator{
     public:
         template<typename ...Args>

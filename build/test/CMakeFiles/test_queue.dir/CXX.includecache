@@ -15,6 +15,8 @@ stl_utility.h
 ../include/stl_utility.h
 type_traits.h
 ../include/type_traits.h
+new
+-
 
 ../include/_move.h
 type_traits.h
@@ -32,9 +34,9 @@ cstdlib
 
 ../include/deque.h
 config.h
--
+../include/config.h
 stl_iterator.h
--
+../include/stl_iterator.h
 stl_algorithm.h
 ../include/stl_algorithm.h
 stl_uninitialized.h
@@ -47,6 +49,38 @@ initializer_list
 -
 stl_exception.h
 ../include/stl_exception.h
+
+../include/func/function.h
+exception
+-
+invoke.h
+../include/func/invoke.h
+
+../include/func/invoke.h
+../type_traits.h
+../include/type_traits.h
+reference_wrapper.h
+../include/func/reference_wrapper.h
+
+../include/func/reference_wrapper.h
+../type_traits.h
+../include/type_traits.h
+memory
+-
+
+../include/functional.h
+stl_utility.h
+../include/stl_utility.h
+type_traits.h
+../include/type_traits.h
+stdexcept
+-
+func/function.h
+../include/func/function.h
+func/invoke.h
+../include/func/invoke.h
+func/reference_wrapper.h
+../include/func/reference_wrapper.h
 
 ../include/queue.h
 deque.h
@@ -65,16 +99,16 @@ type_traits.h
 ../include/type_traits.h
 
 ../include/stl_algorithm.h
-cstring
--
 _move.h
 ../include/_move.h
 stl_iterator.h
--
+../include/stl_iterator.h
 type_traits.h
 ../include/type_traits.h
 stl_algobase.h
 ../include/stl_algobase.h
+functional.h
+../include/functional.h
 
 ../include/stl_construct.h
 new
@@ -98,7 +132,7 @@ type_traits.h
 cstddef
 -
 type_traits.h
--
+../include/type_traits.h
 
 ../include/stl_type_traits.h
 cstddef
@@ -119,6 +153,8 @@ stl_algorithm.h
 ../include/stl_algorithm.h
 type_traits.h
 ../include/type_traits.h
+stl_exception.h
+-
 
 ../include/stl_utility.h
 _move.h
@@ -130,9 +166,7 @@ cstdint
 
 ../include/type_traits.h
 stl_type_traits.h
--
-stl_type_traits_base.h
--
+../include/stl_type_traits.h
 
 ../test/tool.h
 iostream
@@ -140,17 +174,7 @@ iostream
 random
 -
 
-D:/Conzxy/TinySTL/include/alloc.h
-cstddef
--
-cstdlib
--
-
-D:/Conzxy/TinySTL/src/_alloc.cpp
-../include/alloc.h
-D:/Conzxy/TinySTL/include/alloc.h
-
-D:/Conzxy/TinySTL/test/test_queue.cpp
+/home/conzxy/TinySTL/test/test_queue.cpp
 iostream
 -
 queue.h

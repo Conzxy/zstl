@@ -1,12 +1,8 @@
 file(REMOVE_RECURSE
-  "../../bin/libtest_other.dll.a"
-  "../../bin/test_other.exe"
-  "../../bin/test_other.exe.manifest"
+  "../../bin/test_other"
   "../../bin/test_other.pdb"
-  "CMakeFiles/test_other.dir/__/src/_alloc.cpp.obj"
-  "CMakeFiles/test_other.dir/__/src/_alloc.cpp.obj.d"
-  "CMakeFiles/test_other.dir/test_other.cpp.obj"
-  "CMakeFiles/test_other.dir/test_other.cpp.obj.d"
+  "CMakeFiles/test_other.dir/__/src/_alloc.cpp.o"
+  "CMakeFiles/test_other.dir/test_other.cpp.o"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -26,80 +26,234 @@ template<typename T>                                            \
 struct HasMemberT_##Member<T,Void_t<decltype(&T::Member)>>      \
 :_true_type{};                                                  \
 
-//the helper of Is_integral
-#define DEFINE_INTEGRAL(INT_TYPE)								\
-template<>														\
-struct Is_integral_<INT_TYPE>									\
-:_true_type {													\
-};																\
-
-//the helper of Is_floating_point
-#define DEFINE_FLOATING_POINT(TYPE)									\
-template<>															\
-struct Is_floating_point_<TYPE>:_true_type{};						\
-
-//the helper of Is_function
-#define DEFINE_IS_FUNCTION(TYPE)									\
-template<typename R, typename ...Paras>								\
-struct Is_function_<R(Paras...) TYPE> :_true_type {					\
-	using Return=R;													\
-	using Parameter=mpl::Typelist<Paras...>;						\
-	static constexpr bool variadic=false;							\
-};																	\
-
-//variadic helper of Is_function
-#define DEFINE_IS_FUNCTION_VARG(TYPE)								\
-template<typename R, typename ...Paras>								\
-struct Is_function_<R(Paras..., ...) TYPE> :_true_type {			\
-	using Return=R;													\
-	using Parameter=mpl::Typelist<Paras...>;						\
-	static constexpr bool variadic=true;							\
-};																	\
-
-//helper of Make_signed
-#define MAKE_SIGNED_HELPER(TYPE)									\
-template<>															\
-struct Make_signed_<unsigned TYPE, false> {							\
-	using type=signed TYPE;											\
-};																	\
-
-//helper of Make_unsigned
-#define	MAKE_UNSIGNED_HELPER(TYPE)									\
-template<>															\
-struct Make_unsigned_<signed TYPE,false>{							\
-	using type=unsigned TYPE;										\
-};																	\
-
-#define MAKE_UNSIGNED_HELPER_(TYPE)									\
-template<>															\
-struct Make_unsigned_<TYPE,false>{									\
-	using type=unsigned TYPE;										\
-};																	\
-
-
 namespace TinySTL {
+	/////////////////////////
+	///////basic tool////////
+	/////////////////////////
+	//provide SFINAE context to SFINAE out failure version 
+	template<typename...>
+	using Void_t=void;
+
+	//chooses one type or another based on compile-time Boolean 
+	namespace detail {
+		template<bool>
+		struct Conditional_;
+	}
+
+	template<bool Cond, typename T, typename F>
+	using Conditional_t=typename detail::Conditional_<Cond>::template type<T, F>;
 
 	namespace detail {
 		using int_=std::intmax_t;
-		
-		
-		template<typename T>
-		struct Remove_const_;
-
-		template<typename T>
-		struct Remove_volatile_;
-
-		template<typename T>
-		struct Remove_reference_;
-
-		template<typename T>
-		struct Add_lvalue_reference_;
-
-		template<typename T>
-		struct Add_rvalue_reference_;
 	}
 
 	using int_=detail::int_;
+	
+	////////////////////////
+	///Type modifications///
+	////////////////////////
+	//remove cv specifiers:
+	namespace detail {
+		template<typename T>
+		struct Remove_const_ {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_const_ <T const> {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_volatile_ {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_volatile_<T volatile> {
+			using type=T;
+		};
+	}
+	
+	template<typename T>
+	using Remove_const=detail::Remove_const_<T>;
+
+	template<typename T>
+	using Remove_volatile =detail::Remove_volatile_<T>;
+
+	template<typename T>
+	using Remove_cv=Remove_volatile<typename Remove_const<T>::type>;
+
+	//add cv-specifiers
+	namespace detail {
+		template<typename T>
+		struct Add_const_ {
+			using type=T const;
+		};
+
+		template<>
+		struct Add_const_<void> {
+			using type=void;
+		};
+
+		template<typename T>
+		struct Add_volatile_ {
+			using type=T volatile;
+		};
+
+		template<>
+		struct Add_volatile_<void> {
+			using type=void;
+		};
+
+		template<typename T>
+		struct Add_cv_ {
+			using type=T const volatile;
+		};
+
+		template<>
+		struct Add_cv_ <void>{
+			using type=void;
+		};
+	}
+
+	template<typename T>
+	using Add_const=detail::Add_const_<T>;
+
+	template<typename T>
+	using Add_volatile=detail::Add_volatile_<T>;
+
+	template<typename T>
+	using Add_cv=detail::Add_cv_<T>;
+
+	template<typename T>
+	using Add_const_t=typename detail::Add_const_<T>::type;
+
+	template<typename T>
+	using Add_volatile_t=typename detail::Add_volatile_<T>::type;
+
+	template<typename T>
+	using Add_cv_t=typename detail::Add_cv_<T>::type;
+
+	//pointers:
+	namespace detail {
+
+		template<typename T>
+		struct Remove_pointer_ {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_pointer_<T*> {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_pointer_<T* const> {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_pointer_<T* volatile> {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_pointer_<T* const volatile> {
+			using type=T;
+		};
+	}
+
+	template<typename T>
+	using Remove_pointer=detail::Remove_pointer_<T>;
+	
+	template<typename T>
+	using Remove_pointer_t=typename detail::Remove_pointer_<T>::type;
+
+	namespace detail {
+		template<typename T>
+		struct Remove_reference_ {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_reference_<T&> {
+			using type=T;
+		};
+
+		template<typename T>
+		struct Remove_reference_<T&&> {
+			using type=T;
+		};
+	}
+
+	template<typename T>
+	using Remove_reference=detail::Remove_reference_<T>;
+
+	//need to provide SFINAE context here
+	//because a reference or pointer to a qualified function type member is forbidden,
+	//only allow the pointer-to-member
+	namespace detail {
+		template<typename T,typename =Void_t<>>
+		struct Add_pointer_ {
+			using type=T;
+		};
+		
+		template<typename T>
+		struct Add_pointer_ <T,Void_t<typename Remove_reference<T>::type*>>{
+			using type=typename Remove_reference<T>::type*;
+		};
+	}
+
+	template<typename T>
+	using Add_pointer=detail::Add_pointer_<T>;
+
+	template<typename T>
+	using Add_pointer_t=typename detail::Add_pointer_<T>::type;
+
+	namespace detail {
+		//Based on the saying in Add_pointer,
+		//also provide SFINAE context here.
+		//Additionally,reference-to-void is forbidden,
+		//but SFINAE also include that situation
+
+		//type_identity just fit to the standard writing
+		//provide type member:type
+		template<typename T>
+		struct type_identity {
+			using type=T;
+		};
+
+		//expression SFINAE
+		template<typename T>
+		auto try_add_lvalue_reference(void*)
+			->type_identity<T&>;
+
+		template<typename T>
+		auto try_add_lvalue_reference(...)
+			->type_identity<T>;
+	
+		template<typename T>
+		struct Add_lvalue_reference_ :decltype(try_add_lvalue_reference<T>(nullptr)){};
+
+		template<typename T>
+		auto try_add_rvalue_reference(void*)
+			->type_identity<T&&>;
+
+		template<typename T>
+		auto try_add_rvalue_reference(...)
+			->type_identity<T>;
+
+		template<typename T>
+		struct Add_rvalue_reference_ :decltype(try_add_rvalue_reference<T>(nullptr)){};
+	}
+
+	template<typename T>
+	using Add_lvalue_reference=detail::Add_lvalue_reference_<T>;
+
+	template<typename T>
+	using Add_rvalue_reference=detail::Add_rvalue_reference_<T>;
+
 
 	template<typename T>
 	using Remove_reference_t=typename detail::Remove_reference_<T>::type;
@@ -124,18 +278,6 @@ namespace TinySTL {
 	Add_rvalue_reference_t<T> declval()noexcept;
 
 
-	//provide SFINAE context to SFINAE out failure version 
-	template<typename...>
-	using Void_t=void;
-
-	//chooses one type or another based on compile-time Boolean 
-	namespace detail {
-		template<bool>
-		struct Conditional_;
-	}
-
-	template<bool Cond, typename T, typename F>
-	using Conditional_t=typename detail::Conditional_<Cond>::template type<T, F>;
 
 	//////////////////////////
 	///Operation on traits////
@@ -216,6 +358,13 @@ namespace TinySTL {
 	using Is_void=typename detail::Is_void_<Remove_cv_t<T>>::type;
 
 
+//the helper of Is_integral
+#define DEFINE_INTEGRAL(INT_TYPE)								\
+	template<>														\
+	struct Is_integral_<INT_TYPE>									\
+	:_true_type {													\
+	};																
+
 	//check if a type is an integral type
 	namespace detail {
 		template<typename T>
@@ -242,6 +391,10 @@ namespace TinySTL {
 	template<typename T>
 	using Is_integral=typename detail::Is_integral_<Remove_cv_t<T>>::type;
 
+//the helper of Is_floating_point
+#define DEFINE_FLOATING_POINT(TYPE)									\
+	template<>														\
+	struct Is_floating_point_<TYPE> :_true_type{};						
 
 	//check if a type is a floating point type
 	namespace detail {
@@ -329,6 +482,7 @@ namespace TinySTL {
 	struct member_object_pointer_traits <T,_false_type>{
 	};
 
+
 	//check if a type is a pointer-to-member function type
 	namespace detail {
 
@@ -401,6 +555,24 @@ namespace TinySTL {
 	//becase the type just a made-up type
 	template<typename T>
 	using Is_class=typename detail::Is_class_<T>::type;
+
+//the helper of Is_function
+#define DEFINE_IS_FUNCTION(TYPE)									\
+	template<typename R, typename ...Paras>								\
+	struct Is_function_<R(Paras...) TYPE> :_true_type {					\
+		using Return=R;													\
+		using Parameter=mpl::Typelist<Paras...>;						\
+		static constexpr bool variadic=false;							\
+	};
+
+//variadic helper of Is_function
+#define DEFINE_IS_FUNCTION_VARG(TYPE)								\
+	template<typename R, typename ...Paras>								\
+	struct Is_function_<R(Paras..., ...) TYPE> :_true_type {			\
+		using Return=R;													\
+		using Parameter=mpl::Typelist<Paras...>;						\
+		static constexpr bool variadic=true;							\
+	};
 
 	namespace detail {
 		//check if a type is a function type
@@ -1246,210 +1418,27 @@ namespace TinySTL {
 	
 	
 	
-	////////////////////////
-	///Type modifications///
-	////////////////////////
-	//remove cv specifiers:
-	namespace detail {
-		template<typename T>
-		struct Remove_const_ {
-			using type=T;
-		};
-
-		template<typename T>
-		struct Remove_const_ <T const> {
-			using type=T;
-		};
-
-		template<typename T>
-		struct Remove_volatile_ {
-			using type=T;
-		};
-
-		template<typename T>
-		struct Remove_volatile_<T volatile> {
-			using type=T;
-		};
-	}
 	
-	template<typename T>
-	using Remove_const=detail::Remove_const_<T>;
+//helper of Make_signed
+#define MAKE_SIGNED_HELPER(TYPE)									\
+	template<>															\
+	struct Make_signed_<unsigned TYPE, false> {							\
+		using type=signed TYPE;											\
+	};
 
-	template<typename T>
-	using Remove_volatile =detail::Remove_volatile_<T>;
+//helper of Make_unsigned
+#define	MAKE_UNSIGNED_HELPER(TYPE)									\
+	template<>															\
+	struct Make_unsigned_<signed TYPE,false>{							\
+		using type=unsigned TYPE;										\
+	};
 
-	template<typename T>
-	using Remove_cv=Remove_volatile<Remove_const_t<T>>;
+#define MAKE_UNSIGNED_HELPER_(TYPE)									\
+	template<>															\
+	struct Make_unsigned_<TYPE,false>{									\
+		using type=unsigned TYPE;										\
+	};
 
-	//add cv-specifiers
-	namespace detail {
-		template<typename T>
-		struct Add_const_ {
-			using type=T const;
-		};
-
-		template<>
-		struct Add_const_<void> {
-			using type=void;
-		};
-
-		template<typename T>
-		struct Add_volatile_ {
-			using type=T volatile;
-		};
-
-		template<>
-		struct Add_volatile_<void> {
-			using type=void;
-		};
-
-		template<typename T>
-		struct Add_cv_ {
-			using type=T const volatile;
-		};
-
-		template<>
-		struct Add_cv_ <void>{
-			using type=void;
-		};
-	}
-
-	template<typename T>
-	using Add_const=detail::Add_const_<T>;
-
-	template<typename T>
-	using Add_volatile=detail::Add_volatile_<T>;
-
-	template<typename T>
-	using Add_cv=detail::Add_cv_<T>;
-
-	template<typename T>
-	using Add_const_t=typename detail::Add_const_<T>::type;
-
-	template<typename T>
-	using Add_volatile_t=typename detail::Add_volatile_<T>::type;
-
-	template<typename T>
-	using Add_cv_t=typename detail::Add_cv_<T>::type;
-
-	//pointers:
-	namespace detail {
-
-		template<typename T>
-		struct Remove_pointer_ {
-			using type=T;
-		};
-
-		template<typename T>
-		struct Remove_pointer_<T*> {
-			using type=T;
-		};
-
-		template<typename T>
-		struct Remove_pointer_<T* const> {
-			using type=T;
-		};
-
-		template<typename T>
-		struct Remove_pointer_<T* volatile> {
-			using type=T;
-		};
-
-		template<typename T>
-		struct Remove_pointer_<T* const volatile> {
-			using type=T;
-		};
-	}
-
-	template<typename T>
-	using Remove_pointer=detail::Remove_pointer_<T>;
-	
-	template<typename T>
-	using Remove_pointer_t=typename detail::Remove_pointer_<T>::type;
-
-	//need to provide SFINAE context here
-	//because a reference or pointer to a qualified function type member is forbidden,
-	//only allow the pointer-to-member
-	namespace detail {
-		template<typename T,typename =Void_t<>>
-		struct Add_pointer_ {
-			using type=T;
-		};
-		
-		template<typename T>
-		struct Add_pointer_ <T,Void_t<Remove_reference_t<T>*>>{
-			using type=Remove_reference_t<T>*;
-		};
-	}
-
-	template<typename T>
-	using Add_pointer=detail::Add_pointer_<T>;
-
-	template<typename T>
-	using Add_pointer_t=typename detail::Add_pointer_<T>::type;
-
-	namespace detail {
-		template<typename T>
-		struct Remove_reference_ {
-			using type=T;
-		};
-
-		template<typename T>
-		struct Remove_reference_<T&> {
-			using type=T;
-		};
-
-		template<typename T>
-		struct Remove_reference_<T&&> {
-			using type=T;
-		};
-	}
-
-	template<typename T>
-	using Remove_reference=detail::Remove_reference_<T>;
-
-	namespace detail {
-		//Based on the saying in Add_pointer,
-		//also provide SFINAE context here.
-		//Additionally,reference-to-void is forbidden,
-		//but SFINAE also include that situation
-
-		//type_identity just fit to the standard writing
-		//provide type member:type
-		template<typename T>
-		struct type_identity {
-			using type=T;
-		};
-
-		//expression SFINAE
-		template<typename T>
-		auto try_add_lvalue_reference(void*)
-			->type_identity<T&>;
-
-		template<typename T>
-		auto try_add_lvalue_reference(...)
-			->type_identity<T>;
-	
-		template<typename T>
-		struct Add_lvalue_reference_ :decltype(try_add_lvalue_reference<T>(nullptr)){};
-
-		template<typename T>
-		auto try_add_rvalue_reference(void*)
-			->type_identity<T&&>;
-
-		template<typename T>
-		auto try_add_rvalue_reference(...)
-			->type_identity<T>;
-
-		template<typename T>
-		struct Add_rvalue_reference_ :decltype(try_add_rvalue_reference<T>(nullptr)){};
-	}
-
-	template<typename T>
-	using Add_lvalue_reference=detail::Add_lvalue_reference_<T>;
-
-	template<typename T>
-	using Add_rvalue_reference=detail::Add_rvalue_reference_<T>;
 
 	//sign modifiers:
 	namespace detail {

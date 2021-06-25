@@ -15,4 +15,3 @@ add_executable(test_algo test_algo.cpp ${LIB_SRC})
 add_executable(test_hashtable test_hashtable.cpp ${LIB_SRC})
 add_executable(test_other test_other.cpp ${LIB_SRC})
 
-target_link_libraries(test_other C://lib//fmt//libfmt.a)

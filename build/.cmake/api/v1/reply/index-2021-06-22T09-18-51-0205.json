@@ -3,40 +3,30 @@
 	{
 		"generator" : 
 		{
-			"multiConfig" : false,
 			"name" : "Unix Makefiles"
 		},
 		"paths" : 
 		{
-			"cmake" : "C:/Program Files/CMake/bin/cmake.exe",
-			"cpack" : "C:/Program Files/CMake/bin/cpack.exe",
-			"ctest" : "C:/Program Files/CMake/bin/ctest.exe",
-			"root" : "C:/Program Files/CMake/share/cmake-3.20"
+			"cmake" : "/usr/bin/cmake",
+			"cpack" : "/usr/bin/cpack",
+			"ctest" : "/usr/bin/ctest",
+			"root" : "/usr/share/cmake-3.16"
 		},
 		"version" : 
 		{
 			"isDirty" : false,
 			"major" : 3,
-			"minor" : 20,
-			"patch" : 1,
-			"string" : "3.20.1",
+			"minor" : 16,
+			"patch" : 3,
+			"string" : "3.16.3",
 			"suffix" : ""
 		}
 	},
 	"objects" : 
 	[
 		{
-			"jsonFile" : "codemodel-v2-4a39540cabfa3ac15967.json",
+			"jsonFile" : "codemodel-v2-82174cadac3be5cdf06d.json",
 			"kind" : "codemodel",
-			"version" : 
-			{
-				"major" : 2,
-				"minor" : 2
-			}
-		},
-		{
-			"jsonFile" : "cache-v2-cd8c47a15b6c09ab627e.json",
-			"kind" : "cache",
 			"version" : 
 			{
 				"major" : 2,
@@ -44,11 +34,11 @@
 			}
 		},
 		{
-			"jsonFile" : "toolchains-v1-6ba9f4284a29b427300b.json",
-			"kind" : "toolchains",
+			"jsonFile" : "cache-v2-cdce75fef9329ae5edb0.json",
+			"kind" : "cache",
 			"version" : 
 			{
-				"major" : 1,
+				"major" : 2,
 				"minor" : 0
 			}
 		}
@@ -77,7 +67,7 @@
 				"responses" : 
 				[
 					{
-						"jsonFile" : "cache-v2-cd8c47a15b6c09ab627e.json",
+						"jsonFile" : "cache-v2-cdce75fef9329ae5edb0.json",
 						"kind" : "cache",
 						"version" : 
 						{
@@ -86,22 +76,16 @@
 						}
 					},
 					{
-						"jsonFile" : "codemodel-v2-4a39540cabfa3ac15967.json",
+						"jsonFile" : "codemodel-v2-82174cadac3be5cdf06d.json",
 						"kind" : "codemodel",
 						"version" : 
 						{
 							"major" : 2,
-							"minor" : 2
+							"minor" : 0
 						}
 					},
 					{
-						"jsonFile" : "toolchains-v1-6ba9f4284a29b427300b.json",
-						"kind" : "toolchains",
-						"version" : 
-						{
-							"major" : 1,
-							"minor" : 0
-						}
+						"error" : "unknown request kind 'toolchains'"
 					}
 				]
 			}

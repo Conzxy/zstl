@@ -1,15 +1,19 @@
-
-# Consider dependencies only in project.
-set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
-
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
+  "CXX"
   )
+# The set of files for implicit dependencies of each language:
+set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/conzxy/TinySTL/src/_alloc.cpp" "/home/conzxy/TinySTL/build/test/CMakeFiles/test_vector.dir/__/src/_alloc.cpp.o"
+  "/home/conzxy/TinySTL/test/test_vector.cpp" "/home/conzxy/TinySTL/build/test/CMakeFiles/test_vector.dir/test_vector.cpp.o"
+  )
+set(CMAKE_CXX_COMPILER_ID "GNU")
 
-# The set of dependency files which are needed:
-set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "D:/Conzxy/TinySTL/src/_alloc.cpp" "test/CMakeFiles/test_vector.dir/__/src/_alloc.cpp.obj" "gcc" "test/CMakeFiles/test_vector.dir/__/src/_alloc.cpp.obj.d"
-  "D:/Conzxy/TinySTL/test/test_vector.cpp" "test/CMakeFiles/test_vector.dir/test_vector.cpp.obj" "gcc" "test/CMakeFiles/test_vector.dir/test_vector.cpp.obj.d"
+# The include file search paths:
+set(CMAKE_CXX_TARGET_INCLUDE_PATH
+  "../include"
+  "../test"
+  "../test/C:/lib/fmt/include"
   )
 
 # Targets to which this target links.
