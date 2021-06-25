@@ -1,9 +1,9 @@
 #ifndef STL_LIST_H
 #define STL_LIST_H
 
-#include "Allocator.h"
+#include "allocator.h"
 #include <initializer_list>
-#include "Iterator.h"
+#include "iterator.h"
 #include "stl_algorithm.h"
 #include "type_traits.h"
 

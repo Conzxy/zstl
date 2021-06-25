@@ -5,6 +5,6 @@
 #ifndef TINYSTL_VARIANT_H
 #define TINYSTL_VARIANT_H
 
-#include <Variant_.h>
-#include <Variant_impl.h>
+#include <variant_.h>
+#include <variant_impl.h>
 #endif //TINYSTL_VARIANT_H

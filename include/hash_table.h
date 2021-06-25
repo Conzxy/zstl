@@ -15,7 +15,7 @@ typename HashTable<V,K,H,GK,EK,Alloc>::const_iterator \
 
 #include <stl_exception.h>
 #include <config.h>
-#include <Allocator.h>
+#include <allocator.h>
 #include <user_allocator.h>
 #include <vector.h>
 #include <hash_fun.h>

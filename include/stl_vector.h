@@ -1,7 +1,7 @@
 #ifndef TINYSTL_STL_VECTOR_H
 #define TINYSTL_STL_VECTOR_H
 
-#include "Allocator.h"
+#include "allocator.h"
 #include <initializer_list>
 #include "type_traits.h"
 #include "stl_uninitialized.h"

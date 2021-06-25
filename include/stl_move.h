@@ -1,5 +1,5 @@
-#ifndef TINYSTL__MOVE_H
-#define TINYSTL__MOVE_H
+#ifndef TINYSTL_STL_MOVE_H
+#define TINYSTL_STL_MOVE_H
 
 #include "type_traits.h"
 
@@ -27,4 +27,4 @@ namespace TinySTL{
         return static_cast<T&&>(t);
     }//overload 2
 }
-#endif //TINYSTL__MOVE_H
+#endif //TINYSTL_STL_MOVE_H

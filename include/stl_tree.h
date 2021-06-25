@@ -11,10 +11,10 @@
 #define _ZXY_TINYSTL_STL_TREE
 
 #include <cstddef>
-#include "_move.h"
+#include "stl_move.h"
 #include "stl_iterator.h"
 #include "stl_type_traits.h"
-#include "Allocator.h"
+#include "allocator.h"
 
 namespace TinySTL{
 

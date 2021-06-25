@@ -11,7 +11,7 @@
 #include "stl_iterator.h"
 #include "stl_algorithm.h"
 #include "stl_uninitialized.h"
-#include "Allocator.h"
+#include "allocator.h"
 #include "stl_utility.h"
 #include <initializer_list>
 #include "stl_exception.h"

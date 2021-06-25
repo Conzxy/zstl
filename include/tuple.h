@@ -5,11 +5,11 @@
 #ifndef TINYSTL_TUPLE_H
 #define TINYSTL_TUPLE_H
 
-#include <_move.h>
+#include <stl_move.h>
 #include "config.h"
 #include <type_traits.h>
 #include <type_traits>
-#include <Typelist.h>
+#include <typelist.h>
 
 namespace TinySTL{
     template<typename ...>

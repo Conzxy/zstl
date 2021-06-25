@@ -5,8 +5,8 @@
 #ifndef TINYSTL_VARIANT_IMPL_H
 #define TINYSTL_VARIANT_IMPL_H
 
-#include "Variant_.h"
-#include <_move.h>
+#include "variant_.h"
+#include <stl_move.h>
 #include <exception>
 
 namespace TinySTL{
