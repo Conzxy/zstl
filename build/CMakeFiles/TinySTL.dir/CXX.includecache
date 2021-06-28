@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/conzxy/TinySTL/include/alloc.h
+cstddef
+-
+cstdlib
+-
+
+/home/conzxy/TinySTL/src/_alloc.cpp
+../include/alloc.h
+/home/conzxy/TinySTL/include/alloc.h
+
