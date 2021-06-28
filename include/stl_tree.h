@@ -701,6 +701,7 @@ typename RBTree<K, V, GK, CP, Alloc>::iterator
 RBTree<K, V, GK, CP, Alloc>::
 InsertAux(BasePtr cur, BasePtr p, VT&& val){
 	LinkType new_node = CreateNode(TinySTL::forward<VT>(val));
+	new_node->color = RBTreeColor::Red;
 	new_node->left = nullptr;
 	new_node->right = nullptr;
 
