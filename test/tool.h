@@ -34,31 +34,38 @@ auto GetRandom(long long f,long long l){
     return u(e);
 }
 
+template<typename T>
+void PrintRoot(RBTreeNode<T>* root, std::ostream& os){
+	os << root->val << ((root->color == RBTreeColor::Red) ? "(Red)" : "(Black)") << '\n';
+}
+
 template<typename V>
 void PrintSubTree(RBTreeNode<V>* root, std::string const& prefix
                            , std::ostream& os){
     if(! root) return ;
 
-    bool is_red = root->color == RBTreeColor::Red;
-    os << prefix << root->val << (is_red ? "(red)" : "(black)") << '\n';
-
     bool has_right = root->right;
     bool has_left = root->left;
-
+	
+	if(! has_right && ! has_left) return ;
+	
+	os << prefix;
     if(has_right && has_left)
         os << "├── ";
     if(has_right && ! has_left)
         os << "└── ";
 
     if(has_right){
-        if(has_left && has_right && root->right->right || root->right->left)
+		PrintRoot(root->Right(), os);
+        if(has_left && (root->right->right || root->right->left))
             PrintSubTree(root->Right(), prefix + "|   ", os);
         else
             PrintSubTree(root->Right(), prefix + "    ", os);
     }
 
     if(has_left){
-        os << (has_right) ? prefix : "";
+        os << ((has_right) ? prefix : "") << "└── ";
+		PrintRoot(root->Left(), os);
         PrintSubTree(root->Left(), prefix + "    ", os); 
     }
 }
@@ -66,6 +73,8 @@ void PrintSubTree(RBTreeNode<V>* root, std::string const& prefix
 template<typename V>
 void PrintDirTree(RBTreeNode<V>* root, std::ostream& os = std::cout){
     if(! root) return ;
+	
+	PrintRoot(root, os);
 
     PrintSubTree(root, "", os);
 }
