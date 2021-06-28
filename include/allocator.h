@@ -29,93 +29,69 @@ namespace TinySTL{
 		template<typename U>
 		using rebind = typename Rebind<U>::type;
     public:
-        static T* allocate();
-        static T* allocate(size_t n);
-        static void deallocate(T* ptr);
-        static void deallocate(T* ptr,std::size_t);
+        T* allocate(size_t n=1) const {
+            return static_cast<T*>(::operator new(sizeof(T)*n));
+        }
 
-        static void construct(T* ptr);
+        void deallocate(T* ptr,std::size_t=1) const {
+            ::operator delete(ptr);
+        }
 
-        /*template<typename T1,typename T2>
-        static void construct(T1* ptr,T2 const& value);*/
-	
-        static void construct(T* ptr,T const& value);
+        template<typename...Args, typename U>
+        void construct(U* ptr,Args&&... args) const {
+            TinySTL::construct(ptr,TinySTL::forward<Args>(args)...);
+        }
 
-        template<typename...Args>
-        static void construct(T* ptr,Args&&... args);
+        template<typename U>
+        void destroy(U* ptr) const {
+            TinySTL::destroy(ptr);
+        }
 
-        static void destroy(T* ptr);
-        static void destroy(T* first,T* last);
+        template<typename U>
+        void destroy(U* first,U* last) const {
+            TinySTL::destroy(first,last);
+        }
     };
 
-    template<typename T>
-    T* allocator<T>::allocate(){
-        return static_cast<T*>(::operator new(sizeof(T)));
-    }
+    template<typename Alloc>
+    struct allocator_traits{
+        using allocator_type = Alloc;
+        using pointer = typename Alloc::pointer;
+        using reference = typename Alloc::reference;
+        using const_pointer = typename Alloc::const_pointer;
+        using const_reference = typename Alloc::const_reference;
+        using size_type = typename Alloc::size_type;
+        using difference_type = typename Alloc::difference_type;
+        using value_type = typename Alloc::value_type;
 
-    template<typename T>
-    T* allocator<T>::allocate(size_t n){
-        return static_cast<T*>(::operator new(sizeof(T)*n));
-    }
+        template<typename U>
+        using rebind = typename Alloc::template rebind<U>;
 
-    template<typename T>
-    void allocator<T>::deallocate(T *ptr) {
-        ::operator delete(ptr);
-    }
+        inline static pointer allocate(allocator_type& alloc, size_type n=1){
+            return alloc.allocate(n);
+        }
 
-    template<typename T>
-    void allocator<T>::deallocate(T* ptr,size_t n){
-        ::operator delete(ptr);
-    }
+        inline static void deallocate(allocator_type& alloc, pointer ptr
+                                    , size_type n=1){
+            alloc.deallocate(ptr, n);
+        }
+ 
+        template<typename... Args, typename U>
+        inline static void construct(allocator_type& alloc, U* ptr, Args&&... args){
+            alloc.construct(ptr, TinySTL::forward<Args>(args)...);
+        }
 
-    template<typename T>
-    void allocator<T>::construct(T *ptr){
-        ::new(ptr) T();
-    }
+        template<typename U>
+        inline static void destroy(allocator_type& alloc, U* ptr){
+            alloc.destroy(ptr);
+        }
 
-    template<typename T>
-    void allocator<T>::construct(T* ptr,T const& value){
-        TinySTL::construct(ptr,value);              //作用域限定以防递归
-    }
-
-    template<typename T>
-    template<typename...Args>
-    void allocator<T>::construct(T* ptr,Args&&... args){
-        TinySTL::construct(ptr,TinySTL::forward<Args>(args)...);
-    }
-
-    template<typename T>
-    void allocator<T>::destroy(T *ptr) {
-        TinySTL::destroy(ptr);
-    }
-
-    template<typename T>
-    void allocator<T>::destroy(T *first,T *last) {
-        TinySTL::destroy(first,last);
-    }
-
-    template<typename allocator,typename =TinySTL::Void_t<>>
-    struct allocator_traits {
+        template<typename U>
+        inline static void destroy(allocator_type& alloc, U* first, U* last){
+            alloc.destroy(first, last);
+        }
     };
 
-    template<typename allocator>
-    struct allocator_traits<allocator, TinySTL::Void_t<
-                                                        typename allocator::value_type,
-                                                        typename allocator::pointer,
-                                                        typename allocator::reference,
-                                                        typename allocator::const_pointer,
-                                                        typename allocator::const_reference,
-                                                        typename allocator::difference_type,
-                                                        typename allocator::size_type>>
-    {
-        using value_type        =typename allocator::value_type;
-        using pointer           =typename allocator::pointer;
-        using reference         =typename allocator::reference;
-        using const_pointer     =typename allocator::const_pointer;
-        using const_reference   =typename allocator::const_reference;
-        using difference_type   =typename allocator::difference_type;
-        using size_type         =typename allocator::size_type;
-    };
-}
+}//namespace TinySTL
 
 #endif //TINYSTL_ALLOCATOR_H
