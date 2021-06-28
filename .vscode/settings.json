@@ -1,0 +1,24 @@
+{
+    "files.associations": {
+        "vector": "cpp",
+        "xmemory": "cpp",
+        "memory": "cpp",
+        "system_error": "cpp",
+        "type_traits": "cpp",
+        "xstring": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "initializer_list": "cpp",
+        "xutility": "cpp",
+        "list": "cpp",
+        "xhash": "cpp",
+        "new": "cpp",
+        "iterator": "cpp",
+        "random": "cpp",
+        "xlocnum": "cpp",
+        "functional": "cpp",
+        "ostream": "cpp",
+        "*.tcc": "cpp",
+        "numeric": "cpp"
+    }
+}
