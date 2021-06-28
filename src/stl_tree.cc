@@ -127,17 +127,19 @@ RightRotation(RBTreeBaseNode*& root, RBTreeBaseNode* y){
 
 void RBTreeInsertFixup(RBTreeBaseNode* new_node, RBTreeBaseNode*& root){
     while(new_node->parent->color == RBTreeColor::Red 
-        && new_node != root){
+        && new_node != root 
+		&& new_node->parent->parent != root->parent){
         auto parent = new_node->parent;
         auto grandpa = parent->parent;
-
+		
         if(grandpa->left == parent){
             auto uncle = grandpa->right;
             //CASE1 : uncle's color is red
             //recolor uncle and parent, then new_node up by 2 level(grandpa)
-            if(uncle->color == RBTreeColor::Red){
-                parent->color = RBTreeColor::Red;
-                uncle->color = RBTreeColor::Red;
+            if(uncle && uncle->color == RBTreeColor::Red){
+                parent->color = RBTreeColor::Black;
+                uncle->color = RBTreeColor::Black;
+				grandpa->color = RBTreeColor::Red;
                 new_node = grandpa;
             }
             else{ //uncle's color is BLACK
@@ -145,8 +147,8 @@ void RBTreeInsertFixup(RBTreeBaseNode* new_node, RBTreeBaseNode*& root){
                 //now, grandpa, parent and new_node are not in one line
                 //so left rotate parent make them in one change to CASE3
                 if(parent->right == new_node){
-                    LeftRotation(root, parent);
-                    new_node = new_node->left;
+					new_node = new_node->parent;
+                    LeftRotation(root, new_node);
                 }
 
                 //CASE3: parent left is new_node
@@ -159,22 +161,25 @@ void RBTreeInsertFixup(RBTreeBaseNode* new_node, RBTreeBaseNode*& root){
         }
         else{//symmetric cases
             auto uncle = grandpa->left;
-            if(uncle->color == RBTreeColor::Red){
-                parent->color = RBTreeColor::Red;
-                grandpa->color = RBTreeColor::Red;
+            if(uncle && uncle->color == RBTreeColor::Red){
+                parent->color = RBTreeColor::Black;
+                uncle->color = RBTreeColor::Black;
+				grandpa->color = RBTreeColor::Red;
                 new_node = grandpa;
             }           
             else{
                 if(parent->left == new_node){
-                    RightRotation(root, parent);
-                    new_node = new_node->right;
+					new_node = new_node->parent;
+                    RightRotation(root, new_node);
                 }
+
                 grandpa->color = RBTreeColor::Red;
                 parent->color = RBTreeColor::Black;
                 LeftRotation(root, grandpa);
             }
         }//if(grandpa->left == parent)
     }//while
+
     root->color = RBTreeColor::Black;
 }
 
