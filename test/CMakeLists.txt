@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(test)
 
-
+set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR})
