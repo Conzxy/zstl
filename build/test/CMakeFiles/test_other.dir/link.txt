@@ -1,1 +1,0 @@
-/usr/bin/c++     CMakeFiles/test_other.dir/test_other.cpp.o CMakeFiles/test_other.dir/__/src/_alloc.cpp.o  -o ../../bin/test_other 
