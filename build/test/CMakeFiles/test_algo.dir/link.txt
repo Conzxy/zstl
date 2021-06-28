@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/test_algo.dir/test_algo.cpp.o CMakeFiles/test_algo.dir/__/src/_alloc.cpp.o  -o ../../bin/test_algo 

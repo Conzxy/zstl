@@ -1,0 +1,57 @@
+[
+{
+  "directory": "D:/Conzxy/TinySTL/build",
+  "command": "C:/MinGW/bin/g++.exe -DTinySTL_EXPORTS  -g -std=gnu++17 -o CMakeFiles/TinySTL.dir/src/_alloc.cpp.obj -c D:/Conzxy/TinySTL/src/_alloc.cpp",
+  "file": "D:/Conzxy/TinySTL/src/_alloc.cpp"
+},
+{
+  "directory": "D:/Conzxy/TinySTL/build/test",
+  "command": "C:/MinGW/bin/g++.exe  @CMakeFiles/test_algo.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles/test_algo.dir/test_algo.cpp.obj -c D:/Conzxy/TinySTL/test/test_algo.cpp",
+  "file": "D:/Conzxy/TinySTL/test/test_algo.cpp"
+},
+{
+  "directory": "D:/Conzxy/TinySTL/build/test",
+  "command": "C:/MinGW/bin/g++.exe  @CMakeFiles/test_algo.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles/test_algo.dir/__/src/_alloc.cpp.obj -c D:/Conzxy/TinySTL/src/_alloc.cpp",
+  "file": "D:/Conzxy/TinySTL/src/_alloc.cpp"
+},
+{
+  "directory": "D:/Conzxy/TinySTL/build/test",
+  "command": "C:/MinGW/bin/g++.exe  @CMakeFiles/test_queue.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles/test_queue.dir/test_queue.cpp.obj -c D:/Conzxy/TinySTL/test/test_queue.cpp",
+  "file": "D:/Conzxy/TinySTL/test/test_queue.cpp"
+},
+{
+  "directory": "D:/Conzxy/TinySTL/build/test",
+  "command": "C:/MinGW/bin/g++.exe  @CMakeFiles/test_queue.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles/test_queue.dir/__/src/_alloc.cpp.obj -c D:/Conzxy/TinySTL/src/_alloc.cpp",
+  "file": "D:/Conzxy/TinySTL/src/_alloc.cpp"
+},
+{
+  "directory": "D:/Conzxy/TinySTL/build/test",
+  "command": "C:/MinGW/bin/g++.exe  @CMakeFiles/test_vector.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles/test_vector.dir/test_vector.cpp.obj -c D:/Conzxy/TinySTL/test/test_vector.cpp",
+  "file": "D:/Conzxy/TinySTL/test/test_vector.cpp"
+},
+{
+  "directory": "D:/Conzxy/TinySTL/build/test",
+  "command": "C:/MinGW/bin/g++.exe  @CMakeFiles/test_vector.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles/test_vector.dir/__/src/_alloc.cpp.obj -c D:/Conzxy/TinySTL/src/_alloc.cpp",
+  "file": "D:/Conzxy/TinySTL/src/_alloc.cpp"
+},
+{
+  "directory": "D:/Conzxy/TinySTL/build/test",
+  "command": "C:/MinGW/bin/g++.exe  @CMakeFiles/test_hashtable.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles/test_hashtable.dir/test_hashtable.cpp.obj -c D:/Conzxy/TinySTL/test/test_hashtable.cpp",
+  "file": "D:/Conzxy/TinySTL/test/test_hashtable.cpp"
+},
+{
+  "directory": "D:/Conzxy/TinySTL/build/test",
+  "command": "C:/MinGW/bin/g++.exe  @CMakeFiles/test_hashtable.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles/test_hashtable.dir/__/src/_alloc.cpp.obj -c D:/Conzxy/TinySTL/src/_alloc.cpp",
+  "file": "D:/Conzxy/TinySTL/src/_alloc.cpp"
+},
+{
+  "directory": "D:/Conzxy/TinySTL/build/test",
+  "command": "C:/MinGW/bin/g++.exe  @CMakeFiles/test_other.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles/test_other.dir/test_other.cpp.obj -c D:/Conzxy/TinySTL/test/test_other.cpp",
+  "file": "D:/Conzxy/TinySTL/test/test_other.cpp"
+},
+{
+  "directory": "D:/Conzxy/TinySTL/build/test",
+  "command": "C:/MinGW/bin/g++.exe  @CMakeFiles/test_other.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles/test_other.dir/__/src/_alloc.cpp.obj -c D:/Conzxy/TinySTL/src/_alloc.cpp",
+  "file": "D:/Conzxy/TinySTL/src/_alloc.cpp"
+}
+]

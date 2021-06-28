@@ -1,0 +1,136 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "test",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "test",
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "TinySTL",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "test",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "TinySTL::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-TinySTL-2a3daef0fd42015849d9.json",
+					"name" : "TinySTL",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "test_algo::@36f028580bb02cc8272a",
+					"jsonFile" : "target-test_algo-a08f46b22e4b663b07c5.json",
+					"name" : "test_algo",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "test_hashtable::@36f028580bb02cc8272a",
+					"jsonFile" : "target-test_hashtable-101845939f1a9a37f623.json",
+					"name" : "test_hashtable",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "test_other::@36f028580bb02cc8272a",
+					"jsonFile" : "target-test_other-cf44fe359bacad93f344.json",
+					"name" : "test_other",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "test_queue::@36f028580bb02cc8272a",
+					"jsonFile" : "target-test_queue-ef2d3022f582a2360c8a.json",
+					"name" : "test_queue",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "test_vector::@36f028580bb02cc8272a",
+					"jsonFile" : "target-test_vector-c1384b32f75b62a7b9c0.json",
+					"name" : "test_vector",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/conzxy/TinySTL/build",
+		"source" : "/home/conzxy/TinySTL"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 0
+	}
+}
