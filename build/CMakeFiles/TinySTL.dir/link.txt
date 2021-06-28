@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC   -shared -Wl,-soname,libTinySTL.so -o ../lib/libTinySTL.so CMakeFiles/TinySTL.dir/src/_alloc.cpp.o 
