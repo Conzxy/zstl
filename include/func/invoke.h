@@ -1,7 +1,8 @@
-#pragma once
+#ifndef _ZXY_INVOKE_H
+#define _ZXY_INVOKE_H
 
 #include "../type_traits.h"
-#include "reference_wrapper.h"
+#include "../stl_move.h"
 //FUNCTION TEMPLATE invoke
 //applies to any function object type,such as
 //function pointer or reference
@@ -10,6 +11,8 @@
 //(*)function pointer to member function/member data
 
 namespace TinySTL{
+    template<typename T>
+    struct reference_wrapper;
 
     namespace detail{
         template<typename >
@@ -56,7 +59,9 @@ namespace TinySTL{
     constexpr decltype(auto)
     invoke(F&& f,Args&&... args) noexcept(noexcept(f))
     {
-        return detail::invoke_impl(std::forward<F>(f),std::forward<Args>(args)...);
+        return detail::invoke_impl(TinySTL::forward<F>(f),TinySTL::forward<Args>(args)...);
     }
 
 }
+
+#endif //_ZXY_INVOKE_H

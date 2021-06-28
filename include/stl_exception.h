@@ -16,6 +16,7 @@
 #define STL_TRY try
 #define TRY_BEGIN try{
 #define TRY_END }
+#define CATCH_ALL catch(...)
 #define CATCH_ALL_BEGIN catch(...){
 #define CATCH_END   }
 #define CATCH_BEGIN(type) catch(type const&){

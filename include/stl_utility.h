@@ -2,6 +2,7 @@
 #define TINYSTL_STL_UTILITY_H
 
 #include "stl_move.h"
+#include "stl_type_traits.h"
 
 namespace TinySTL{
 	template<typename T1,typename T2>
@@ -10,19 +11,33 @@ namespace TinySTL{
 		T2 second;
 
 		pair(T1 const& _first,T2 const& _second)
-			: first{_first},second{_second}{}
-		pair(T1&& _first=T1{},T2&& _second=T2{})
-			: first{_first},second{_second}{}
+			: first{_first}
+			, second{_second}
+		{ }
+		
+		explicit pair(T1&& _first=T1{},T2&& _second=T2{})
+			: first{TinySTL::move(_first)}
+			, second{TinySTL::move(_second)}
+		{ }
 	};
+
+	template<typename T1, typename T2>
+	inline pair<Decay_t<T1>, Decay_t<T2>> make_pair(T1&& x, T2&& y){
+		return pair<Decay_t<T1>, Decay_t<T2>>(
+			TinySTL::forward<T1>(x), TinySTL::forward<T2>(y)
+		);
+	}
+
 
 	template<typename InIter>
 	InIter Next_Iter(InIter iter){
-		++iter;
+		return ++iter;
 	}
 
 	template<typename InIter>
 	InIter Prev_Iter(InIter iter){
-		--iter;
+		return --iter;
 	}
 }
+
 #endif //TINYSTL_STL_UTILITY_H
