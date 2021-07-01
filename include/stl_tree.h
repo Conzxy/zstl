@@ -19,6 +19,10 @@
 #include "stl_utility.h"
 
 #ifdef RBTREE_DEBUG
+#include <iostream>
+#endif
+
+#ifdef RBTREE_DEBUG
 template<typename >
 class RBTreeTest;
 #endif
@@ -175,14 +179,24 @@ struct RBTreeIterator{
 
 	using BasePtr = RBTreeBaseNode::BasePtr;
 	using LinkType = typename RBTreeNode<T>::LinkType;
+	using ConstLinkType = typename RBTreeNode<T>::ConstLinkType;
+
 	using Self = RBTreeIterator;
 
 	RBTreeIterator()
 	{}
 
-	explicit RBTreeIterator(BasePtr p)
+	RBTreeIterator(BasePtr p)
 		: node_(p)
 	{}
+	
+	LinkType node() noexcept {
+		return static_cast<LinkType>(node_);
+	}
+	
+	ConstLinkType node() const noexcept {
+		return static_cast<ConstLinkType>(node_);
+	}
 
 	reference operator*() const noexcept{
 		return static_cast<LinkType>(node_)->val;
@@ -245,13 +259,21 @@ struct RBTreeConstIterator{
 	RBTreeConstIterator()
 	{}
 
-	explicit RBTreeConstIterator(BasePtr p)
+	RBTreeConstIterator(BasePtr p)
 		: node_(p)
 	{}
 	
 	RBTreeConstIterator(RBTreeIterator<T> const& iter)
 		: node_(iter.node_)
 	{}
+	
+	LinkType node() const noexcept {
+		return static_cast<LinkType>(node_);
+	}
+	
+	RBTreeIterator<T> ConstCast() noexcept {
+		return const_cast<RBTreeBaseNode*>(node_);
+	}
 
 	reference operator*() const noexcept {
 		return static_cast<LinkType>(node_)->val;
@@ -320,14 +342,48 @@ struct KeyCompare{
 };
 
 /*
- * @fn
- * @brief Red-Black rebalance alghorithm
+ * @brief Red-Black rebalance alghorithm for insert
+ * @param x inserted new node
+ * @param root root of rbtree
+ * @return void
  * @see https://conzxy.github.io/2021/01/26/CLRS/Search-Tree/BlackRedTree/
  */
 void RBTreeInsertFixup(RBTreeBaseNode* x, RBTreeBaseNode*& root);
-void RBTreeEraseFixup(RBTreeBaseNode* x, RBTreeBaseNode*& root);
 
+/*
+ * @brief Red-Black rebalance algorithm for delete
+ * @param x node to be deleted
+ * @param root root of rbtree
+ * @param leftmost the most left node of rbtree
+ * @param rightmost the most right node of rbtree
+ * @return actual deleted node location(i.e. x)
+ * @note the reason why return x instead of void is that delete RBTreeBaseNode is imcompleted
+ * because RBTreeBaseNode destructor is non-virtual
+ * @see https://conzxy.github.io/2021/01/26/CLRS/Search-Tree/BlackRedTree/
+ */
+RBTreeBaseNode* 
+RBTreeEraseAndFixup(RBTreeBaseNode* x, RBTreeBaseNode*& root
+									 , RBTreeBaseNode*& leftmost
+									 , RBTreeBaseNode*& rightmost);
 
+/*
+ * @brief get the black height of given node
+ * @param node given node
+ * @param root root of rbtree
+ * @pre node have no child
+ * @return black height
+ * @note black height not include root itself
+ */
+constexpr std::size_t BH(RBTreeBaseNode const* node, RBTreeBaseNode const* root) noexcept {
+	if(!node)
+		return 0;
+	
+	std::size_t bh = node->color == RBTreeColor::Black ? 1 : 0;
+	if(node == root)
+		return bh - 1;
+	else
+		return bh + BH(node->parent, root);
+}
 
 /*
  * @class RBTree
@@ -413,7 +469,7 @@ protected:
 		return new_node;
 	}
 
-	void DropNOde(LinkType ptr) noexcept {
+	void DropNode(LinkType ptr) noexcept {
 		DestroyNode(ptr);
 		PutNode(ptr);
 	}
@@ -481,15 +537,25 @@ protected:
 		return impl_.header.right;
 	}
 
+	static const Key
+	_Key(ConstLinkType x) {
+		//TODO: static_assert(Is_invocable_v)
+		return GetKey()(x->val);
+	}
+
+	static const Key
+	_Key(ConstBasePtr x) {
+		return GetKey()(static_cast<ConstLinkType>(x)->val);
+	}
+
 	static const_reference
 	Value(ConstLinkType x) noexcept {
 		return x->val;
 	}
 
-	static const Key&
-	_Key(ConstLinkType x) noexcept {
-		//TODO: static_assert(Is_invocable_v)
-		return GetKey()(x->val);
+	static const_reference
+	Value(ConstBasePtr x) noexcept {
+		return static_cast<ConstLinkType>(x)->val;
 	}
 
 	static LinkType
@@ -520,16 +586,6 @@ protected:
 	static ConstBasePtr
 	Parent(ConstBasePtr x) noexcept {
 		return x->parent;
-	}
-
-	static const_reference
-	Value(ConstBasePtr x) noexcept {
-		return static_cast<ConstLinkType>(x)->val;
-	}
-
-	static const Key&
-	_Key(ConstBasePtr x) noexcept {
-		return Key(static_cast<ConstLinkType>(x));
 	}
 
 	static BasePtr
@@ -634,10 +690,35 @@ public:
 	pair<iterator, bool> EmplaceUnique(Args&&... args);
 	template<typename ...Args>
 	iterator EmplaceEqual(Args&&... args);
+	
+	iterator erase(const_iterator pos){
+		assert(pos != end());
+
+		EraseAux(pos);
+		return Next_Iter(pos).ConstCast();
+	}
+	
+	void erase(const_iterator first, const_iterator last){
+		for(auto it = begin(); it != end(); ++it)
+			erase(it);
+
+		assert(size() == 0 && begin() == end());
+	}
 
 private:
 	template<typename VT>
 	iterator InsertAux(BasePtr cur, BasePtr p, VT&& val);
+	
+	void EraseAux(const_iterator node) noexcept;
+
+	//debug helper
+#ifdef RBTREE_DEBUG
+	pair<bool, const char*> IsRequired() const;
+	void PrintRoot(ConstLinkType root,  std::ostream& os) const;
+	void PrintSubTree(ConstLinkType root, std::ostream& os, std::string const& prefix = "") const;
+	void Print(std::ostream& os = std::cout) const;
+	
+#endif
 
 protected:
 	RBTreeImpl impl_;
@@ -646,8 +727,7 @@ protected:
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
 template<typename VT>
 pair<typename RBTree<K, V, GK, CP, Alloc>::iterator, bool>
-RBTree<K, V, GK, CP, Alloc>::
-InsertUnique(VT&& val){
+RBTree<K, V, GK, CP, Alloc>::InsertUnique(VT&& val){
 	BasePtr p = Header();
 	BasePtr cur = Root();
 
@@ -655,7 +735,7 @@ InsertUnique(VT&& val){
 
 	while(cur){
 		p = cur;
-		cmp_res = key_comp()(val, Value(cur));
+		cmp_res = key_comp()(GK()(val), _Key(cur));
 		cur = cmp_res ? cur->left : cur->right;	
 	}
 
@@ -673,7 +753,7 @@ InsertUnique(VT&& val){
 	//becase predecessor is just less than p.val
 	//only pre.val < val prove val is unique
 	//that is, there is a "hole" in the sorted sequence
-	if(key_comp()(Value(pre.node_), val))
+	if(key_comp()(_Key(pre.node_), GK()(val)))
 		return make_pair(InsertAux(cur, p, TinySTL::forward<VT>(val)), true);
 	else
 		return make_pair(pre, false);
@@ -682,39 +762,42 @@ InsertUnique(VT&& val){
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
 template<typename VT>
 typename RBTree<K, V, GK, CP, Alloc>::iterator 
-RBTree<K, V, GK, CP, Alloc>::
-InsertEqual(VT&& val){
-	BasePtr p = Header();
-	BasePtr cur = Root();
+RBTree<K, V, GK, CP, Alloc>::InsertEqual(VT&& val){
+	//LinkType p = static_cast<LinkType>(Header());
+	//LinkType cur = static_cast<LinkType>(Root());
+	auto p = Header();
+	auto cur = Root();
 
 	while(cur){
 		p = cur;
-		cur = key_comp()(val, Value(cur)) ? cur->left : cur->right;
+		cur = key_comp()(GK()(val), _Key(cur)) ? cur->left : cur->right;
 	}
-
+	
 	return InsertAux(cur, p, TinySTL::forward<VT>(val));
 }
 
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
 template<typename VT>
 typename RBTree<K, V, GK, CP, Alloc>::iterator
-RBTree<K, V, GK, CP, Alloc>::
-InsertAux(BasePtr cur, BasePtr p, VT&& val){
+RBTree<K, V, GK, CP, Alloc>::InsertAux(BasePtr cur, BasePtr p, VT&& val){
 	LinkType new_node = CreateNode(TinySTL::forward<VT>(val));
 	new_node->color = RBTreeColor::Red;
 	new_node->left = nullptr;
 	new_node->right = nullptr;
-
+	
 	assert(cur == nullptr);
-	if(p == Header()){
-		Root() = new_node;
-		Header()->parent = Root();
-		LeftMost() = new_node;
-		RightMost() = new_node;
-	}else if(key_comp()(val, Value(p))){
+	if(p == Header() || key_comp()(GK()(val), _Key(p))){
 		p->left = new_node;
-		if(p == LeftMost())
+
+		if(p == Header()){
+			Root() = new_node;
+			RightMost() = new_node;
+		}
+		else if(p == LeftMost()){
 			LeftMost() = new_node;
+		}
+		//printf("%d\n", val);
+		//printf("header insert\n");
 	}else{
 		p->right = new_node;
 		if(p == RightMost())
@@ -723,12 +806,112 @@ InsertAux(BasePtr cur, BasePtr p, VT&& val){
 
 	new_node->parent = p;
 	++impl_.node_count;
+
 	RBTreeInsertFixup(new_node, Root());
 
 	return iterator(new_node);
 }
 
+template<typename K, typename V, typename GK, typename CP, typename Alloc>
+void RBTree<K, V, GK, CP, Alloc>::EraseAux(const_iterator pos) noexcept {
+	auto node = static_cast<LinkType>(RBTreeEraseAndFixup(const_cast<BasePtr>(pos.node_),
+															 Root(), LeftMost(), RightMost()));
 
+	DropNode(node);
+	--impl_.node_count;
+}
+
+#ifdef RBTREE_DEBUG
+
+template<typename K, typename V, typename GK, typename CP, typename Alloc>
+pair<bool, const char*> RBTree<K, V, GK, CP, Alloc>::IsRequired() const {
+	if(size() == 0)
+		return make_pair(begin() == end() && Header()->left == Header() 
+			&& Header()->right == Header() && Header()->parent == nullptr, "Header()'s invariant broken when node_count == 0");
+
+	int bh = BH(LeftMost(), Root());
+
+	for(auto it = begin(); it != end(); ++it){
+		auto cur = it.node();
+		auto left = Left(cur);
+		auto right = Right(cur);
+
+		if(cur->color == RBTreeColor::Red){
+			if((left && left->color == RBTreeColor::Red)
+				|| (right && right->color == RBTreeColor::Red))
+				return make_pair(false, "two red closed");
+		}
+
+		if(left && !key_compare()(_Key(left), _Key(cur)))
+		{
+			char buf[128];
+			sprintf(buf, "left: %d and cur: %d isn't required", _Key(left), _Key(cur));
+			return make_pair<bool, const char*>(false, buf);
+		}
+		
+		if(right && !key_compare()(_Key(cur), _Key(right)))
+		{
+			char buf[128];
+			sprintf(buf, "cur: %d and right: %d isn't required", _Key(cur), _Key(right));
+			return make_pair<bool, const char*>(false, buf);
+		}
+		if(!left && !right && BH(cur, Root()) != bh)
+			return make_pair(false, "black height isn't equal"); 
+	}
+
+	if(RightMost() != Maximum(Root()))
+		return make_pair(false, "right most isn't maximum");
+	if(LeftMost() != Minimum(Root()))
+		return make_pair(false, "left most isn't mimumum");
+
+	return make_pair(true, "");
+}
+
+template<typename K, typename V, typename GK, typename CP, typename Alloc>
+void RBTree<K, V, GK, CP, Alloc>::PrintRoot(ConstLinkType root, std::ostream& os) const {
+	os << root->val << ((root->color == RBTreeColor::Red) ? "(Red)" : "(Black)") << '\n';
+}
+
+template<typename K, typename V, typename GK, typename CP, typename Alloc>
+void RBTree<K, V, GK, CP, Alloc>::PrintSubTree(ConstLinkType root, std::ostream& os, std::string const& prefix) const {
+    if(! root) return ;
+
+    bool has_right = root->right;
+    bool has_left = root->left;
+	
+	if(! has_right && ! has_left) return ;
+	
+	os << prefix;
+    if(has_right && has_left)
+        os << "├── ";
+    if(has_right && ! has_left)
+        os << "└── ";
+
+    if(has_right){
+		PrintRoot(root->Right(), os);
+        if(has_left && (root->right->right || root->right->left))
+            PrintSubTree(root->Right(), os, prefix + "|   ");
+        else
+            PrintSubTree(root->Right(), os, prefix + "    ");
+    }
+
+    if(has_left){
+        os << ((has_right) ? prefix : "") << "└───";
+		PrintRoot(root->Left(), os);
+        PrintSubTree(root->Left(), os, prefix + "    "); 
+    }
+}
+
+template<typename K, typename V, typename GK, typename CP, typename Alloc>
+void RBTree<K, V, GK, CP, Alloc>::Print(std::ostream& os) const {
+    if(!Root()) return ;
+
+	auto root = static_cast<ConstLinkType>(Root()); 
+	PrintRoot(root, os);
+    PrintSubTree(root, os);
+}
+
+#endif //RBTREE_DEBUG
 
 }//namespace TinySTL
 
