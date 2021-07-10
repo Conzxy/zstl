@@ -121,7 +121,14 @@ RightRotation(RBTreeBaseNode*& root, RBTreeBaseNode* y){
     y->parent = x;
 }
 
-void RBTreeInsertFixup(RBTreeBaseNode* z, RBTreeBaseNode*& root){
+/*
+ * @brief Red-Black rebalance alghorithm for insert
+ * @param x inserted new node
+ * @param root root of rbtree
+ * @return void
+ * @see https://conzxy.github.io/2021/01/26/CLRS/Search-Tree/BlackRedTree/
+ */
+static void RBTreeInsertFixup(RBTreeBaseNode* z, RBTreeBaseNode*& root){
     while(z->parent->color == RBTreeColor::Red 
         && z != root ){
 		
@@ -176,6 +183,30 @@ void RBTreeInsertFixup(RBTreeBaseNode* z, RBTreeBaseNode*& root){
     root->color = RBTreeColor::Black;
 }
 
+void RBTreeInsertAndFixup(const bool insert_left, 
+		RBTreeBaseNode* x,
+		RBTreeBaseNode* p,
+		RBTreeBaseNode* header) noexcept {
+	if(insert_left){
+		p->left = x;
+
+		if(p == header){
+			header->parent = x;
+			header->right = x;
+		}else if(p == header->left){
+			header->left = x;
+		}
+	}else{
+		p->right = x;
+		
+		if(p == header->right)
+			header->right = x;
+	}
+
+	x->parent = p;
+	RBTreeInsertFixup(x, header->parent);
+}
+
 /*
  * @brief transplant the newnode to oldnode location
  * @param root the root of BST
@@ -222,7 +253,8 @@ static void RBTreeEraseFixup(RBTreeBaseNode* x, RBTreeBaseNode* x_parent, RBTree
 				if((!sibling->right || sibling->right->color == RBTreeColor::Black)
 				&& (!sibling->left || sibling->left->color == RBTreeColor::Black)){
 					sibling->color = RBTreeColor::Red;
-					x = x->parent;	//if x's parent's color is red, exit loop and recolor to black
+					x = x_parent;	//if x's parent's color is red, exit loop and recolor to black
+					if(x) x_parent = x->parent;
 				}else{
 					if(!sibling->right || sibling->right->color == RBTreeColor::Black){
 						//CASE3 : sibling's left child's color is red, and right child's color is black
@@ -240,7 +272,7 @@ static void RBTreeEraseFixup(RBTreeBaseNode* x, RBTreeBaseNode* x_parent, RBTree
 				}//if sibling's has two black child
 			}//if sibling's color is red
 		}//if parent->left = x
-		else{//paren->right = x, i.e. sibling in left
+		else{//parent->right = x, i.e. sibling in left
 			auto sibling = x_parent->left;
 			if(sibling->color == RBTreeColor::Red){
 				x_parent->color = RBTreeColor::Red;
@@ -250,9 +282,10 @@ static void RBTreeEraseFixup(RBTreeBaseNode* x, RBTreeBaseNode* x_parent, RBTree
 				if((!sibling->left || sibling->left->color == RBTreeColor::Black)
 				&& (!sibling->right || sibling->right->color == RBTreeColor::Black)){
 					sibling->color = RBTreeColor::Red;
-					x = x->parent;
+					x = x_parent;
+					if(x) x_parent = x->parent;
 				}else{
-					if(!sibling || sibling->left->color == RBTreeColor::Black){
+					if(!sibling->left || sibling->left->color == RBTreeColor::Black){
 						sibling->right->color = RBTreeColor::Black;
 						sibling->color = RBTreeColor::Red;
 						LeftRotation(root, sibling);
@@ -267,6 +300,7 @@ static void RBTreeEraseFixup(RBTreeBaseNode* x, RBTreeBaseNode* x_parent, RBTree
 			}
 		}
 	}//while x != root and x->color == black
+	x->color = RBTreeColor::Black;
 }
 
 /*
