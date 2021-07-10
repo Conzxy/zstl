@@ -12,7 +12,7 @@
 #define TL_ mpl::TL::
 #define STL_MOVE(val) TinySTL::move(val)
 #define STL_SWAP(val1,val2) TinySTL::swap(val1,val2)
-
+#define STL_FORWARD(type, args) TinySTL::forward<type>(args)
 using sz_t=std::size_t;
 
 #endif //TINYSTL_CONFIG_H

@@ -3,7 +3,7 @@
 
 #include <cstring>
 #include "stl_move.h"
-#include <stl_iterator.h>
+#include "stl_iterator.h"
 #include "type_traits.h"
 
 
@@ -30,12 +30,12 @@ namespace TinySTL{
 
     //对char，wchar_t进行特化
     template<>
-    void fill<char*,char>(char* first,char* last,char const& value){
+    inline void fill<char*,char>(char* first,char* last,char const& value){
         std::memset(first,static_cast<unsigned char>(value),last-first);
     }
 
     template<>
-    void fill<wchar_t*,wchar_t>(wchar_t *first,wchar_t *last,wchar_t const& value){
+    inline void fill<wchar_t*,wchar_t>(wchar_t *first,wchar_t *last,wchar_t const& value){
         std::memset(first,static_cast<unsigned char>(value),(last-first)*sizeof(wchar_t));
     }
 

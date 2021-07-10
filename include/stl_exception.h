@@ -21,4 +21,10 @@
 #define CATCH_END   }
 #define CATCH_BEGIN(type) catch(type const&){
 #define RETHROW throw;
+#define CATCH_ALL_UNWIND(expr) \
+	catch(...){ \
+		expr; \
+		throw; \
+	} 
+
 #endif //TINYSTL_STL_EXCEPTION_H
