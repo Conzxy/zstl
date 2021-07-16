@@ -2,7 +2,7 @@
 #define TINYSTL_STL_UTILITY_H
 
 #include "stl_move.h"
-#include "stl_type_traits.h"
+#include "type_traits.h"
 
 namespace TinySTL{
 	template<typename T1,typename T2>

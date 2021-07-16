@@ -7,9 +7,7 @@
 
 #include <iostream>
 #include <random>
-#include "../include/stl_tree.h"
 
-using namespace TinySTL;
 
 template<typename Container>
 std::ostream& PrintContainer(Container const& cont,std::string const& message="",

@@ -2,8 +2,8 @@
 // Created by conzxy on 2021/3/20.
 //
 
-#include <vector.h>
-#include <tool.h>
+#include "vector.h"
+#include "tool.h"
 using namespace TinySTL;
 
 class test_vector{
@@ -22,7 +22,7 @@ public:
         for(int i=0;i<=sz;++i){
             vec->push_back(i);
         }
-        print_container(*vec);
+        PrintContainer(*vec);
         caseEnd();
     }
 
@@ -31,7 +31,7 @@ public:
         std::cout<<"test insert of vector<int>:\n";
         for(int i=0;i <= num;++i)
             vec->insert(vec->begin(),i);
-        print_container(*vec);
+        PrintContainer(*vec);
         caseEnd();
     }
     
@@ -42,16 +42,16 @@ public:
         vec->insert(vec->begin(),first,last);
         //vec->erase(vec->begin(),vec->end());
         //vec->erase(vec->begin());
-        print_container(*vec);
+        PrintContainer(*vec);
     }
 
     void test_copy(){
         caseBegin();
-        std::cout<<"test copy of vector<int>:\n";
+        std::cout<<"test copy of vector<int>:"<<std::endl;
         for(int i=0;i!=1000;++i)
             vec->emplace_back(i);
         auto v=*vec;
-        print_container(v);
+        PrintContainer(v);
         std::cout<<"capacity of copy: "<<v.capacity()
                  <<"\ncapacity of origin: "<<vec->capacity();
         std::cout<<"after reserve\n";
@@ -77,8 +77,8 @@ int main(){
         arr[i]=i;
     int* parr=arr;
     test_vector t_vec;
-    //t_vec.test_push_back(1000);
+    t_vec.test_push_back(1000);
     //t_vec.test_insert(parr,parr+1000);
-    t_vec.test_copy();
+    //t_vec.test_copy();
 
 }

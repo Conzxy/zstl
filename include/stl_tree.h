@@ -14,7 +14,7 @@
 #include <cstring>
 #include "stl_move.h"
 #include "stl_iterator.h"
-#include "stl_type_traits.h"
+#include "type_traits.h"
 #include "allocator.h"
 #include "stl_exception.h"
 #include "stl_utility.h"
