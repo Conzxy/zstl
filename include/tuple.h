@@ -5,11 +5,13 @@
 #ifndef TINYSTL_TUPLE_H
 #define TINYSTL_TUPLE_H
 
-#include <stl_move.h>
+#include "stl_move.h"
 #include "config.h"
-#include <type_traits.h>
+#include "type_traits.h"
 #include <type_traits>
-#include <typelist.h>
+#include "func/invoke.h"
+#include "typelist.h"
+#include "stl_algobase.h"
 
 namespace TinySTL{
     template<typename ...>
@@ -53,8 +55,16 @@ namespace TinySTL{
     class TupleElt<height,T,true>: private T{
     public:
         TupleElt()=default;
+
+		template<typename U>
+		TupleElt(U const& other)
+			: T(other)
+		{ }
+
         template<typename U>
-        TupleElt(U&& other):T(STL_ forward<U>(other)){}
+        TupleElt(U&& other)
+			: T(STL_ forward<U>(other))
+		{ }
 
         T& get(){return *this;}
         T const& get()const{return *this;}
@@ -66,8 +76,16 @@ namespace TinySTL{
         T value;
     public:
         TupleElt()=default;
+	
+		template<typename U>
+		TupleElt(U const& val)
+			: value(val)
+		{ }
+
         template<typename U>
-        TupleElt(U&& val):value(STL_ forward<U>(val)){}
+        TupleElt(U&& val)
+			: value(STL_ forward<U>(val))
+		{ }
 
         T& get(){return value;}
         T const& get()const{return value;}
@@ -94,6 +112,46 @@ namespace TinySTL{
                 typename =STL_ Enable_if_t<sizeof...(Tail)==sizeof...(_Tail)>>
         Tuple(_Head const& head,Tuple<_Tail...> const& tail)
                 :HeadElt(head),Tuple<Tail...>(tail){}
+		
+		
+		template<typename ...Args, typename = Enable_if_t<
+			sizeof...(Args) == sizeof...(Tail) + 1
+		>>
+		Tuple(Tuple<Args...> const& other)
+			: HeadElt(other.getHead())
+			, Tuple<Tail...>(other.getTail())
+		{ }
+
+		template<typename ...Args, typename = Enable_if_t<
+			sizeof...(Args) == sizeof...(Tail) + 1
+		>>
+		Tuple(Tuple<Args...>&& other) noexcept
+			: HeadElt(STL_MOVE(other.getHead()))
+			, Tuple<Tail...>(STL_MOVE(other.getTail()))
+		{ }
+		
+		template<typename ...Args, typename = Enable_if_t<
+			sizeof...(Args) == sizeof...(Tail) + 1
+		>>
+		Tuple& operator=(Tuple<Args...> const& other){
+			auto tmp = other;
+			this->swap(other);
+			return *this;
+		}
+
+		template<typename ...Args, typename = Enable_if_t<
+			sizeof...(Args) == sizeof...(Tail) + 1
+		>>
+		Tuple& operator=(Tuple<Args...>&& other) noexcept {
+			this->swap(other);
+
+			return *this;
+		}
+
+		void swap(Tuple& rhs) noexcept{
+			STL_SWAP(getHead(), rhs.getHead());
+			STL_SWAP(getTail(), rhs.getTail());
+		}
 
         Head& getHead(){
             return static_cast<HeadElt*>(this)->get();
@@ -131,7 +189,7 @@ namespace TinySTL{
     template<int_ N>
     struct TupleGet{
         template<typename ...Types>
-        inline static auto apply(Tuple<Types...> const& self){
+        inline static auto& apply(Tuple<Types...>& self){
             return TupleGet<N-1>::apply(self.getTail());
         }
     };
@@ -139,19 +197,19 @@ namespace TinySTL{
     template<>
     struct TupleGet<0>{
         template<typename ...Types>
-        inline static auto apply(Tuple<Types...> const& self){
+        inline static auto& apply(Tuple<Types...>& self){
             return self.getHead();
         }
     };
 
     template<int_ N,typename ...Types>
-    auto Get(Tuple<Types...> const& self){
+    auto& Get(Tuple<Types...>& self){
         return TupleGet<N>::apply(self);
     }
 
     //Comparison
     //Tuple_1==Tuple_2
-    bool operator==(Tuple<> const&,Tuple<> const&){
+    constexpr bool operator==(Tuple<> const&,Tuple<> const&){
         return true;
     }
 
@@ -169,24 +227,25 @@ namespace TinySTL{
 
     //fall back if sizeof...(Tail1)!=sizeof...(Tail2)
     template<typename ...Types1,typename ...Types2>
-    bool operator ==(Tuple<Types1...> const& t1,Tuple<Types2...> const& t2){
+    bool operator ==(Tuple<Types1...> const&,Tuple<Types2...> const& ){
         return false;
     }
 
     //Output
-    void PrintTuple(std::ostream& os,Tuple<> const&,bool isFirst=true){
-        os<<(isFirst?'[':']');
+	template<typename Ostream>
+    void PrintTuple(Ostream& os,Tuple<> const&,bool isFirst=true){
+        os<<(isFirst ? "()" : ")");
     }
 
-    template<typename ...Types>
-    void PrintTuple(std::ostream& os,Tuple<Types...> const& t,bool isFirst=true){
-        os<<(isFirst?'[':',');
+    template<typename Ostream, typename ...Types>
+    void PrintTuple(Ostream& os,Tuple<Types...> const& t,bool isFirst=true){
+        os<<(isFirst ? "(" : ", ");
         os<<t.getHead();
         PrintTuple(os,t.getTail(),false);
     }
 
-    template<typename ...Types>
-    std::ostream& operator<<(std::ostream& os,Tuple<Types...> const& t){
+    template<typename Ostream, typename ...Types>
+    Ostream& operator<<(Ostream&& os,Tuple<Types...> const& t){
         PrintTuple(os,t);
         return os;
     }
@@ -343,8 +402,38 @@ namespace TinySTL{
                                 MetaFun_Of_NthElement<Tuple<Elems...>,Comp>::template apply>());
         }
 
+		template<typename Ostream>
+		Ostream& PrintValuelist(Ostream& os, mpl::Valuelist<int_>, bool is_first=true){
+			os << (is_first ? "[]" : "]");
+			return os;
+		}
+
+		template<typename Ostream, int_... values>
+		Ostream& PrintValuelist(Ostream& os, mpl::Valuelist<int_, values...>, bool is_first = true) {
+			using Cur = mpl::Valuelist<int_, values...>;
+			os << ((is_first) ? "[" : ", ");
+			os << mpl::TL::Front<Cur>::value;
+			return PrintValuelist(os, mpl::TL::Pop_Front<Cur>{}, false);
+		}
 
 
+		template<typename Ostream, typename T, int_ ...indices>
+		Ostream& operator<<(Ostream& os, mpl::Valuelist<T, indices...> x){
+			return PrintValuelist(os, x);
+		}
+
+		template<typename F, typename ...Args, int_... indices>
+		auto for_each_impl(Tuple<Args...>& tuple, F&& func, mpl::Valuelist<int_, indices...>){
+			return make_Tuple(func(Get<indices>(tuple))...);
+		}
+
+		template<typename F, typename ...Args>
+		auto for_each(Tuple<Args...>& tuple, F&& func){
+			using Indices = Make_Indexlist<sizeof...(Args)>;
+			
+
+			return for_each_impl(tuple, STL_FORWARD(F, func), Indices{});
+		}
 }
 
 #endif //TINYSTL_TUPLE_H

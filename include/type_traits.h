@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include "stl_type_traits_base.h"
-#include "type_list.h"
+#include "typelist.h"
 
 //check if a given type member exists
 #define DEFINE_HAS_TYPE(Memtype)						        \

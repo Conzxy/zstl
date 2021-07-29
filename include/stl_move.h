@@ -4,21 +4,23 @@
 #include "type_traits.h"
 
 namespace TinySTL{
-    //Remove_reference_t是为了避开引用折叠
-    //通过static_cast<&&>使之强制获得右值性
+   
+	// need remove_reference of T to avoid reference collapse 
     template<typename T>
     constexpr decltype(auto) move(T&& t) noexcept{
         return static_cast<Remove_reference_t<T>&&>(t);
     }
 
-    //Remove_reference_t是为了避开引用折叠
-    //forward是根据值类别有选择性使之获得右值性，从而实现perfect forwarding
+    // trick: reference collapse
+	// you should use it with universal reference
+	// e.g.
+	// template<typename T> void g(T&& x) { return f(TinySTL::forward<T>(x)) }
     template<typename T>
     constexpr T&& forward(Remove_reference_t<T>& t) noexcept{
         return static_cast<T&&>(t);
     }//overload 1
 
-    //rvalue->lvalue，触发static_assert
+    //prohibit reference to rvalue(end lifetime), trigger static_assert
     template<typename T>
     constexpr T&& forward(Remove_reference_t<T>&& t) noexcept{
         static_assert(!Is_lvalue_reference_v<T>,
