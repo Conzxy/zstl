@@ -102,7 +102,7 @@ public:
 	{ vector_aux<value_type>(n); }
 
 	template<class InputIterator,
-		Enable_if_t<is_input_iterator<InputIterator>,int> =0>
+		Enable_if_t<is_input_iterator<InputIterator>::value,int> =0>
 	vector(InputIterator first,InputIterator last)
 		: vector(distance(first,last))
 	{
@@ -117,7 +117,7 @@ public:
 	{ }
 	
 	template<typename U, typename =
-		TinySTL::Enable_if_t<Is_convertible_v<U, T>>>
+		TinySTL::Enable_if_t<Is_convertible<U, T>::value>>
 	vector(std::initializer_list<U> il)
 		: vector(il.begin(),il.end()){}
 	
@@ -129,11 +129,11 @@ public:
 	}
 	
 	template<typename U, typename = 
-		TinySTL::Enable_if_t<Is_convertible_v<U, T>>>
+		TinySTL::Enable_if_t<Is_convertible<U, T>::value>>
 	vector& operator=(std::initializer_list<U>);
 
 	template<class InputIterator,typename =Enable_if_t<
-			is_input_iterator<InputIterator>>>
+			is_input_iterator<InputIterator>::value>>
 	void assign(InputIterator first,InputIterator last);
 	void assign(size_type n,T const& t);
 
@@ -225,7 +225,7 @@ public:
 	}
 
 	template<typename InputIterator,typename =
-		Enable_if_t<is_input_iterator<InputIterator>>>
+		Enable_if_t<is_input_iterator<InputIterator>::value>>
 	iterator insert(const_iterator position,
 					InputIterator first,InputIterator last) {
 		auto pos = const_cast<iterator>(position);
@@ -234,7 +234,7 @@ public:
 	}
 
 	template<typename U, typename = 
-		TinySTL::Enable_if_t<Is_convertible_v<U, T>>>
+		TinySTL::Enable_if_t<Is_convertible<U, T>::value>>
 	iterator insert(const_iterator position,std::initializer_list<U> il) {
 		auto pos = const_cast<iterator>(position);
 		insert_aux(pos, il.begin(), il.end());
@@ -273,13 +273,13 @@ private:
 	iterator erase_aux(iterator first,iterator last);
 	iterator erase_aux(iterator position);
 	
-	template<typename U, TinySTL::Enable_if_t<Is_default_constructible_v<U>, char> = 0>
+	template<typename U, TinySTL::Enable_if_t<Is_default_constructible<U>::value, char> = 0>
 	void vector_aux(size_type n) {
 		uninitialized_fill_n(this->first_, n, U{});
 	}
 	
-	template<typename U, TinySTL::Enable_if_t<!Is_default_constructible_v<U>, int> = 0>
-	void vector_aux(size_type n)
+	template<typename U, TinySTL::Enable_if_t<!Is_default_constructible<U>::value, int> = 0>
+	void vector_aux(size_type )
 	{ }
 };
 

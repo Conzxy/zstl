@@ -19,8 +19,12 @@ namespace TinySTL {
     template<>
     struct plus<void> {
         template<typename T1,typename T2>
-        constexpr auto operator()(T1&& lhs, T2&& rhs)const
-            noexcept(noexcept(static_cast<T1&&>(lhs)+static_cast<T2&&>(rhs))) {
+        constexpr  auto operator()(T1&& lhs, T2&& rhs)const noexcept(
+            noexcept(
+				static_cast<T1&&>(lhs)+static_cast<T2&&>(rhs)
+				)
+			) 
+		-> decltype(static_cast<T1&&>(lhs)+static_cast<T2&&>(rhs)) {
             return static_cast<T1&&>(lhs)+static_cast<T2&&>(rhs);
         }
     };
@@ -37,7 +41,8 @@ namespace TinySTL {
     struct minus <void>{
         template<typename T1,typename T2>
         constexpr auto operator()(T1&& lhs, T2&& rhs) const 
-        noexcept(noexcept(static_cast<T1&&>(lhs)-static_cast<T2&&>(rhs))){
+        noexcept(noexcept(static_cast<T1&&>(lhs)-static_cast<T2&&>(rhs)))
+		-> decltype(static_cast<T1&&>(lhs)-static_cast<T2&&>(rhs)) {
             return static_cast<T1&&>(lhs)-static_cast<T2&&>(rhs);
         }
     };
@@ -54,7 +59,8 @@ namespace TinySTL {
     struct multiplies<void> {
         template<typename T1,typename T2>
         constexpr auto operator()(T1&& lhs, T2&& rhs)const
-            noexcept(noexcept(static_cast<T1&&>(lhs)*static_cast<T2&&>(rhs))) {
+            noexcept(noexcept(static_cast<T1&&>(lhs)*static_cast<T2&&>(rhs))) 
+		-> decltype(static_cast<T1&&>(lhs)*static_cast<T2&&>(rhs)){
             return static_cast<T1&&>(lhs)*static_cast<T2&&>(rhs);
         }
     };

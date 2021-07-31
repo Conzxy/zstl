@@ -22,7 +22,7 @@ namespace TinySTL{
         template<typename U,
                 typename =decltype(
                     detail::try_lref<T>(TinySTL::declval<U>())),
-                TinySTL::Enable_if_t<!Is_same_v<self,Remove_cv_t<Remove_reference_t<U>>>,int> =0
+                TinySTL::Enable_if_t<!Is_same<self,Remove_cv_t<Remove_reference_t<U>>>::value,int> =0
                 >             
         reference_wrapper(U&& val)
             :ref_{std::addressof(val)}

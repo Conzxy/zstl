@@ -7,11 +7,9 @@
 
 #include "stl_move.h"
 #include "config.h"
-#include "type_traits.h"
 #include <type_traits>
-#include "func/invoke.h"
 #include "typelist.h"
-#include "stl_algobase.h"
+#include "utility.h"
 
 namespace TinySTL{
     template<typename ...>
@@ -47,8 +45,13 @@ namespace TinySTL{
         Tuple<Tail...> const& getTail()const{return tail;}
     };*/
 
-    template<int_ height,typename T,
-            bool =STD_ is_class_v<T>&&!STD_ is_final_v<T>>
+    template<int_ height, typename T, bool = 
+            TinySTL::Is_class<T>::value
+#if __cplusplus >= 201402L
+				&& ! std::is_final<T>::value>
+#else
+			>
+#endif
     class TupleElt;
 
     template<int_ height,typename T>
@@ -180,7 +183,8 @@ namespace TinySTL{
     //convert built-in array type to pointer type
     //convert function type to pointer-to-function type
     template<typename ...Types>
-    auto make_Tuple(Types&&... elems){
+    auto make_Tuple(Types&&... elems)
+		-> Tuple<STL_ Decay_t<Types>...>{
         return Tuple<STL_ Decay_t<Types>...>(STL_ forward<Types>(elems)...);
     }
 
@@ -189,7 +193,8 @@ namespace TinySTL{
     template<int_ N>
     struct TupleGet{
         template<typename ...Types>
-        inline static auto& apply(Tuple<Types...>& self){
+        inline static auto apply(Tuple<Types...>& self)
+		-> decltype(TupleGet<N-1>::apply(self.getTail())){
             return TupleGet<N-1>::apply(self.getTail());
         }
     };
@@ -197,13 +202,15 @@ namespace TinySTL{
     template<>
     struct TupleGet<0>{
         template<typename ...Types>
-        inline static auto& apply(Tuple<Types...>& self){
+        inline static auto apply(Tuple<Types...>& self)
+			->decltype(self.getHead()){
             return self.getHead();
         }
     };
 
     template<int_ N,typename ...Types>
-    auto& Get(Tuple<Types...>& self){
+    auto Get(Tuple<Types...>& self)
+		-> decltype(TupleGet<N>::apply(self)){
         return TupleGet<N>::apply(self);
     }
 
@@ -283,30 +290,35 @@ namespace TinySTL{
 
         //Push_Front
         template<typename ...Types,typename New>
-        auto Push_Front(Tuple<Types...> const& t,New const& value){
+        auto Push_Front(Tuple<Types...> const& t,New const& value)
+		-> mpl::TL::Push_Front<Tuple<Types...>, New>{
             return mpl::TL::Push_Front<Tuple<Types...>,New>(value,t);
         }
 
         //Push_Back
         template<typename Head,typename ...Tail,typename New>
-        auto Push_Back(Tuple<Head,Tail...> const& t,New const& value){
+        auto Push_Back(Tuple<Head,Tail...> const& t,New const& value)
+		-> Tuple<Head, Tail..., New>{
             return Tuple<Head,Tail...,New>(t.getHead(),Push_Back(t.getTail(),value));
         }
 
         template<typename New>
-        auto Push_Back(Tuple<> const&,New const& value){
+        auto Push_Back(Tuple<> const&,New const& value)
+			-> Tuple<New> {
             return Tuple<New>(value);
         }
 
         //Pop_Back
         template<typename Head,typename ...Tail>
-        auto Pop_Front(Tuple<Head,Tail...> const& t){
+        auto Pop_Front(Tuple<Head,Tail...> const& t)
+			-> decltype(t.getTail()){
             return t.getTail();
         }
 
         //Pop_Back
         template<typename Head,typename ...Tail>
-        auto Pop_Back(Tuple<Head,Tail...> const& t){
+        auto Pop_Back(Tuple<Head,Tail...> const& t)
+			-> decltype(Reverse(Pop_Front(Reverse(t)))){
             return Reverse(Pop_Front(Reverse(t)));
         }
         //Make_Indexlist
@@ -332,7 +344,7 @@ namespace TinySTL{
 
         template<typename ...Elems,int_ ...Indices>
         auto Pick(Tuple<Elems...> const& t,mpl::Valuelist<int_,Indices...>)
-        {
+			-> decltype(make_Tuple(Get<Indices>(t)...)){
             return make_Tuple(Get<Indices>(t)...);
         }
 
@@ -341,7 +353,7 @@ namespace TinySTL{
         //->decltype(...)
         template<typename ...Elems>
         auto Reverse(Tuple<Elems...> const& t)
-        ->decltype(Pick(t,mpl::TL::Reverse<Make_Indexlist<sizeof...(Elems)>>()))
+        -> decltype(Pick(t,mpl::TL::Reverse<Make_Indexlist<sizeof...(Elems)>>()))
         {
             return Pick(t,mpl::TL::Reverse<Make_Indexlist<sizeof...(Elems)>>());
         }
@@ -379,7 +391,8 @@ namespace TinySTL{
         //may be the abbr of "split at" Since the meaning of "splat" doesn't feel right
         //produce a "replicated" index set consisting of N copies of the value I(index)
         template<int_ I,int_ N,typename ...Elems>
-        auto splat(Tuple<Elems...> const& t){
+        auto splat(Tuple<Elems...> const& t)
+			-> decltype(Pick(t, Replicate<I, N>())){
             return Pick(t,Replicate<I,N>());
         }
 
@@ -396,6 +409,9 @@ namespace TinySTL{
 
         template<template<typename ,typename > class Comp,typename ...Elems>
         auto sort(Tuple<Elems...> const& t)
+			-> decltype(Pick(t,
+                        TL_ Sort<Make_Indexlist<sizeof...(Elems)>,
+                                MetaFun_Of_NthElement<Tuple<Elems...>,Comp>::template apply>()))
         {
             return Pick(t,
                         TL_ Sort<Make_Indexlist<sizeof...(Elems)>,
@@ -423,12 +439,15 @@ namespace TinySTL{
 		}
 
 		template<typename F, typename ...Args, int_... indices>
-		auto for_each_impl(Tuple<Args...>& tuple, F&& func, mpl::Valuelist<int_, indices...>){
+		auto for_each_impl(Tuple<Args...>& tuple, F&& func, mpl::Valuelist<int_, indices...>)
+		-> decltype(make_Tuple(func(Get<indices>(tuple))...)){
 			return make_Tuple(func(Get<indices>(tuple))...);
 		}
 
 		template<typename F, typename ...Args>
-		auto for_each(Tuple<Args...>& tuple, F&& func){
+		auto for_each(Tuple<Args...>& tuple, F&& func)
+		-> decltype(for_each_impl(tuple, STL_FORWARD(F, func), 
+					Make_Indexlist<sizeof...(Args)>{})){
 			using Indices = Make_Indexlist<sizeof...(Args)>;
 			
 

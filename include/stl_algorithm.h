@@ -1,6 +1,7 @@
 #ifndef TINYSTL_STL_ALGORITHM_H
 #define TINYSTL_STL_ALGORITHM_H
 
+#include "config.h"
 #include "stl_move.h"
 #include "stl_iterator.h"
 #include "type_traits.h"
@@ -28,42 +29,48 @@ namespace TinySTL {
     /*****************************find_end****************************************/
 
 
-    template<typename Iter>
+    template<typename Iter, STL_ENABLE_IF((is_bidirectional_iterator<Iter>::value), int)>
     void reverse(Iter first,Iter last){
-        if constexpr (is_bidirectional_iterator<Iter>){
-            if(first == last || first == --last)
-                return ;
-            else{
-                iter_swap(first++,last--);
-            }
-        }
-        else if constexpr (is_random_access_iterator<Iter>){
-            while(first < last)
-                iter_swap(first++,last--);
-        }
+		if(first == last || first == --last)
+			return ;
+		else{
+			iter_swap(first++,last--);
+		}
     }
+
+	template<typename Iter, STL_ENABLE_IF((is_random_access_iterator<Iter>::value), char)>
+	void reverse(Iter first, Iter last){
+		while(first < last)
+			iter_swap(first++,last--);
+	}
+	
+	template<typename Iter, STL_ENABLE_IF((is_forward_iterator<Iter>::value), char)>
+	void rotate_impl(Iter first, Iter mid, Iter last){
+		for(Iter _mid=mid;;){
+			iter_swap(first++,_mid++);
+
+			if(first == mid){
+				if(_mid == last) return ;
+				mid=_mid;
+			}
+			else if(_mid == last){
+				_mid=mid;
+			}
+		}
+	}
+	
+	template<typename Iter, STL_ENABLE_IF((is_bidirectional_iterator<Iter>::value), int)>
+	void rotate_impl(Iter first, Iter mid, Iter last){
+		reverse(first,mid);
+		reverse(mid,last);
+		reverse(first,last);
+	}
 
     template<typename Iter>
     void rotate(Iter first,Iter mid,Iter last){
         if(first == mid || mid == last) return ;
-        if constexpr (is_forward_iterator<Iter>){
-            for(Iter _mid=mid;;){
-                iter_swap(first++,_mid++);
 
-                if(first == mid){
-                    if(_mid == last) return ;
-                    mid=_mid;
-                }
-                else if(_mid == last){
-                    _mid=mid;
-                }
-            }
-        }
-        else if constexpr (is_bidirectional_iterator<Iter>){
-            reverse(first,mid);
-            reverse(mid,last);
-            reverse(first,last);
-        }
+		rotate_impl(first, mid, last);
     }
 
     //lower_bound
@@ -120,8 +127,8 @@ namespace TinySTL {
 	//remove does not really remove some elements, just let these unremoved elements move forward,return new logical end
 	//you should use erase provided by correspending container to delete these elements after the logical end 
 	template<typename FI, typename T>
-	FI remove(FI first, FI last, T const& value){
-		static_assert(TinySTL::Is_same_v<typename iterator_traits<FI>::value_type, T>, 
+	FI remove(FI , FI , T const& ){
+		static_assert(TinySTL::Is_same<typename iterator_traits<FI>::value_type, T>::value, 
 					  "remove assert: the value_type of the iterator differ from given value type");
 		
 	}

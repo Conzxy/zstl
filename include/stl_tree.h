@@ -381,7 +381,7 @@ RBTreeEraseAndFixup(RBTreeBaseNode* x, RBTreeBaseNode*& root
  * @return black height
  * @note black height not include root itself
  */
-constexpr std::size_t BH(RBTreeBaseNode const* node, RBTreeBaseNode const* root) noexcept {
+inline std::size_t BH(RBTreeBaseNode const* node, RBTreeBaseNode const* root) noexcept {
 	if(!node)
 		return 0;
 	

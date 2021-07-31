@@ -5,18 +5,18 @@
 #include "stl_move.h"
 #include "stl_iterator.h"
 #include "type_traits.h"
-
+#include "utility.h" // swap()
 
 namespace TinySTL{
 	/*********************************max**************************************/
     template<typename T1,typename T2>
-    auto max(T1 const& x,T2 const& y){
+	Common_type_t<T1, T2> max(T1 const& x,T2 const& y){
         return x<y?y:x;
     }
 
     /*********************************min**************************************/
     template<typename T1,typename T2>
-    auto min(T1 const& x, T2 const& y) {
+    Common_type_t<T1, T2> min(T1 const& x, T2 const& y) {
         return x<y?x:y;
     }
 
@@ -295,8 +295,8 @@ namespace TinySTL{
     }
 
     template<typename IT,typename OT>
-    TinySTL::Enable_if_t<TinySTL::Is_same_v<TinySTL::Remove_reference_t<IT>,
-                                          OT>&&_type_traits<OT>
+    TinySTL::Enable_if_t<TinySTL::Is_same<TinySTL::Remove_reference_t<IT>,
+                                          OT>::value &&_type_traits<OT>
                                           ::has_trivially_assignment_operator::value,OT*>
     move_dispatch(IT* first,IT* last,OT* result){
         auto n=last-first;
@@ -334,8 +334,8 @@ namespace TinySTL{
     }
 
     template<typename T1,typename T2>
-    TinySTL::Enable_if_t<TinySTL::Is_same_v<TinySTL::Remove_reference_t<T1>,
-                                            T2>&&
+    TinySTL::Enable_if_t<TinySTL::Is_same<TinySTL::Remove_reference_t<T1>,
+                                            T2>::value&&
                                             _type_traits<T2>
                                             ::has_trivially_assignment_operator::value,T2*>
     move_b_dispatch(T1* first,T1* last,T2* result){
@@ -397,14 +397,8 @@ namespace TinySTL{
         return first1==last1&&first2!=last2;
     }
     /*****************************swap********************************************/
-    template<typename T>
-    void swap(T& x,T& y)noexcept{
-        auto tmp=TinySTL::move(y);
-        y=TinySTL::move(x);
-        x=TinySTL::move(tmp);
-    }
 
-    template<typename FwdIter,typename =TinySTL::Enable_if_t<is_forward_iterator<FwdIter>>>
+    template<typename FwdIter,typename =TinySTL::Enable_if_t<is_forward_iterator<FwdIter>::value>>
     void iter_swap(FwdIter iter1,FwdIter iter2){
     	using value_type=Iter_value_type<FwdIter>;
     	value_type tmp=TinySTL::move(*iter2);

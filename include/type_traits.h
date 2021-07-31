@@ -8,6 +8,7 @@
 #include "stl_type_traits_base.h"
 #include "typelist.h"
 
+namespace TinySTL {
 //check if a given type member exists
 #define DEFINE_HAS_TYPE(Memtype)						        \
 template<typename,typename =Void_t<>>				            \
@@ -26,7 +27,6 @@ template<typename T>                                            \
 struct HasMemberT_##Member<T,Void_t<decltype(&T::Member)>>      \
 :_true_type{};                                                  \
 
-namespace TinySTL {
 	/////////////////////////
 	///////basic tool////////
 	/////////////////////////
@@ -328,16 +328,6 @@ namespace TinySTL {
 	template<typename T>
 	struct Negation :detail::_not_<T> {};
 
-	//variable
-	template<typename...Tn>
-	inline constexpr bool Conjunction_v=Conjunction<Tn...>::value;
-
-	template<typename...Tn>
-	inline constexpr bool Disjunction_v=Disjunction<Tn...>::value;
-
-	template<typename T>
-	inline constexpr bool Negation_v=Negation<T>::value;
-
 	//////////////////////////////////////
 	///Check the Primary Type Category////
 	//////////////////////////////////////
@@ -556,6 +546,7 @@ namespace TinySTL {
 	template<typename T>
 	using Is_class=typename detail::Is_class_<T>::type;
 
+#if __cplusplus >= 201703L
 //the helper of Is_function
 #define DEFINE_IS_FUNCTION(TYPE)									\
 	template<typename R, typename ...Paras>								\
@@ -573,6 +564,7 @@ namespace TinySTL {
 		using Parameter=mpl::Typelist<Paras...>;						\
 		static constexpr bool variadic=true;							\
 	};
+#endif
 
 	namespace detail {
 		//check if a type is a function type
@@ -596,6 +588,7 @@ namespace TinySTL {
 			static constexpr bool variadic=true;
 		};
 
+#if __cplusplus >= 201703L	
 		//cv
 		DEFINE_IS_FUNCTION(const)
 		DEFINE_IS_FUNCTION(volatile)
@@ -649,6 +642,7 @@ namespace TinySTL {
 		DEFINE_IS_FUNCTION_VARG(volatile&& noexcept)
 		DEFINE_IS_FUNCTION_VARG(const volatile&& noexcept)
 		DEFINE_IS_FUNCTION_VARG(const)
+#endif
 	}
 
 	//no need to provide Remove_cv_t,because the cv specifiers have different means on function
@@ -679,48 +673,6 @@ namespace TinySTL {
 
 	template<typename T>
 	using Is_enum=typename Negation<detail::Is_enum_<T>>::type;
-
-	//variable
-	template<typename T>
-	inline constexpr bool Is_void_v=Is_void<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_integral_v=Is_integral<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_floating_point_v=Is_floating_point<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_pointer_v=Is_pointer<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_array_v=Is_array<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_null_pointer_v=Is_null_pointer<T>::type;
-
-	template<typename T>
-	inline constexpr bool Is_member_object_pointer_v=Is_member_object_pointer<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_member_function_pointer_v=Is_member_function_pointer<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_function_v=Is_function<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_lvalue_reference_v=Is_lvalue_reference<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_rvalue_reference_v=Is_rvalue_reference<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_class_v=Is_class<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_enum_v=Is_enum<T>::value;
-
-
 
 	/////////////////////////////////////
 	///Composite type categories/////////
@@ -765,29 +717,6 @@ namespace TinySTL {
 	//this is,array,function,union,reference,pointer,pointer to member,class,union,enumeration
 	template<typename T>
 	using Is_compound=typename Negation<Is_fundamental<T>>::type;
-
-	//variable
-	template<typename T>
-	inline constexpr bool Is_arithmetic_v=Is_arithmetic<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_fundamental_v=Is_fundamental<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_member_pointer_v=Is_member_pointer<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_scalar_v=Is_scalar<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_reference_v=Is_reference<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_object_v=Is_object<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_compound_v=Is_compound<T>::value;
-
 
 	////////////////////////
 	///Type properties//////
@@ -933,54 +862,6 @@ namespace TinySTL {
 		struct Is_scoped_enum<T, false> :_false_type {};
 	}*/
 
-	
-	//variable
-	template<typename T>
-	inline constexpr bool Is_const_v=Is_const<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_volatile_v=Is_volatile<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_pod_v=Is_pod<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_trivially_default_constructible_v
-		=Is_trivially_default_constructible<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_trivially_copy_constructible_v
-		=Is_trivially_copy_constructible<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_trivially_assignment_v
-		=Is_trivially_assigment<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_trivially_destructible_v
-		=Is_trivially_destructible<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_empty_v=Is_empty<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_polymorphic_v=Is_polymorphic<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_abstract_v=Is_abstract<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_signed_v=Is_signed<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_unsigned_V=Is_unsigned<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_unbounded_array_v=Is_unbounded_array<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_bounded_array_v=Is_bounded_array<T>::value;
-
 	////////////////////////
 	///Property quries//////
 	////////////////////////
@@ -1003,9 +884,6 @@ namespace TinySTL {
 
 	template<typename T>
 	using Rank=detail::Rank_<T>;
-
-	template<typename T>
-	inline constexpr auto Rank_v=detail::Rank_<T>::value;
 
 	namespace detail {
 		template<typename T, int_ N>
@@ -1036,15 +914,11 @@ namespace TinySTL {
 	template<typename T, int_ N>
 	using Extent=detail::Extent_<T, N>;
 
-	template<typename T, int_ N>
-	inline constexpr auto Extent_v=detail::Extent_<T, N>::value;
-
-
-
 	///////////////////////////
 	///Supported operations////
 	///////////////////////////
 
+#if __cplusplus >= 201703L	
 	namespace detail {
 		//generic lambda version
 		//helper:check validity of f(args...) for F f and Args...args
@@ -1123,7 +997,8 @@ namespace TinySTL {
 			using type=decltype(test<T>(nullptr));
 		};
 
-	}
+	} //namespace detail
+
 	//type
 	template<typename T>
 	using Is_default_constructible
@@ -1265,96 +1140,230 @@ namespace TinySTL {
 	struct Is_nothrow_swappable<T,_false_type>
 		:_false_type{};
 
-	//variable
+#elif __cplusplus >= 201103L
+	namespace detail{
+#define Object_SUPPORTED_OPERATION_SFINAE(name, condition) \
+		template<typename T> \
+		struct name##_ { \
+		private: \
+			template<typename U, typename = decltype(condition)> \
+			static _true_type Apply(void*); \
+ \
+			template<typename > \
+			static _false_type Apply(...); \
+		public: \
+			using type = decltype(Apply<T>(nullptr)); \
+		}; \
+\
+		template<typename T> \
+		struct name##T : name##_<T>::type \
+		{ };
+
+		Object_SUPPORTED_OPERATION_SFINAE(Is_default_constructible, U{})
+		Object_SUPPORTED_OPERATION_SFINAE(Is_destructible, declval<U>().~U())
+		
+		// Is_contructible better use SFINAE out function
+		// because variadic template parameters only allowed in the tain of template parameters list
+		template<typename T, typename ...Args>
+		struct Is_constructible_ {
+			template<typename U,  typename = decltype(U{ declval<Args>()... })>
+			static _true_type Apply(void*);
+
+			template<typename>
+			static _false_type Apply(...);
+
+		public:
+			using type = decltype(Apply<T>(nullptr));
+		};
+
+		template<typename T, typename ...Args>
+		struct Is_constructibleT : Is_constructible_<T, Args...>::type
+		{ };
+		
+		template<typename T>
+		struct Is_copy_constructibleT : Is_constructibleT<T, T const&>::type
+		{ };
+
+		template<typename T>
+		struct Is_move_constructibleT : Is_constructibleT<T, T&&>::type
+		{ };
+		
+		template<typename T, typename U, typename = void>
+		struct Is_assignableT : _false_type
+		{ };
+		
+		template<typename T, typename U>
+		struct Is_assignableT<T, U, Void_t<decltype(declval<T>().operator=(declval<U>()))>>
+			: _true_type
+		{ };
+		
+		template<typename T>
+		struct Is_copy_assignableT : Is_assignableT<T, T const&>
+		{ };
+
+		template<typename T>
+		struct Is_move_assignableT : Is_assignableT<T, T&&>
+		{ };
+		
+		template<typename T, typename U, typename = void>
+		struct Is_swappable_withT : _false_type
+		{ };
+	
+		template<typename T, typename U>
+		struct Is_swappable_withT<T, U, Void_t<
+			decltype(swap(declval<T>(), declval<U>())),
+			decltype(swap(declval<U>(), declval<T>()))
+			>>
+			: _true_type
+		{ };
+		
+		template<typename T>
+		struct Is_swappableT : Is_swappable_withT<T&, T&>
+		{ };
+
+		// Trick: set default typename argument to _true_type
+		// then if the same typename argument in partial specialization also get _true_type, 
+		// because specialization is more "specialized" than primary template
+		// so select it
+		// (but, if two or more partial specializations get same result
+		// maybe trigger fatal error...)
+#define NOTHROW_PARTIAL_SPECIALIZATION(name, condition) \
+		template<typename T, typename = _true_type> \
+		struct Is_nothrow_##name : _false_type {}; \
+\
+		template<typename T> \
+		struct Is_nothrow_##name<T, typename Is_##name<T>::type> \
+			: Bool_constant<noexcept(condition)> {};
+
+		NOTHROW_PARTIAL_SPECIALIZATION(default_constructibleT, T{})	
+		NOTHROW_PARTIAL_SPECIALIZATION(destructibleT, declval<T>().~T())
+
+		template<typename T, typename ...Args>
+		struct Is_nothrow_constructible_ {
+		private:
+			template<typename U, typename ...Args2>
+			static Bool_constant<noexcept(U{ declval<Args2>()... })> Apply(_true_type);
+
+			template<typename , typename ...>
+			static _false_type Apply(_false_type);
+
+		public:
+			using type = decltype(Apply<T, Args...>(typename Is_constructibleT<T, Args...>::type{}));
+		};
+	
+		template<typename T, typename ...Args>
+		struct Is_nothrow_constructibleT : Is_nothrow_constructible_<T, Args...>::type {};
+
+		template<typename T>
+		struct Is_nothrow_copy_constructibleT : Is_nothrow_constructibleT<T, T const&> {};
+
+		template<typename T>
+		struct Is_nothrow_move_constructibleT : Is_nothrow_constructibleT<T, T&&> {};
+	
+		template<typename T, typename U, typename>
+		struct Is_nothrow_assignable_ : _false_type {};
+
+		template<typename T, typename U>
+		struct Is_nothrow_assignable_<T, U, _true_type>
+			: Bool_constant<noexcept(declval<T>().operator=(declval<U>()))> {};
+
+		template<typename T, typename U>
+		struct Is_nothrow_assignableT : Is_nothrow_assignable_<T, U, typename Is_assignableT<T, U>::type> {};
+
+		template<typename T>
+		struct Is_nothrow_copy_assignableT : Is_nothrow_assignableT<T, T const&> {};
+
+		template<typename T>
+		struct Is_nothrow_move_assignableT : Is_nothrow_assignableT<T, T&&> {};
+
+		template<typename T, typename U, typename = _true_type>
+		struct Is_nothrow_swappable_withT : _false_type {};
+
+		template<typename T, typename U>
+		struct Is_nothrow_swappable_withT<T, U, typename Is_swappable_withT<T, U>::type>
+			: Bool_constant<
+			noexcept(swap(declval<T>(), declval<U>())) &&
+			noexcept(swap(declval<U>(), declval<T>()))
+			> {};
+
+		template<typename T>
+		struct Is_nothrow_swappableT : Is_nothrow_swappable_withT<T&, T&> {};
+
+	} // namespace detail
+
+	// type alias
 	template<typename T>
-	inline constexpr bool Is_default_constructible_v
-		=Is_default_constructible<T>::value;
-
-
-	template<typename T,typename ...Types>
-	inline constexpr bool Is_constructible_v
-		=Is_constructible<T,Types...>::value;
-
-	template<typename T>
-	inline constexpr bool Is_copy_constructible_v
-		=Is_copy_constructible<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_move_constructible_v
-		=Is_move_constructible<T>::value;
-
-	template<typename T,typename U>
-	inline constexpr bool Is_assignable_v
-		=Is_assignable<T,U>::value;
-
-	template<typename T>
-	inline constexpr bool Is_copy_assignable_v
-		=Is_copy_assignable<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_move_assignable_v
-		=Is_move_assignable<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_destructible_v
-		=Is_destructible<T>::value;
-
-	template<typename T,typename U>
-	inline constexpr bool Is_swappable_with_v
-		=Is_swappable_with<T, U>::value;
+	using Is_default_constructible = detail::Is_default_constructibleT<T>;
 	
 	template<typename T>
-	inline constexpr bool Is_swappable_v
-		=Is_swappable<T>::value;
+	using Is_destructible  = detail::Is_destructibleT<T>;
 
-	//nothrow-variable
-	template<typename T>
-	inline constexpr bool Is_nothrow_default_constructible_v
-		=Is_nothrow_default_constructible<T>::value;
-
-	template<typename T,typename ...Types>
-	inline constexpr bool Is_nothrow_constructible_v
-		=Is_nothrow_constructible<T,Types...>::value;
-
-	template<typename T>
-	inline constexpr bool Is_nothrow_copy_constructible_v
-		=Is_nothrow_copy_constructible<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_nothrow_move_constructible_v
-		=Is_nothrow_move_constructible<T>::value;
-
-	template<typename T,typename U>
-	inline constexpr bool Is_nothrow_assignable_v
-		=Is_nothrow_assignable<T,U>::value;
-
-	template<typename T>
-	inline constexpr bool Is_nothrow_copy_assignable_v
-		=Is_nothrow_copy_assignable<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_nothrow_move_assignable_v
-		=Is_nothrow_move_assignable<T>::value;
-
-	template<typename T>
-	inline constexpr bool Is_nothrow_destructible_v
-		=Is_nothrow_destructible<T>::value;
-
-	template<typename T,typename U>
-	inline constexpr bool Is_nothrow_swappable_with_v
-		=Is_nothrow_swappable_with<T, U>::value;
+	template<typename T, typename ...Args>
+	using Is_constructible = detail::Is_constructibleT<T, Args...>;
 	
 	template<typename T>
-	inline constexpr bool Is_nothrow_swappable_v
-		=Is_nothrow_swappable<T>::value;
+	using Is_copy_constructible = detail::Is_copy_constructibleT<T>;
 
+	template<typename T>
+	using Is_move_constructible = detail::Is_move_constructibleT<T>;
+
+	template<typename T, typename U>
+	using Is_assignable = detail::Is_assignableT<T, U>;
+
+	template<typename T>
+	using Is_copy_assignable = detail::Is_copy_assignableT<T>;
+
+	template<typename T>
+	using Is_move_assignable = detail::Is_move_assignableT<T>;
+	
+	template<typename T, typename U>
+	using Is_swappable_with = detail::Is_swappable_withT<T, U>;
+
+	template<typename T>
+	using Is_swappable = detail::Is_swappableT<T>;
+
+	template<typename T>
+	using Is_nothrow_default_constructible = detail::Is_nothrow_default_constructibleT<T>;
+
+	template<typename T>
+	using Is_nothrow_destructible = detail::Is_nothrow_destructibleT<T>;
+
+	template<typename T, typename ...Args>
+	using Is_nothrow_constructible = detail::Is_nothrow_constructibleT<T, Args...>;
+
+	template<typename T>
+	using Is_nothrow_copy_constructible = detail::Is_nothrow_copy_constructibleT<T>;
+
+	template<typename T>
+	using Is_nothrow_move_constructible = detail::Is_nothrow_move_constructibleT<T>;
+	
+	template<typename T, typename U>
+	using Is_nothrow_assignable = detail::Is_nothrow_assignableT<T, U>;
+
+	template<typename T>
+	using Is_nothrow_copy_assignable = detail::Is_nothrow_copy_assignableT<T>;
+
+	template<typename T>
+	using Is_nothrow_move_assignable = detail::Is_nothrow_move_assignableT<T>;
+
+	template<typename T, typename U>
+	using Is_nothrow_swappable_with = detail::Is_nothrow_swappable_withT<T, U>;
+
+	template<typename T>
+	using Is_nothrow_swappable = detail::Is_nothrow_swappableT<T>;
+
+#endif // __cplusplus > 201703L
 
 	////////////////////////
 	///Type relationships///
 	////////////////////////
 	namespace detail {
 		template<typename from, typename to, bool =
-			Disjunction_v<Is_void<to>, Is_array<to>, Is_function<to>>>
+			Disjunction<
+				Is_void<to>,
+				Is_array<to>, 
+				Is_function<to>
+			>::value>
 			struct Is_convertible_ :Bool_constant<Is_void<to>::value||Is_void<from>::value> {
 		};
 
@@ -1375,35 +1384,37 @@ namespace TinySTL {
 	template<typename from, typename to>
 	using Is_convertible =typename detail::Is_convertible_<from, to>::type;
 
-	template<typename from, typename to>
-	inline constexpr bool Is_convertible_v=Is_convertible<from, to>::value;
-
 	namespace detail {
-		/*template<typename T1, typename T2>
-		struct Is_same :_false_type {
+#if __cplusplus < 201402L
+		template<typename T1, typename T2>
+		struct Is_sameT :_false_type {
 		};
 
 		template<typename T>
-		struct Is_same<T, T> :_true_type {
+		struct Is_sameT<T, T> :_true_type {
 		};
 		
-		template<typename T1,typename T2>
-		inline constexpr bool Is_same_v=Is_same<T1,T2>::value;*/
-	
+#else	
 		//Based on the rule of chiel
 		template<typename T1,typename T2>
-		inline constexpr bool Is_same_=false;
+		constexpr bool Is_same_=false;
 
 		template<typename T>
-		inline constexpr bool Is_same_<T,T> =true;
-	}
+		constexpr bool Is_same_<T,T> =true;
 
-	template<typename T1,typename T2>
-	inline constexpr bool Is_same_v=detail::Is_same_<T1, T2>;
+		template<typename T, typename U>
+		struct Is_sameT : Bool_constant<Is_same_<T, U>> {};
+#endif
+	}
 	
+	template<typename T, typename U>
+	using Is_same = detail::Is_sameT<T, U>;
+
 	namespace detail {
-		template<typename B, typename D, bool =Conjunction_v<
-			Is_class<B>,Is_class<D>>>
+		template<typename B, typename D, bool =Conjunction<
+			Is_class<B>,
+			Is_class<D>
+			>::value>
 		struct Is_base_of_ :Bool_constant<Is_convertible<D*, B*>::value> {};
 
 		template<typename B,typename D>
@@ -1412,12 +1423,6 @@ namespace TinySTL {
 	
 	template<typename B,typename D>
 	using Is_base_of=typename detail::Is_base_of_<B, D>::type;
-	
-	template<typename B,typename D>
-	inline constexpr bool Is_base_of_v=detail::Is_base_of_<B, D>::value;
-	
-	
-	
 	
 //helper of Make_signed
 #define MAKE_SIGNED_HELPER(TYPE)									\
@@ -1586,8 +1591,8 @@ namespace TinySTL {
 
 		template<typename T, typename U=R_ref<T>>
 		struct Decay_{
-			using type=Conditional_t<Is_array_v<U>,Remove_extent_t<U>*,
-				Conditional_t<Is_function_v<U>, Add_pointer_t<U>,
+			using type=Conditional_t<Is_array<U>::value,Remove_extent_t<U>*,
+				Conditional_t<Is_function<U>::value, Add_pointer_t<U>,
 				Remove_reference_t<U>>>;
 		};
 	}
@@ -1641,6 +1646,219 @@ namespace TinySTL {
 	template<typename... Ts>
 	using Common_type_t=typename detail::Common_type_<Ts...>::type;
 
+// template variable since c++14
+#if __cplusplus >= 201402L
+	template<typename...Tn>
+	constexpr bool Conjunction_v=Conjunction<Tn...>::value;
+
+	template<typename...Tn>
+	constexpr bool Disjunction_v=Disjunction<Tn...>::value;
+
+	template<typename T>
+	constexpr bool Negation_v=Negation<T>::value;
+
+	template<typename T>
+	constexpr bool Is_void_v=Is_void<T>::value;
+
+	template<typename T>
+	constexpr bool Is_integral_v=Is_integral<T>::value;
+
+	template<typename T>
+	constexpr bool Is_floating_point_v=Is_floating_point<T>::value;
+
+	template<typename T>
+	constexpr bool Is_pointer_v=Is_pointer<T>::value;
+
+	template<typename T>
+	constexpr bool Is_array_v=Is_array<T>::value;
+
+	template<typename T>
+	constexpr bool Is_null_pointer_v=Is_null_pointer<T>::type;
+
+	template<typename T>
+	constexpr bool Is_member_object_pointer_v=Is_member_object_pointer<T>::value;
+
+	template<typename T>
+	constexpr bool Is_member_function_pointer_v=Is_member_function_pointer<T>::value;
+
+	template<typename T>
+	constexpr bool Is_function_v=Is_function<T>::value;
+
+	template<typename T>
+	constexpr bool Is_lvalue_reference_v=Is_lvalue_reference<T>::value;
+
+	template<typename T>
+	constexpr bool Is_rvalue_reference_v=Is_rvalue_reference<T>::value;
+
+	template<typename T>
+	constexpr bool Is_class_v=Is_class<T>::value;
+
+	template<typename T>
+	constexpr bool Is_enum_v=Is_enum<T>::value;
+		
+	template<typename T>
+	constexpr bool Is_arithmetic_v=Is_arithmetic<T>::value;
+
+	template<typename T>
+	constexpr bool Is_const_v=Is_const<T>::value;
+
+	template<typename T>
+	constexpr bool Is_volatile_v=Is_volatile<T>::value;
+
+	template<typename T>
+	constexpr bool Is_pod_v=Is_pod<T>::value;
+
+	template<typename T>
+	constexpr bool Is_trivially_default_constructible_v
+		=Is_trivially_default_constructible<T>::value;
+
+	template<typename T>
+	constexpr bool Is_trivially_copy_constructible_v
+		=Is_trivially_copy_constructible<T>::value;
+
+	template<typename T>
+	constexpr bool Is_trivially_assignment_v
+		=Is_trivially_assigment<T>::value;
+
+	template<typename T>
+	constexpr bool Is_trivially_destructible_v
+		=Is_trivially_destructible<T>::value;
+
+	template<typename T>
+	constexpr bool Is_empty_v=Is_empty<T>::value;
+
+	template<typename T>
+	constexpr bool Is_polymorphic_v=Is_polymorphic<T>::value;
+
+	template<typename T>
+	constexpr bool Is_abstract_v=Is_abstract<T>::value;
+
+	template<typename T>
+	constexpr bool Is_signed_v=Is_signed<T>::value;
+
+	template<typename T>
+	constexpr bool Is_unsigned_V=Is_unsigned<T>::value;
+
+	template<typename T>
+	constexpr bool Is_unbounded_array_v=Is_unbounded_array<T>::value;
+
+	template<typename T>
+	constexpr bool Is_bounded_array_v=Is_bounded_array<T>::value;
+	template<typename T>
+	constexpr bool Is_fundamental_v=Is_fundamental<T>::value;
+
+	template<typename T>
+	constexpr bool Is_member_pointer_v=Is_member_pointer<T>::value;
+
+	template<typename T>
+	constexpr bool Is_scalar_v=Is_scalar<T>::value;
+
+	template<typename T>
+	constexpr bool Is_reference_v=Is_reference<T>::value;
+
+	template<typename T>
+	constexpr bool Is_object_v=Is_object<T>::value;
+
+	template<typename T>
+	constexpr bool Is_compound_v=Is_compound<T>::value;
+
+	template<typename T>
+	constexpr auto Rank_v=detail::Rank_<T>::value;
+
+	template<typename T, int_ N>
+	constexpr auto Extent_v=detail::Extent_<T, N>::value;
+
+	template<typename T>
+	constexpr bool Is_default_constructible_v
+		=Is_default_constructible<T>::value;
+
+
+	template<typename T,typename ...Types>
+	constexpr bool Is_constructible_v
+		=Is_constructible<T,Types...>::value;
+
+	template<typename T>
+	constexpr bool Is_copy_constructible_v
+		=Is_copy_constructible<T>::value;
+
+	template<typename T>
+	constexpr bool Is_move_constructible_v
+		=Is_move_constructible<T>::value;
+
+	template<typename T,typename U>
+	constexpr bool Is_assignable_v
+		=Is_assignable<T,U>::value;
+
+	template<typename T>
+	constexpr bool Is_copy_assignable_v
+		=Is_copy_assignable<T>::value;
+
+	template<typename T>
+	constexpr bool Is_move_assignable_v
+		=Is_move_assignable<T>::value;
+
+	template<typename T>
+	constexpr bool Is_destructible_v
+		=Is_destructible<T>::value;
+
+	template<typename T,typename U>
+	constexpr bool Is_swappable_with_v
+		=Is_swappable_with<T, U>::value;
+	
+	template<typename T>
+	constexpr bool Is_swappable_v
+		=Is_swappable<T>::value;
+
+	//nothrow-variable
+	template<typename T>
+	constexpr bool Is_nothrow_default_constructible_v
+		=Is_nothrow_default_constructible<T>::value;
+
+	template<typename T,typename ...Types>
+	constexpr bool Is_nothrow_constructible_v
+		=Is_nothrow_constructible<T,Types...>::value;
+
+	template<typename T>
+	constexpr bool Is_nothrow_copy_constructible_v
+		=Is_nothrow_copy_constructible<T>::value;
+
+	template<typename T>
+	constexpr bool Is_nothrow_move_constructible_v
+		=Is_nothrow_move_constructible<T>::value;
+
+	template<typename T,typename U>
+	constexpr bool Is_nothrow_assignable_v
+		=Is_nothrow_assignable<T,U>::value;
+
+	template<typename T>
+	constexpr bool Is_nothrow_copy_assignable_v
+		=Is_nothrow_copy_assignable<T>::value;
+
+	template<typename T>
+	constexpr bool Is_nothrow_move_assignable_v
+		=Is_nothrow_move_assignable<T>::value;
+
+	template<typename T>
+	constexpr bool Is_nothrow_destructible_v
+		=Is_nothrow_destructible<T>::value;
+
+	template<typename T,typename U>
+	constexpr bool Is_nothrow_swappable_with_v
+		=Is_nothrow_swappable_with<T, U>::value;
+	
+	template<typename T>
+	constexpr bool Is_nothrow_swappable_v
+		=Is_nothrow_swappable<T>::value;
+
+	template<typename from, typename to>
+	constexpr bool Is_convertible_v=Is_convertible<from, to>::value;
+
+	template<typename T1,typename T2>
+	constexpr bool Is_same_v = Is_same<T1, T2>::value;
+
+	template<typename B,typename D>
+	constexpr bool Is_base_of_v=detail::Is_base_of_<B, D>::value;
+#endif
 } //namespace TinySTL
 
 #endif //TINYSTL_TYPE_TRAITS_H

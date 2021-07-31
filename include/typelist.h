@@ -152,9 +152,9 @@ namespace TinySTL {
 
 				
 			}
-
+			
 			template<typename List>
-			inline constexpr auto Length=detail::Length_<List>::value;
+			using Length = detail::Length_<List>;
 
 //////////////////////////////////////////////////////////
 // class template Is_Empty
@@ -180,9 +180,8 @@ namespace TinySTL {
 				struct Is_Empty_<Nil> :_true_type {};
 			}
 
-			template<typename T>
-			inline constexpr bool Is_Empty=detail::Is_Empty_<T>::value;
-
+			template<typename List>
+			using Is_Empty = detail::Is_Empty_<List>;
 
 /////////////////////////////////////////////////////////
 // class template Front
@@ -285,7 +284,7 @@ namespace TinySTL {
 
 			namespace detail {
 				template<typename List, typename New,
-						 bool=Is_Empty<List>>
+						 bool=Is_Empty<List>::value>
 				struct Push_Back_Rec;
 
 				template<typename List, typename New>
@@ -334,7 +333,7 @@ namespace TinySTL {
 ////////////////////////////////////////////////////////////////////
 
 			namespace detail {
-				template<typename List, bool=Is_Empty<List>>
+				template<typename List, bool=Is_Empty<List>::value>
 				struct Reverse_;
 
 				/*template<typename List>
@@ -408,7 +407,7 @@ namespace TinySTL {
 				template<typename List, int_ N>
 				struct Type_At_ 
 					:Type_At_<Pop_Front<List>,N-1>{
-					static_assert(!Is_Empty<List>, "Typelist is empty!");
+					static_assert(!Is_Empty<List>::value, "Typelist is empty!");
 				};
 
 				template<typename List>
@@ -432,7 +431,7 @@ namespace TinySTL {
 
 			namespace detail {
 				template<typename TL, typename T,
-						bool=Is_Empty<TL>>
+						bool=Is_Empty<TL>::value>
 				struct Index_Of_ {
 					static constexpr int_ temp=Index_Of_<Pop_Front<TL>, T>::value;
 					static constexpr int_ value=(temp==-1?-1:1+temp);
@@ -451,7 +450,7 @@ namespace TinySTL {
 			}
 
 			template<typename TL, typename T>
-			inline constexpr auto Index_Of=detail::Index_Of_<TL, T>::value;
+			using Index_Of = detail::Index_Of_<TL, T>;
 
 ///////////////////////////////////////////////////////////////////
 // class template Erase
@@ -462,7 +461,7 @@ namespace TinySTL {
 
 			namespace detail {
 				template<typename TL, typename T,
-						 bool=Is_Empty<TL>>
+						 bool=Is_Empty<TL>::value>
 				struct Erase_
 					:Push_FrontT<typename Erase_<Pop_Front<TL>, T>::type, Front<TL>> {};
 
@@ -490,7 +489,7 @@ namespace TinySTL {
 
 			namespace detail {
 				template<typename TL, typename T,
-					     bool=Is_Empty<TL>>
+					     bool=Is_Empty<TL>::value>
 				struct Erase_All_
 					:Push_FrontT<typename Erase_All_<Pop_Front<TL>, T>::type, Front<TL>> {};
 
@@ -517,7 +516,7 @@ namespace TinySTL {
 ///////////////////////////////////////////////////////////////
 
 			namespace detail {
-				template<typename TL, bool=Is_Empty<TL>>
+				template<typename TL, bool=Is_Empty<TL>::value>
 				struct Unique_;
 
 				template<typename TL>
@@ -549,7 +548,7 @@ namespace TinySTL {
 
 			namespace detail {
 				template<typename TL, typename Cur, typename Rp,
-						 bool=Is_Empty<TL>>
+						 bool=Is_Empty<TL>::value>
 				struct Replace_
 					:Push_FrontT<typename Replace_<Pop_Front<TL>, Cur, Rp>::type, Front<TL>> {};
 
@@ -578,7 +577,7 @@ namespace TinySTL {
 
 			namespace detail {
 				template<typename TL, typename Cur, typename Rp,
-						bool=Is_Empty<TL>>
+						bool=Is_Empty<TL>::value>
 				struct Replace_All_
 					:Push_FrontT<typename Replace_All_<Pop_Front<TL>, Cur, Rp>::type, Front<TL>> {};
 
@@ -604,7 +603,7 @@ namespace TinySTL {
 			// Largest_Type<List> or Largest_TypeT<List>::type
 			////////////////////////////////////////////////////
 			namespace detail {
-				template<typename List, bool=Is_Empty<List>>
+				template<typename List, bool=Is_Empty<List>::value>
 				struct Largest_Type_;
 
 				template<typename List>
@@ -638,7 +637,7 @@ namespace TinySTL {
 
 			namespace detail {
 				template<typename List, template<typename > class MetaFun,
-					bool=Is_Empty<List>>
+					bool=Is_Empty<List>::value>
 					struct Transform_;
 
 //generic version:fit for Cons cell	
@@ -683,7 +682,7 @@ namespace TinySTL {
 
 			namespace detail {
 				template<typename List, template<typename, typename > class MetaFun, typename I,
-						bool=Is_Empty<List>>
+						bool=Is_Empty<List>::value>
 				struct Accumulate_;
 
 
@@ -724,7 +723,7 @@ namespace TinySTL {
 			namespace detail {
 
 				template<typename List, template<typename, typename > class Comp,
-						 bool=Is_Empty<List>>
+						 bool=Is_Empty<List>::value>
 				struct Sort_;
 
 				template<typename List, template<typename, typename > class Comp>
@@ -733,7 +732,7 @@ namespace TinySTL {
 
 //insert a type into an already-sorted list at the first point that will keep the list sorted				
 				template<typename List, typename Elem, template<typename, typename > class Comp,
-						bool=Is_Empty<List>>
+						bool=Is_Empty<List>::value>
 				struct Sorted_;
 
 				template<typename List, template<typename, typename > class Comp>
@@ -813,7 +812,18 @@ namespace TinySTL {
 
 			template<typename TL, typename Indices>
 			using Pick=typename detail::Pick_<TL, Indices>::type;
+			
+			// template vriable since c++14
+#if __cplusplus >= 201402L
+			template<typename List>
+			constexpr auto Length_v = Length<List>::value;
 
+			template<typename T>
+			constexpr bool Is_Empty_v = Is_Empty<T>::value;
+
+			template<typename TL, typename T>
+			constexpr auto Index_Of_v = Index_Of<TL, T>::value;
+#endif
 		}	//namespace TL
 	}	//namespace mpl
 }	//namespace TinySTL

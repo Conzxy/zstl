@@ -85,29 +85,26 @@ namespace TinySTL{
     struct has_iterator_helper:_false_type {
     };
 
-    template<typename iter>
-    struct has_iterator_helper<iter,Void_t<
-            typename iterator_traits<iter>::iterator_category>>:_true_type {
-    };
+	// NOTE: typename iterator_traits<iter>::iterator_category is non-SFINAE context
+	// so provide has_iterator(SFINAE wrapper) predicate to avoid hard error
+    //template<typename iter>
+    //struct has_iterator_helper<iter,Void_t<
+            //typename iterator_traits<iter>::iterator_category>>:_true_type {
+    //};
 
-    template<typename iter>
-    struct has_iterator:has_iterator_helper<iter>::type{};
+    //template<typename iter>
+    //struct has_iterator:has_iterator_helper<iter>::type{};
+    //template<typename iter,typename U,bool =has_iterator<iter>::value>
+    //struct has_iterator_of:Bool_constant<
+            //Is_convertible_v<typename iterator_traits<iter>::iterator_category,
+                             //U>>{};
 
-    template<typename iter>
-    constexpr bool has_iterator_v=has_iterator<iter>::value;
+    //template<typename iter,typename U>
+    //struct has_iterator_of<iter,U,false>:_false_type{};
 
-	//NOTE: typename iterator_traits<iter>::iterator_category is non-SFINAE context
-	//so provide has_iterator(SFINAE wrapper) predicate to avoid hard error
-    /*template<typename iter,typename U,bool =has_iterator_v<iter>>
-    struct has_iterator_of:Bool_constant<
-            Is_convertible_v<typename iterator_traits<iter>::iterator_category,
-                             U>>{};
+	// Sure, you can use Void_t instead of has_iterator, because Void_t is SFINAE context
+	// more simple and elegent
 
-    template<typename iter,typename U>
-    struct has_iterator_of<iter,U,false>:_false_type{};*/
-
-	//Sure, you can use Void_t instead of has_iterator, because Void_t is SFINAE context
-	//more simple and elegent
     template<typename iter,typename U,typename =Void_t<>>
     struct has_iterator_of:_false_type{};
 
@@ -116,30 +113,48 @@ namespace TinySTL{
             typename iterator_traits<iter>::iterator_category,U>>>:_true_type{};
 
     //iterator predicate:
+#define is_XXX_iterator_TEMPLATE(name, tag) \
+	template<typename Iter> \
+	struct is_##name##_iterator : has_iterator_of<Iter, tag> {};
+
+	is_XXX_iterator_TEMPLATE(input, Input_iterator_tag)
+	is_XXX_iterator_TEMPLATE(output, Output_iterator_tag)
+	is_XXX_iterator_TEMPLATE(forward, Forward_iterator_tag)
+	is_XXX_iterator_TEMPLATE(bidirectional, Bidirectional_iterator_tag)
+	is_XXX_iterator_TEMPLATE(random_access, Random_access_iterator_tag)
+	
+	template<typename Iter>
+	struct is_iterator : Disjunction<
+				is_input_iterator<Iter>,
+				is_output_iterator<Iter>>
+	{};
+
+#if __cplusplus >= 201402L
     template<typename iter>
-    constexpr bool is_input_iterator
+    constexpr bool is_input_iterator_v
     =has_iterator_of<iter,Input_iterator_tag>::value;
 
     template<typename iter>
-    constexpr bool is_output_iterator
+    constexpr bool is_output_iterator_v
     =has_iterator_of<iter,Output_iterator_tag>::value;
 
     template<typename iter>
-    constexpr bool is_forward_iterator
+    constexpr bool is_forward_iterator_v
     =has_iterator_of<iter,Forward_iterator_tag>::value;
 
     template<typename iter>
-    constexpr bool is_bidirectional_iterator
+    constexpr bool is_bidirectional_iterator_v
     =has_iterator_of<iter,Bidirectional_iterator_tag>::value;
 
     template<typename iter>
-    constexpr bool is_random_access_iterator
+    constexpr bool is_random_access_iterator_v
     =has_iterator_of<iter,Random_access_iterator_tag>::value;
 
     template<typename iter>
-    constexpr bool is_iterator
-    =is_input_iterator<iter> || is_output_iterator<iter>;
+    constexpr bool is_iterator_v
+    =is_input_iterator_v<iter> || is_output_iterator_v<iter>;
 
+#endif
 	//iterator_traits type interface:
 	//maybe you don't like use these...
     template<typename Iter>
@@ -159,20 +174,20 @@ namespace TinySTL{
 
 	//yep...you should use Iter_category, Iter_diff_type and Iter_value_type to get typename
     template<class Iterator>
-    constexpr decltype(auto)
+    constexpr typename iterator_traits<Iterator>::iterator_category
     iterator_category(Iterator const&){
         using category=typename iterator_traits<Iterator>::iterator_category;
         return category();
     }
 
     template<class Iterator>
-    constexpr decltype(auto)
+    constexpr typename iterator_traits<Iterator>::difference_type*
     distance_type(Iterator const&){
         return static_cast<typename iterator_traits<Iterator>::difference_type*>(nullptr);
     }
 
     template<class Iterator>
-    constexpr decltype(auto)
+    constexpr typename iterator_traits<Iterator>::value_type*
     value_type(Iterator const&){
         return static_cast<typename iterator_traits<Iterator>::value_type*>(nullptr);
     }
@@ -180,7 +195,7 @@ namespace TinySTL{
     //FUNCTION TEMPLATE distance
 	//@brief: calculate distance between first and last iterator
     template<class InputIterator>
-    inline decltype(auto)
+    inline typename iterator_traits<InputIterator>::difference_type
     _distance(InputIterator first,InputIterator last,Input_iterator_tag){
         typename iterator_traits<InputIterator>::difference_type n=0;
         for(;first!=last;++first){
@@ -372,7 +387,7 @@ namespace TinySTL{
     template<class Iterator1,class Iterator2>
     auto operator-(
             reverse_iterator<Iterator1> const& x,
-            reverse_iterator<Iterator2> const& y)/*->decltype(y.current-x.current)*/{
+            reverse_iterator<Iterator2> const& y)->decltype(y.current-x.current){
                 return y.base()-x.base();     //C++14支持编译器推断auto
             }
 

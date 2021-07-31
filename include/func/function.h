@@ -96,7 +96,7 @@ namespace TinySTL{
 
         template<typename F>
         function(F&& f):bridge(nullptr) {
-            using Functor=std::decay_t<F>;
+            using Functor=Decay_t<F>;
             using Bridge=SpecificFunctorBridge<Functor, R, Args...>;
             bridge=new Bridge(std::forward<F>(f));
         }
