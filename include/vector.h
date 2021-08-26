@@ -8,7 +8,6 @@
 #include "stl_iterator.h"
 #include "stl_algorithm.h"
 #include "config.h"
-#include "IO/writer.h"
 #include <climits>
 
 namespace TinySTL{

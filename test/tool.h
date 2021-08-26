@@ -27,7 +27,7 @@ std::ostream& PrintContainer(Container const& cont,std::string const& message=""
 }
 
 template<typename T>
-auto GetRandom(T f,T l){
+T GetRandom(T f,T l){
     static std::uniform_int_distribution<T> u(f,l);
     static std::default_random_engine e;
     return u(e);

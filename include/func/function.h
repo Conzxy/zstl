@@ -1,5 +1,5 @@
 //CLASS TEMPLATE function
-//use type erasure to make function to adapt all functors
+//use type erasure to make function to accept all callables
 
 #pragma once
 #include <exception>
@@ -98,7 +98,7 @@ namespace TinySTL{
         function(F&& f):bridge(nullptr) {
             using Functor=Decay_t<F>;
             using Bridge=SpecificFunctorBridge<Functor, R, Args...>;
-            bridge=new Bridge(std::forward<F>(f));
+            bridge=new Bridge(TinySTL::forward<F>(f));
         }
 
         function& operator=(function const& other) {

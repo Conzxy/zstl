@@ -336,7 +336,7 @@ struct KeyCompare{
 		: key_compare_(cmp)
 	{ }
 
-#if __cplusplus > 201103L
+#if __cplusplus >= 201103L
 	KeyCompare(KeyCompare const&) = default;
 	
 	KeyCompare(KeyCompare&& cmp)
@@ -878,7 +878,7 @@ public:
 	
 	template<typename ...Args>
 	pair<iterator, bool> EmplaceUnique(Args&&... args) {
-		return InsertEqualNoAlloc(CreateNode(STL_FORWARD(Args, args)...));
+		return InsertUniqueNoAlloc(CreateNode(STL_FORWARD(Args, args)...));
 	}
 
 	template<typename ...Args>
@@ -1214,7 +1214,7 @@ RBTree<K, V, GK, CP, Alloc>::InsertUniqueNoAlloc(LinkType new_node) noexcept {
 			--pre;
 	}
 
-	if(key_comp()(_Key(pre.node), _key(new_node)))
+	if(key_comp()(_Key(pre.node_), _Key(new_node)))
 		return make_pair(InsertAux(new_node, x, y), true);
 	else {
 		DropNode(new_node);
@@ -1428,6 +1428,8 @@ void RBTree<K, V, GK, CP, Alloc>::Print(std::ostream& os) const {
     PrintSubTree(root, os);
 }
 
+#endif //RBTREE_DEBUG
+
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
 template<typename Policy>
 typename RBTree<K, V, GK, CP, Alloc>::LinkType
@@ -1470,7 +1472,6 @@ void RBTree<K, V, GK, CP, Alloc>::Erase(LinkType root) noexcept {
 	}
 }
 
-#endif //RBTREE_DEBUG
 
 }//namespace TinySTL
 

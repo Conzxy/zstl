@@ -546,7 +546,6 @@ struct HasMemberT_##Member<T,Void_t<decltype(&T::Member)>>      \
 	template<typename T>
 	using Is_class=typename detail::Is_class_<T>::type;
 
-#if __cplusplus >= 201703L
 //the helper of Is_function
 #define DEFINE_IS_FUNCTION(TYPE)									\
 	template<typename R, typename ...Paras>								\
@@ -564,7 +563,6 @@ struct HasMemberT_##Member<T,Void_t<decltype(&T::Member)>>      \
 		using Parameter=mpl::Typelist<Paras...>;						\
 		static constexpr bool variadic=true;							\
 	};
-#endif
 
 	namespace detail {
 		//check if a type is a function type
@@ -588,22 +586,36 @@ struct HasMemberT_##Member<T,Void_t<decltype(&T::Member)>>      \
 			static constexpr bool variadic=true;
 		};
 
-#if __cplusplus >= 201703L	
 		//cv
 		DEFINE_IS_FUNCTION(const)
 		DEFINE_IS_FUNCTION(volatile)
 		DEFINE_IS_FUNCTION(const volatile)
+		DEFINE_IS_FUNCTION_VARG(const)
+		DEFINE_IS_FUNCTION_VARG(volatile)
+		DEFINE_IS_FUNCTION_VARG(const volatile)
 
 		//&/&&
 		DEFINE_IS_FUNCTION(&)
 		DEFINE_IS_FUNCTION(const&)
 		DEFINE_IS_FUNCTION(volatile&)
 		DEFINE_IS_FUNCTION(const volatile&)
+		DEFINE_IS_FUNCTION_VARG(&)
+		DEFINE_IS_FUNCTION_VARG(const&)
+		DEFINE_IS_FUNCTION_VARG(volatile&)
+		DEFINE_IS_FUNCTION_VARG(const volatile&)
+
 		DEFINE_IS_FUNCTION(&&)
 		DEFINE_IS_FUNCTION(const&&)
 		DEFINE_IS_FUNCTION(volatile&&)
 		DEFINE_IS_FUNCTION(const volatile&&)
+		DEFINE_IS_FUNCTION_VARG(&&)
+		DEFINE_IS_FUNCTION_VARG(const&&)
+		DEFINE_IS_FUNCTION_VARG(volatile&&)
+		DEFINE_IS_FUNCTION_VARG(const volatile&&)
 
+#if __cplusplus >= 201703L	
+// before C++ 17 
+// qualifier "const" and "const noexcept" is not different
 		//noexcept
 		DEFINE_IS_FUNCTION(noexcept)
 		DEFINE_IS_FUNCTION(const noexcept)
@@ -617,18 +629,6 @@ struct HasMemberT_##Member<T,Void_t<decltype(&T::Member)>>      \
 		DEFINE_IS_FUNCTION(const&& noexcept)
 		DEFINE_IS_FUNCTION(volatile&& noexcept)
 		DEFINE_IS_FUNCTION(const volatile&& noexcept)
-
-		//variadic
-		DEFINE_IS_FUNCTION_VARG(volatile)
-		DEFINE_IS_FUNCTION_VARG(const volatile)
-		DEFINE_IS_FUNCTION_VARG(&)
-		DEFINE_IS_FUNCTION_VARG(const&)
-		DEFINE_IS_FUNCTION_VARG(volatile&)
-		DEFINE_IS_FUNCTION_VARG(const volatile&)
-		DEFINE_IS_FUNCTION_VARG(&&)
-		DEFINE_IS_FUNCTION_VARG(const&&)
-		DEFINE_IS_FUNCTION_VARG(volatile&&)
-		DEFINE_IS_FUNCTION_VARG(const volatile&&)
 		DEFINE_IS_FUNCTION_VARG(noexcept)
 		DEFINE_IS_FUNCTION_VARG(const noexcept)
 		DEFINE_IS_FUNCTION_VARG(volatile noexcept)
@@ -641,8 +641,7 @@ struct HasMemberT_##Member<T,Void_t<decltype(&T::Member)>>      \
 		DEFINE_IS_FUNCTION_VARG(const&& noexcept)
 		DEFINE_IS_FUNCTION_VARG(volatile&& noexcept)
 		DEFINE_IS_FUNCTION_VARG(const volatile&& noexcept)
-		DEFINE_IS_FUNCTION_VARG(const)
-#endif
+#endif // _cpluscplus >= 201703L
 	}
 
 	//no need to provide Remove_cv_t,because the cv specifiers have different means on function
