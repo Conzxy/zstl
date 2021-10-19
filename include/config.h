@@ -7,6 +7,7 @@
 #define STD_ std::
 #define TL_ mpl::TL::
 #define STL_ENABLE_IF(condition, type) TinySTL::Enable_if_t<(condition), type> = 0
+#define ADDRESSOF TinySTL::addressof
 
 using sz_t=std::size_t;
 
