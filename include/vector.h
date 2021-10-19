@@ -123,7 +123,7 @@ public:
 	vector(InputIterator first,InputIterator last)
 		: vector(distance(first,last))
 	{
-		uninitialized_copy(first,last,begin());
+		TinySTL::uninitialized_copy(first,last,begin());
 	}
 	
 	// dtor:	
@@ -299,12 +299,18 @@ private:
 	
 	template<typename U, TinySTL::Enable_if_t<Is_default_constructible<U>::value, char> = 0>
 	void vector_aux(size_type n) {
-		uninitialized_fill_n(this->first_, n, U{});
+		TinySTL::uninitialized_fill_n(this->first_, n, U{});
 	}
 		
 	template<typename U, TinySTL::Enable_if_t<!Is_default_constructible<U>::value, int> = 0>
 	void vector_aux(size_type )
 	{ }
+
+	static constexpr bool useReallocPolicy = 
+		Conjunction_t<
+			Is_same<Allocator, allocator<T>>,
+			Is_trivially_copyable<T>>::value;
+		
 };
 
 template<typename T,typename Allocator>
@@ -340,20 +346,22 @@ TINYSTL_NOEXCEPT(TINYSTL_NOEXCEPT(x.swap(y)))
 { x.swap(y); }
 
 template<typename T,typename Alloc>
-vector<T,Alloc>& vector<T,Alloc>::operator=(vector const& rhs){
+inline vector<T,Alloc>& 
+vector<T,Alloc>::operator=(vector const& rhs){
+	// if this == rhs, the handler can get true result
+	// but meaningless copy also have cost
 	if (this != &rhs) {                 
 		auto r_size=rhs.size();
-		
+				
 		if(r_size>capacity()){
 			vector tmp(rhs);
 			this->swap(tmp);
 			return *this;
 		}
-		//容量足够时根据元素数量进行copy
 		else if(r_size<=size()){
 			auto new_end = TinySTL::copy(rhs.begin(),rhs.end(),begin());
 			destroy(new_end ,end());
-		}else{//size()<rhs.size()<=capacity()
+		}else{
 			TinySTL::copy(rhs.begin(),rhs.begin()+size(),begin());
 			TinySTL::uninitialized_copy(rhs.begin()+size(),rhs.end(),end());
 		}
@@ -364,16 +372,17 @@ vector<T,Alloc>& vector<T,Alloc>::operator=(vector const& rhs){
 
 template<typename T,typename Alloc>
 template<typename U, typename>
-vector<T,Alloc>& vector<T,Alloc>::operator=(std::initializer_list<U> il){
+inline vector<T,Alloc>& 
+vector<T,Alloc>::operator=(std::initializer_list<U> il){
 	auto tmp=vector(il.begin(),il.end());
 	swap(tmp);
 	return *this;
 }
 
-//接受[first,last)，将其中的元素赋给vector
 template<typename T,typename Alloc>
 template<typename InputIterator,typename>
-void vector<T,Alloc>::assign(InputIterator first,InputIterator last){
+inline void vector<T,Alloc>::assign(InputIterator first,InputIterator last){
+	// The assign() is different from operator
 	erase(begin(),end());
 	insert(begin(),first,last);
 }
@@ -426,17 +435,52 @@ void vector<T,Alloc>::resize(size_type sz,T const& c){
 		insert(end(),sz-size(),c);
 }
 
-//如果容量不足，扩大
 template<typename T,typename Alloc>
 void vector<T,Alloc>::reserve(size_type n){
-	if(n <= capacity())
-		return ;
-	THROW_LENGTH_ERROR_IF(n>max_size(),
-						  "The requirement is greater than maximum number of elements!");
+	if (n > max_size()) { 
+		throw std::out_of_range{ "The requirement is greater than maximum number of elements!" }; 
+	}
+	
+	const auto old_sz = size();	
+	pointer new_first;
+	
+	if (n > capacity()) {
+		// NOTE: STL use constexpr if here, but this is not necessary, I guess it is just acquire compile-time branch switch
+		if (useReallocPolicy) {
+			new_first = static_cast<pointer>(realloc(this->first_, n * sizeof(T)));
+			if (!new_first) {
+				throw std::bad_alloc {};
+			}
+		}
+		else {
+			new_first = AllocTraits::allocate(*this, n);
+			// In fact, TinySTL::copy use __builtin_memmove() when 
+			// * iterator is pointer(so, it must be RandomAccessIterator)
+			// * value_type of range iteraot and result is same
+			// * value_type is trivially_copyable
+			// @see stl_algobase.h
+			TRY_BEGIN	
+				TinySTL::uninitialized_copy(
+						MAKE_MOVE_IF_NOEXCEPT_ITERATOR(begin()),
+						MAKE_MOVE_IF_NOEXCEPT_ITERATOR(end()),
+						new_first);
+			TRY_END
+			CATCH_ALL_BEGIN
+				AllocTraits::deallocate(*this, new_first, n);	
+				RETHROW
+			CATCH_END
 
-	vector<T, Alloc> self(n);
-	self.last_ = TinySTL::uninitialized_move(begin(), end(), self.begin());
-	this->swap(self);
+			// non-POD type, we should destroy it to call dtor which may reclaim the resource
+			if (! Is_trivially_copyable<T>::value)
+				AllocTraits::destroy(*this, begin(), end());			
+			AllocTraits::deallocate(*this, this->first_, capacity());
+		}
+
+		this->first_ = new_first;
+		this->last_ = new_first + old_sz;
+		this->capa_ = new_first + n;
+	}	
+
 }
 
 //缩减容量以适应元素个数
@@ -477,14 +521,14 @@ void vector<T,Alloc>::emplace_back(Args&&... args){
 	if(this->last_ >= this->capa_)
 		reserve(getNewCapacity(1));
 
-	AllocTraits::construct(*this, &*end(),TinySTL::forward<Args>(args)...);
+	AllocTraits::construct(*this, ADDRESSOF(*end()),TinySTL::forward<Args>(args)...);
 	++this->last_;
 }
 
 template<typename T,typename Alloc>
 void vector<T,Alloc>::push_back(T const& x){
 	if(this->last_ != this->capa_){
-		AllocTraits::construct(*this, &*end(),x);
+		AllocTraits::construct(*this, ADDRESSOF(*end()),x);
 		++this->last_;
 	}
 	else{
@@ -501,7 +545,7 @@ template<typename T,typename Alloc>
 void vector<T,Alloc>::insert_aux(iterator position,T const& x){
 	//将[position,end())往后面移一位，x占据position位置
 	if(this->last_ < this->capa_){
-		AllocTraits::construct(*this, &*end(), back());
+		AllocTraits::construct(*this, ADDRESS(*end()), back());
 		TinySTL::copy_backward(position,iterator(this->last_ - 1), iterator(this->last_));
 		++this->last_;
 		*position=x;
