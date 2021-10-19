@@ -1438,7 +1438,19 @@ struct HasMemberT_##Member<T,Void_t<decltype(&T::Member)>>      \
 			> {};
 	
 	} // namespace detail
-
+	
+	// Trivial default constructor:
+	// * not user-defined
+	// * no virtual member function and virtual base class
+	// * (C++11) no non-static members with default initialzers
+	// * direct base class also has trivial default constructor
+	// * non-static member of class has a trivial default constructor
+	//
+	//
+	// Trivial include:
+	// scalar type, trivially copyable class with trivial default constructor,
+	// array of such type/class(cv qualified also)
+	//
 	template<typename T>
 	struct Is_trivial : Bool_constant<__is_trivial(T)> {};
 
