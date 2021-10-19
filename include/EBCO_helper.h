@@ -8,24 +8,29 @@
 #ifndef _ZXY_EBCO_HELPER_H
 #define _ZXY_EBCO_HELPER_H
 
-#include "stl_type_traits.h"
-#include <type_traits>
+#include "type_traits.h"
 
 namespace TinySTL{
 
-#define EBCO_HELPER(classname, fieldname) \
-template<typename Base, \
-	bool=Disjunction_v<std::is_empty<Base>, \
-				  Negation<std::is_final<Base>>>> \
-struct classname : Base{	\
-	\
+#define EBCO(Base) \
+template<typename B, typename = _true_type> \
+struct EBCO_##Base##_ \
+{ \
+	B& get_##Base() { return ebco; } \
+	B ebco; \
 }; \
 \
-template<typename Base>	\
-struct classname<Base, false>{ \
-	Base filename; \
-};
+template<typename B> \
+struct EBCO_##Base##_ < B, Conjunction_t< \
+	Is_empty<B>,  \
+	Negation<Is_final<B>>> > \
+	: B \
+{ \
+	B& get_##Base() { return *this; } \
+}; \
+ \
+struct EBCO_##Base : EBCO_##Base##_<Base> {}; 
 
 }//namespace TinySTL
 
-#endif _ZXY_EBCO_HELPER_H //_ZXY_EBCO_HELPER_H
+#endif //_ZXY_EBCO_HELPER_H

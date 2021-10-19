@@ -29,7 +29,10 @@ namespace TinySTL {
     /*****************************find_end****************************************/
 
 
-    template<typename Iter, STL_ENABLE_IF((is_bidirectional_iterator<Iter>::value), int)>
+    template<typename Iter, STL_ENABLE_IF((
+				is_bidirectional_iterator<Iter>::value &&
+				!is_random_access_iterator<Iter>::value), int
+			)>
     void reverse(Iter first,Iter last){
 		if(first == last || first == --last)
 			return ;
@@ -38,12 +41,16 @@ namespace TinySTL {
 		}
     }
 
-	template<typename Iter, STL_ENABLE_IF((is_random_access_iterator<Iter>::value), char)>
+	template<typename Iter, STL_ENABLE_IF((
+				is_random_access_iterator<Iter>::value), char
+			)>
 	void reverse(Iter first, Iter last){
 		while(first < last)
 			iter_swap(first++,last--);
 	}
-	
+
+	//FIXME the enable_if is not cover all branch
+	//use tag simple
 	template<typename Iter, STL_ENABLE_IF((is_forward_iterator<Iter>::value), char)>
 	void rotate_impl(Iter first, Iter mid, Iter last){
 		for(Iter _mid=mid;;){

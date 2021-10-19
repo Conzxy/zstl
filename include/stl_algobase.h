@@ -8,42 +8,54 @@
 #include "utility.h" // swap()
 
 namespace TinySTL{
-	/*********************************max**************************************/
+	// FIXME: In C++14, use auto is better
     template<typename T1,typename T2>
-	Common_type_t<T1, T2> max(T1 const& x,T2 const& y){
+	TINYSTL_CONSTEXPR
+#ifdef CXX_STANDARD_14
+	auto
+#else
+	Common_type_t<T1, T2> 
+#endif
+	max(T1 const& x,T2 const& y) {
         return x<y?y:x;
     }
 
-    /*********************************min**************************************/
     template<typename T1,typename T2>
-    Common_type_t<T1, T2> min(T1 const& x, T2 const& y) {
+	TINYSTL_CONSTEXPR
+#ifdef CXX_STANDARD_14
+	auto
+#else
+    Common_type_t<T1, T2> 
+#endif
+	min(T1 const& x, T2 const& y) {
         return x<y?x:y;
     }
 
-    /**************************************************************************/
-    //[first,last)内的所有元素覆写（overwrite）新值
+	/**
+	 * @fn fill
+     * @brief fill range in a given value
+	 */
     template<typename ForwardIterator,typename T>
-    void fill(ForwardIterator first,ForwardIterator last,T const& value){
+    TINYSTL_CONSTEXPR void fill(ForwardIterator first,ForwardIterator last,T const& value){
         for(;first!=last;++first)
             *first=value;
     }
 
-    //对char，wchar_t进行特化
-    template<>
-    inline void fill<char*,char>(char* first,char* last,char const& value){
+    // char* and wchar_t* as byte stream, we can use memset to set specified value
+    TINYSTL_CONSTEXPR void fill(char* first,char* last,char const& value){
         std::memset(first,static_cast<unsigned char>(value),last-first);
     }
 
-    template<>
-    inline void fill<wchar_t*,wchar_t>(wchar_t *first,wchar_t *last,wchar_t const& value){
+    inline void fill(wchar_t* first,wchar_t* last,wchar_t const& value){
         std::memset(first,static_cast<unsigned char>(value),(last-first)*sizeof(wchar_t));
     }
-
-    /**********************************************************************************/
-    //[first,last)内的前n个元素覆写（overwrite）新值
+	
+	/**
+	 * @fn fill_n
+	 * @brief fill number of n after first in given value	
+	 */
     template<typename OutputIterator,typename Size,typename T>
-    OutputIterator fill_n(OutputIterator first, Size n, T const& value){
-        //异常处理待补充
+    TINYSTL_CONSTEXPR OutputIterator fill_n(OutputIterator first, Size n, T const& value){
         for(;n>0;--n,++first){
             *first=value;
         }
@@ -51,7 +63,7 @@ namespace TinySTL{
     }
 
     template<typename Size>
-    char* fill_n(char* first,Size n,char const& value){
+    TINYSTL_CONSTEXPR char* fill_n(char* first,Size n,char const& value){
         std::memset(first,static_cast<unsigned char>(value),n);
         return first+n;
     }
@@ -61,16 +73,11 @@ namespace TinySTL{
         std::memset(first,static_cast<unsigned char>(value),n*sizeof(wchar_t));
         return first+n;
     }
-
-    /***************************************************************************/
-    //拷贝[first,last)内的元素到[result,result+(last-first))
-    //对于n<(last-first),(*result+n)=*(first+n)
-    //require：result不在[first,last)中
-    //如果result在[first,last)则可能在被复制前该值就被覆写了，
-    //但是如果是memmove操作，则不会出现这种情况，因为memmove会先拷贝好原来区间的值
-
-    //InputIterator版本
-    //由迭代器是否等同来决定循环次数，速度相对较慢
+	
+	/**
+	 * @fn copy
+	 * @brief write contents in [first, last) into [result, result + (last - first))
+	 */
     template<class InputIterator,class OutputIterator>
     OutputIterator copy_iterator(InputIterator first,InputIterator last,
                                  OutputIterator result,Input_iterator_tag)
@@ -80,8 +87,6 @@ namespace TinySTL{
         return result;
     }
 
-    //Random access Iterator的辅助函数
-    //由n来决定循环次数，速度快
     template<class RandomAccessIterator,class OutputIterator,
             typename Distance_type>
     OutputIterator copy_distance(RandomAccessIterator first,RandomAccessIterator last,
@@ -241,7 +246,7 @@ namespace TinySTL{
     {
         T* operator()(const T* first,const T* last,T* result){
             using is_assign=typename _type_traits<T>::has_trivially_assignment_operator;
-            return copy_b_trivial(first,last,is_assign());
+            return copy_b_trivial(first,last,result,is_assign());
         }
     };
 
@@ -269,7 +274,7 @@ namespace TinySTL{
 
     /*********************************move*****************************************************/
     template<typename II,typename OI>
-    OI move_iterator(II first,II last,OI result,
+    OI move_iterator_(II first,II last,OI result,
             Input_iterator_tag){
         for(;first!=last;++result,++first){
             *result=TinySTL::move(*first);
@@ -278,7 +283,7 @@ namespace TinySTL{
     }
 
     template<typename II,typename OI>
-    OI move_iterator(II first,II last,OI result,
+    OI move_iterator_(II first,II last,OI result,
             Random_access_iterator_tag){
         for(auto n=last-first;n>0;--n,++result,++first){
             *result=TinySTL::move(*first);
@@ -291,7 +296,7 @@ namespace TinySTL{
     //当然不同类型选择第一重载
     template<typename II,typename OI>
     OI move_dispatch(II first,II last,OI result){
-        return move_iterator(first,last,result,iterator_category(first));
+        return move_iterator_(first,last,result,iterator_category(first));
     }
 
     template<typename IT,typename OT>
@@ -405,8 +410,6 @@ namespace TinySTL{
     	*iter2=TinySTL::move(*iter1);
     	*iter1=TinySTL::move(tmp);
     }
-
-
 
 }
 

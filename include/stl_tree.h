@@ -949,6 +949,8 @@ public:
 	 * @exception Compare object may throw
 	 * @return not found return end() otherwise return iterator which indicate key location
 	 */
+
+	// FIXME: find and some algorithm have logic problem
 	const_iterator find(Key const& key) const{
 		auto y = Header(); //last node which is not less than key
 		auto x = Root(); //current node

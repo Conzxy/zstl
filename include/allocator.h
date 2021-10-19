@@ -1,9 +1,15 @@
+// allocator interface
+// requires:
+// allocator need provide non-static member:
+// -- T* allocate(size_t n = 1)
+// -- void deallocate(T* ptr, size_t)
+// if you have a static class(i.e. allocate and deallocate are static)
+// you should inherit from this class in proteced(EBCO)
+//
+// FIXME remove others interfaces except for allocate and deallocate
 #ifndef TINYSTL_ALLOCATOR_H
 #define TINYSTL_ALLOCATOR_H
 
-//空间配置器
-//以变量为单元进行分配
-#include "alloc.h"
 #include "stl_construct.h"
 #include "stl_utility.h"
 #include "type_traits.h"
@@ -54,7 +60,7 @@ namespace TinySTL{
     };
 
     template<typename Alloc>
-    struct allocator_traits{
+    struct allocator_traits {
         using allocator_type = Alloc;
         using pointer = typename Alloc::pointer;
         using reference = typename Alloc::reference;
@@ -66,7 +72,7 @@ namespace TinySTL{
 
         template<typename U>
         using rebind = typename Alloc::template rebind<U>;
-
+	
         inline static pointer allocate(allocator_type& alloc, size_type n=1){
             return alloc.allocate(n);
         }

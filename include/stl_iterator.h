@@ -16,6 +16,8 @@
 
 #include <cstddef>
 #include "type_traits.h"
+#include "stl_move.h"
+#include "config.h"
 
 namespace TinySTL{
     //以下提供五种迭代器的对应tag
@@ -315,18 +317,18 @@ namespace TinySTL{
             return tmp;
         }
 
-        reverse_iterator operator+(difference_type n)const{ return reverse_iterator(current-n);}
+        reverse_iterator operator+(difference_type n){ return reverse_iterator(current-n);}
         reverse_iterator& operator+=(difference_type n){
             current-=n;
             return *this;
         }
 
-        reverse_iterator operator-(difference_type n)const{ return reverse_iterator(current+n);}
+        reverse_iterator operator-(difference_type n){ return reverse_iterator(current+n);}
         reverse_iterator& operator-=(difference_type n){
             current+=n;
             return *this;
         }
-
+		
         reference operator[](difference_type n)const{
             //return current[-n-1]; //这个依赖于underlying Iterator的[]实现
             //current[-n-1]=current[-(n+1)]，多减一个1是因为rbegin=end
@@ -387,16 +389,202 @@ namespace TinySTL{
     template<class Iterator1,class Iterator2>
     auto operator-(
             reverse_iterator<Iterator1> const& x,
-            reverse_iterator<Iterator2> const& y)->decltype(y.current-x.current){
-                return y.base()-x.base();     //C++14支持编译器推断auto
-            }
+            reverse_iterator<Iterator2> const& y)
+    -> decltype(y.current-x.current)
+    {
+        return x.base()-y.base();     //C++14支持编译器推断auto
+    }
 
-    //与成员版的不同在于操作数的位置不同
+    // n + iterator, because member version is iterator + n
     template<class Iterator>
     reverse_iterator<Iterator> operator+(
             typename reverse_iterator<Iterator>::difference_type n,
             reverse_iterator<Iterator>& x){
         return reverse_iterator<Iterator>(x.base()-n);
     }
-}
+
+    /**
+     * @class move_iterator
+     * @tparam Iterator
+     * @brief 
+     * behavior as the underlying iterator but its dereference operator
+     * return rvalue reference(i.e. xvalue), used in generic algorithm
+     * can replace copying with moving
+     */
+    template<typename Iterator>
+    class move_iterator
+    {
+    protected:
+        typedef iterator_traits<Iterator> IteratorTraits;
+        typedef Iterator Base;
+        typedef typename IteratorTraits::reference BaseReference;
+		typedef move_iterator Self;
+    public:
+        typedef typename IteratorTraits::value_type value_type;
+        // if reference is not reference type, no change
+        typedef Conditional_t<Is_reference<BaseReference>::value,
+            Remove_reference_t<BaseReference>&&,
+            BaseReference> reference;
+        typedef Iterator iterator;
+        typedef iterator pointer;
+        typedef typename IteratorTraits::iterator_category
+            iterator_category;
+        typedef typename IteratorTraits::difference_type
+            difference_type;
+		
+		explicit move_iterator(Base const& iter)
+			: base_{ iter }
+		{ }
+
+		inline  reference
+		operator*() const noexcept
+		{ return STL_MOVE(*base_); }
+		
+		TINYSTL_CONSTEXPR pointer
+		operator->() const noexcept
+		{ return base_; }
+		
+		TINYSTL_CONSTEXPR reference
+		operator[](difference_type n) const noexcept
+		{ return STL_MOVE(*(*this + n)); }
+
+		TINYSTL_CONSTEXPR Self&
+		operator++()
+		{
+			++base_;
+			return *this;
+		}
+
+		TINYSTL_CONSTEXPR Self
+		operator++(int)
+		{
+			Self tmp = *this;
+			++base_;
+			return tmp;
+		}
+		
+		TINYSTL_CONSTEXPR Self&
+		operator--()
+		{
+			--base_;
+			return *this;
+		}
+
+		TINYSTL_CONSTEXPR Self
+		operator--(int)
+		{
+			Self tmp = *this;
+			--base_;
+			return tmp;
+		}
+		
+		TINYSTL_CONSTEXPR Self
+		operator+(difference_type n)
+		{
+			return base_ + n;
+		}
+
+		TINYSTL_CONSTEXPR Self
+		operator-(difference_type n)
+		{
+			return base_ - n;
+		}
+
+		TINYSTL_CONSTEXPR Self
+		operator+=(difference_type n)
+		{
+			return base_ += n;
+		}
+
+		TINYSTL_CONSTEXPR Self
+		operator-=(difference_type n)
+		{
+			return base_ -= n;
+		}
+
+		TINYSTL_CONSTEXPR Iterator 
+		base() const noexcept
+		{ return base_; }
+	protected:
+		Iterator base_;
+    };
+	
+	template<typename I>
+	move_iterator<I> operator+(typename move_iterator<I>::difference_type n, move_iterator<I>& x)
+	{ return x + n; }
+	
+	template<typename I1, typename I2>
+	auto operator-(
+			move_iterator<I1> const& x,
+			move_iterator<I2> const& y)
+	-> decltype(x.base() - y.base())
+	{ return x.base() - y.base(); }
+
+	template<typename I1, typename I2>
+	bool operator==(
+			move_iterator<I1> const& x,
+			move_iterator<I2> const& y) 
+	{
+		return x.base() == y.base(); 
+	}
+
+	template<typename I1, typename I2>
+	bool operator!=(
+			move_iterator<I1> const& x,
+			move_iterator<I2> const& y)
+	{ return !(x == y); }
+	
+
+	template<typename I1, typename I2>
+	bool operator<(
+			move_iterator<I1> const& x,
+			move_iterator<I2> const& y)
+	{ return x.base() < y.base(); }
+
+	template<typename I1, typename I2>
+	bool operator>=(
+			move_iterator<I1> const& x,
+			move_iterator<I2> const& y)
+	{ return !(x < y); }
+
+	template<typename I1, typename I2>
+	bool operator>(
+			move_iterator<I1> const& x,
+			move_iterator<I2> const& y)
+	{ return y < x; }
+
+	template<typename I1, typename I2>
+	bool operator<=(
+			move_iterator<I1> const& x,
+			move_iterator<I2> const& y)
+	{ return !(y < x); }
+
+	template<typename Iter>
+	move_iterator<Iter> make_move_iterator(Iter const& x)
+	{ return move_iterator<Iter>(x); }
+	
+	template<typename Iter, bool = 
+		move_if_noexcept_cond<Iter_value_type<Iter>>::value>
+	struct make_move_if_noexcept_iterator_impl
+	{
+		static move_iterator<Iter> apply(Iter const& x)
+		{ return make_move_iterator(x); }
+	};
+
+	template<typename Iter>
+	struct make_move_if_noexcept_iterator_impl <Iter, true>
+	{
+		static Iter apply(Iter const& x)
+		{ return x; }
+	};
+	
+	template<typename Iter>
+	auto make_move_if_noexcept_iterator(Iter const& x)
+//		-> decltype(make_move_if_noexcept_iterator_impl<Iter>::apply(x))
+	{ return make_move_if_noexcept_iterator_impl<Iter>::apply(x); }
+	
+#define MAKE_MOVE_IF_NOEXCEPT_ITERATOR(x) make_move_if_noexcept_iterator(x)
+
+} // namespace TinySTL
+
 #endif //TINYSTL_STL_ITERATOR_H
