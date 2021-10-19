@@ -38,7 +38,7 @@ namespace TinySTL{
 	// addressof
 	template<typename T>
 	inline T* addressof(T& p) noexcept
-	{ return __buildin_addressof(p); }
+	{ return __builtin_addressof(p); }
 
 	template<typename T>
 	inline T* addressof(T&& p) = delete;
