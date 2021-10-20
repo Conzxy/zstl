@@ -13,7 +13,6 @@
 #include <climits>
 
 namespace TinySTL {
-// sss
 /**
  * @class VectorBase
  * @tparam T type of element
