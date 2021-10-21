@@ -51,7 +51,10 @@ struct VectorBase : Allocator {
 	{ }
 
 	~VectorBase()
-	{ AllocTraits::deallocate(*this, first_, capa_ - last_); }
+	{ 
+		AllocTraits::deallocate(*this, first_, capa_ - last_);
+		first_ = last_ = capa_ = nullptr;
+	}
 
 	VectorBase(VectorBase&& base) TINYSTL_NOEXCEPT
 		: first_{base.first_}
@@ -130,6 +133,8 @@ public:
 	Vector(InputIterator first,InputIterator last)
 		: Vector(distance(first,last))
 	{
+		// no need to catch exception
+		// because RAII
 		TinySTL::uninitialized_copy(first,last,begin());
 	}
 
@@ -201,13 +206,13 @@ public:
 
 	// capacity:
 	size_type   size()               const   TINYSTL_NOEXCEPT
-	{ return end()-begin();}
+	{ return end()-begin(); }
 	size_type   max_size()           const   TINYSTL_NOEXCEPT
 	{ return size_type(UINT_MAX/sizeof(T)); }
 	void        resize(size_type sz);
 	void        resize(size_type sz,T const& c);
 	size_type   capacity()              const   TINYSTL_NOEXCEPT
-	{ return this->capa_ - this->first_;}
+	{ return this->capa_ - this->first_; }
 	bool        empty()                 const   TINYSTL_NOEXCEPT
 	{return begin() == end(); }
 	void        reserve(size_type n);
@@ -257,8 +262,8 @@ public:
 	iterator insert(const_iterator position,std::initializer_list<U> il);
 	void pop_back() TINYSTL_NOEXCEPT;
 
-	iterator erase(const_iterator position) TINYSTL_NOEXCEPT;
-	iterator erase(const_iterator first,const_iterator last) TINYSTL_NOEXCEPT;
+	iterator erase(const_iterator position);
+	iterator erase(const_iterator first,const_iterator last);
 
 	void swap(Vector& rhs)TINYSTL_NOEXCEPT
 	{ this->base::swap(rhs); }
@@ -268,8 +273,7 @@ public:
 	// also you can use Vector(v).swap(v)(used before c++11).
 	// But the second approach is not recommended,
 	// because 
-
-	void clear()TINYSTL_NOEXCEPT
+	void clear() TINYSTL_NOEXCEPT
 	{ erase(begin(),end()); }
 
 private:
@@ -283,8 +287,8 @@ private:
 	template<typename II> iterator insertRangeAux(iterator, II first, II last);
 	template<typename ...Args> void expandAndEmplace(const_iterator position, Args&&... args);
 
-	iterator erase_aux(iterator first,iterator last);
-	iterator erase_aux(iterator position);
+	iterator eraseAux(iterator first,iterator last);
+	iterator eraseAux(iterator position);
 	
 	template<typename U, TinySTL::Enable_if_t<Is_default_constructible<U>::value, char> = 0>
 	void Vector_aux(size_type n) {
@@ -295,6 +299,8 @@ private:
 	void Vector_aux(size_type )
 	{ }
 
+	// if element type is trivial and use default allocator
+	// we use realloc() to reallocate then no need to move old element to new space
 	static constexpr bool useReallocPolicy = 
 		Conjunction_t<
 			Is_same<Allocator, TinySTL::allocator<T>>,
@@ -304,8 +310,10 @@ private:
 
 template<typename T,typename Allocator>
 inline bool 
-operator==(Vector<T,Allocator> const& x,Vector<T,Allocator> const& y)
-{ return x.size()==x.size() && TinySTL::equal(x.begin(),x.end(),y.begin()); }
+operator==(Vector<T,Allocator> const& x,Vector<T,Allocator> const& y) {
+	return x.size()==x.size() &&
+			TinySTL::equal(x.begin(),x.end(),y.begin());
+}
 
 template<typename T,typename Allocator>
 inline bool 
@@ -314,9 +322,10 @@ operator!=(Vector<T,Allocator> const& x,Vector<T,Allocator> const& y)
 
 template<typename T,typename Allocator>
 inline bool 
-operator <(Vector<T,Allocator> const& x,Vector<T,Allocator> const& y)
-{ return TinySTL::lexicographical_compare(x.begin(), x.end(),
-										  y.begin(), y.end()); }
+operator <(Vector<T,Allocator> const& x,Vector<T,Allocator> const& y) {
+	return TinySTL::lexicographical_compare(
+		x.begin(), x.end(), y.begin(), y.end());
+}
 
 template<typename T,typename Allocator>
 inline bool 
@@ -382,24 +391,26 @@ template<typename T,typename Alloc>
 template<typename U, typename>
 inline Vector<T,Alloc>& 
 Vector<T,Alloc>::operator=(std::initializer_list<U> il){
-	auto tmp=Vector(il.begin(),il.end());
+	auto tmp = Vector(il.begin(), il.end());
 	swap(tmp);
 	return *this;
 }
 
+// erase all elements at first and re-insert elements which are given by parameters
+// @see N337(a standard draft in C++11) 23.3.6.2 page 755 for detail
 template<typename T,typename Alloc>
 template<typename InputIterator,typename>
 inline void 
 Vector<T,Alloc>::assign(InputIterator first,InputIterator last){
-	erase(begin(),end());
-	insert(begin(),first,last);
+	clear();
+	insert(begin(), first, last);
 }
 
 template<typename T,typename Alloc>
 void 
 Vector<T,Alloc>::assign(size_type n,T const& t){
-	erase(begin(),end());
-	insert(begin(),n,t);
+	clear();
+	insert(begin(), n, t);
 }
 
 template<typename T,typename Alloc>
@@ -420,20 +431,20 @@ Vector<T,Alloc>::at(size_type n) const
 
 template<typename T,typename Alloc>
 void 
-Vector<T,Alloc>::resize(size_type sz){
-	if(sz<=size())
-		erase(begin()+sz,end());
+Vector<T,Alloc>::resize(size_type sz) {
+	if(sz <= size())
+		erase(begin()+sz, end());
 	else
-		resize(sz,T{});
+		resize(sz, T{});
 }
 
 template<typename T,typename Alloc>
 void 
-Vector<T,Alloc>::resize(size_type sz,T const& c){
-	if(sz<size())
-		erase(begin()+sz,end());
-	else if(sz>size())
-		insert(end(),sz-size(),c);
+Vector<T,Alloc>::resize(size_type sz,T const& c) {
+	if(sz < size())
+		erase(begin()+sz, end());
+	else if(sz > size())
+		insert(end(), sz-size(), c);
 }
 
 template<typename T,typename Alloc>
@@ -546,14 +557,14 @@ template<typename T, typename Alloc>
 inline auto 
 Vector<T, Alloc>::insert(const_iterator position, T const& x) 
 -> iterator {
-	return iteratorAux(const_cast<iterator>(position), x);
+	return insertAux(const_cast<iterator>(position), x);
 }
 
 template<typename T, typename Alloc>
 inline auto 
 Vector<T, Alloc>::insert(const_iterator position, size_type n, T const& x)
 -> iterator {
-	return insertFillAux(const_cast<iterator>(position), n, x);
+	return insertFillNAux(const_cast<iterator>(position), n, x);
 }
 
 template<typename T, typename Alloc>
@@ -582,16 +593,16 @@ Vector<T, Alloc>::pop_back() TINYSTL_NOEXCEPT {
 
 template<typename T, typename Alloc>
 inline auto 
-Vector<T, Alloc>::erase(const_iterator position) TINYSTL_NOEXCEPT
+Vector<T, Alloc>::erase(const_iterator position) 
 -> iterator  {
-	return erase_aux(const_cast<iterator>(position));
+	return eraseAux(const_cast<iterator>(position));
 }
 
 template<typename T, typename Alloc>
 inline auto
-Vector<T, Alloc>::erase(const_iterator first, const_iterator last) TINYSTL_NOEXCEPT
+Vector<T, Alloc>::erase(const_iterator first, const_iterator last) 
 -> iterator {
-	return erase_aux(
+	return eraseAux(
 		const_cast<iterator>(first),
 		const_cast<iterator>(last));
 }
@@ -600,14 +611,17 @@ template<typename T,typename Alloc>
 auto
 Vector<T,Alloc>::insertAux(iterator position,T const& x)
 -> iterator {
+	const auto offset = position - begin();
 	if(this->last_ < this->capa_) {
-		AllocTraits::construct(*this, ADDRESS(*end()), STL_MOVE(back()));
+		AllocTraits::construct(*this, ADDRESSOF(*end()), STL_MOVE(back()));
 		TinySTL::copy_backward(
 			MAKE_MOVE_IF_NOEXCEPT_ITERATOR(position),
 			MAKE_MOVE_IF_NOEXCEPT_ITERATOR(end() - 1),
 			end());
 		++this->last_;
 		*position = x;
+
+		return begin() + offset;
 	} else {
 		return insertFillNAux(position, size_type(1), x);
 	}
@@ -643,7 +657,7 @@ Vector<T,Alloc>::insertFillNAux(iterator position,size_type n,T const& x)
 			const size_type old_size = size();
 			const auto new_capa = getNewCapacity(n);
 			const auto new_first = AllocTraits::allocate(*this, new_capa);
-			decltype(new_first) tmp = new_first;
+			iterator tmp = new_first;
 			TRY_BEGIN
 				tmp = TinySTL::uninitialized_move_if_noexcept(begin(), position, tmp);
 				tmp = TinySTL::uninitialized_fill_n(tmp, n, x);
@@ -681,7 +695,7 @@ Vector<T, Alloc>::insertRangeAux(iterator position, II first, II last)
 		if (remaining_storage >= n) {
 			if (eles_after_pos <= n) {
 				auto tmp = TinySTL::uninitialized_move_if_noexcept(position, end(), position+n);
-				auto tmp2 = TinySTL::advance(first, eles_after_pos);
+				auto tmp2 = TinySTL::advanceIter(first, eles_after_pos);
 				TinySTL::copy(first, tmp2, position);
 				TinySTL::uninitialized_copy(tmp2, last, begin() + eles_after_pos);
 				this->last_ = tmp;	
@@ -698,7 +712,7 @@ Vector<T, Alloc>::insertRangeAux(iterator position, II first, II last)
 			const size_type old_size = size();
 			const auto new_capa = getNewCapacity(n);
 			const auto new_first = AllocTraits::allocate(*this, new_capa);
-			decltype(new_first) tmp = new_first;
+			iterator tmp = new_first;
 			TRY_BEGIN
 				tmp = TinySTL::uninitialized_move_if_noexcept(begin(), position, tmp);
 				tmp = TinySTL::uninitialized_copy(first, last, tmp);
@@ -753,7 +767,7 @@ Vector<T, Alloc>::expandAndEmplace(const_iterator pos, Args&&... args) {
 // The policy is very simple
 template<typename T,typename Alloc>
 auto
-Vector<T,Alloc>::erase_aux(iterator first,iterator last)
+Vector<T,Alloc>::eraseAux(iterator first,iterator last)
 -> iterator {
 	const auto offset = first - begin();
 	auto tmp = TinySTL::copy(
@@ -769,19 +783,18 @@ Vector<T,Alloc>::erase_aux(iterator first,iterator last)
 
 // Swap the element which want to erase but not back() and back(), 
 // make the operation time complexity to O(1)
-// @note
-// The treatment is not taken by STL.
-// In STL, if position is not last element location,
-// will call copy().
-// @see https://en.cppreference.com/w/cpp/container/vector/erase
-// So, it's time complexity is O(n).
+// but it requires element provide such interface that can get its index in vector
+// Therefore, this is a choice of user, not a lib task.
 template<typename T,typename Alloc>
 auto
-Vector<T,Alloc>::erase_aux(iterator position)
+Vector<T,Alloc>::eraseAux(iterator position)
 -> iterator {
 	const auto offset = position - begin();
 	if (NextIter(position) != end())  {
-		TinySTL::iter_swap(position, PrevIter(end()));	
+		TinySTL::copy(
+			MAKE_MOVE_IF_NOEXCEPT_ITERATOR(position + 1),
+			MAKE_MOVE_IF_NOEXCEPT_ITERATOR(end()),
+			position);
 	}
 	--this->last_;
 	AllocTraits::destroy(*this, end());
@@ -794,8 +807,9 @@ void
 Vector<T, Alloc>::checkSize(size_type n) {
 	if (n > size()) {
 		char buf[64];
-		snprintf(buf, sizeof buf, 
-		"out_of_range: The location %lu is not exist(size: %lu)\n", n, size());
+		snprintf(
+			buf, sizeof buf, 
+			"out_of_range: The location %lu is not exist(size: %lu)\n", n, size());
 		throw std::out_of_range(buf);
 	}
 }
