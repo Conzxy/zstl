@@ -18,11 +18,12 @@ namespace TinySTL {
  * @tparam T type of element
  * @tparam Allocator type of Allocator
  * @brief memery management implemetation of Vector
- * @note: Use RAII technique or as base class both is OK
- *		  only delegate the momery management to other part instead of Vector<> itself.
+ * @note: 
+ * Use RAII technique or as base class both is OK,
+ * as long as it can delegate the momery management to other part instead of Vector<> itself.
  *
- *		  Allocator as base class is based a basic facts: allocator is a empty class usually
- *		  so we can take advantage of EBCO(empty base class optimization)
+ * Allocator as base class is based a basic facts: allocator is a empty class usually
+ * so we can take advantage of EBCO(empty base class optimization)
  */
 template<typename T,typename Allocator>
 struct VectorBase : Allocator {
