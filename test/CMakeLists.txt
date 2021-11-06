@@ -3,16 +3,16 @@
 string(REPLACE ";" " " LIB_SRC_LIST "${LIB_SRC}")
 
 message(STATUS "${LIB_SRC_LIST}")
-#add_executable(deque-test deque-test.cc ${LIB_SRC})
-#add_executable(test_queue test_queue.cpp ${LIB_SRC})
-add_executable(vector-test vector-test.cc ${LIB_SRC})
-#add_executable(test_algo test_algo.cpp ${LIB_SRC})
-#add_executable(test_hashtable test_hashtable.cpp ${LIB_SRC})
-#add_executable(test_other test_other.cpp ${LIB_SRC})
-#add_executable(rbtree rbtree.cc ${LIB_SRC})
-#add_executable(typelist typelist.cc ${LIB_SRC})
-#add_executable(tuple tuple.cc ${LIB_SRC})
-#add_executable(variant variant.cc ${LIB_SRC})
-#add_executable(rbtree-test rbtree-test.cc ${LIB_SRC})
-#add_executable(algobase_test algobase_test.cc)
-#add_executable(set-test set-test.cc ${LIB_SRC})
+
+add_executable(vector_test vector_test.cc ${LIB_SRC})
+
+# hash table test
+add_executable(hash_aux_test hash_aux_test.cc ${LIB_SRC})
+add_executable(hashtable_test hashtable_test.cc ${LIB_SRC})
+
+# rbtree
+add_executable(set_test set_test.cc ${LIB_SRC})
+add_executable(set_bench set_bench.cc ${LIB_SRC})
+
+target_link_libraries(set_test gtest)
+target_link_libraries(set_bench benchmark)
