@@ -6,7 +6,6 @@
 #include "type_traits.h"
 #include "utility.h" // swap
 
-#include <stdio.h>
 #include <cstring>
 
 namespace TinySTL {
@@ -102,7 +101,7 @@ struct CopyMove <false, false, Random_access_iterator_tag> {
 	static OI apply(II first, II last, OI result) {
 		typedef typename iterator_traits<II>::difference_type DistanceType;
 		DistanceType n = last - first;
-		for(; n > 0; --n) {
+		for (; n > 0; --n) {
 			*result = *first;
 			++first;
 			++result;
@@ -118,7 +117,7 @@ struct CopyMove <true, false, Random_access_iterator_tag> {
 	static OI apply(II first, II last, OI result) {
 		typedef typename iterator_traits<II>::difference_type DistanceType;
 		DistanceType n = last - first;
-		for(; n > 0; --n) {
+		for (; n > 0; --n) {
 			*result = STL_MOVE(*first);
 			++first;
 			++result;
@@ -136,7 +135,6 @@ struct CopyMove <isMove, true, Random_access_iterator_tag> {
 		typedef typename iterator_traits<II>::value_type ValueType;
 		DistanceType n = last - first;
 		
-		puts("memmove copy");	
 		// The value_type between II and OI must be same
 		__builtin_memmove(result, first, sizeof(ValueType) * n);
 

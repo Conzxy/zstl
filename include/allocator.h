@@ -26,7 +26,7 @@ namespace TinySTL{
         typedef const T&    const_reference;
         typedef std::size_t size_type;
         typedef ptrdiff_t   difference_type;
-		
+
 		template<typename U>
 		struct Rebind{
 			using type = allocator<U>;

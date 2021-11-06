@@ -489,11 +489,11 @@ namespace TinySTL {
 
         if(Off < size()/2){
             emplace_front(STL_ forward<Args>(args)...);
-            STL_ rotate(begin(),Next_Iter(begin()),begin()+static_cast<difference_type>(Off+1));
+            STL_ rotate(begin(),NextIter(begin()),begin()+static_cast<difference_type>(Off+1));
         }
         else{
             emplace_back(STL_ forward<Args>(args)...);
-            STL_ rotate(begin()+static_cast<difference_type>(Off),Prev_Iter(end()),end());
+            STL_ rotate(begin()+static_cast<difference_type>(Off),PrevIter(end()),end());
         }
         return begin()+static_cast<difference_type>(Off);
     }
@@ -748,7 +748,7 @@ namespace TinySTL {
 //**********************erase*****************************************//
     template<typename T,typename Alloc>
     typename deque<T,Alloc>::iterator deque<T,Alloc>::erase(const_iterator pos){
-        return erase(pos,Next_Iter(pos));
+        return erase(pos,NextIter(pos));
     }
 
     template<typename T,typename Alloc>

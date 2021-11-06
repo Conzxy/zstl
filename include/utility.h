@@ -32,12 +32,12 @@ namespace TinySTL{
 
 
 	template<typename InIter>
-	InIter Next_Iter(InIter iter){
+	InIter NextIter(InIter iter){
 		return ++iter;
 	}
 
 	template<typename InIter>
-	InIter Prev_Iter(InIter iter){
+	InIter PrevIter(InIter iter){
 		return --iter;
 	}
 }
