@@ -1,47 +1,38 @@
-/*
- * @file stl_tree.h
- * implementation of Red-Black tree
- * algorithm source from CLRS
- *
- * @author Conzxy
- * @date 24-6-2021
- */
-
 #ifndef _ZXY_TINYSTL_STL_TREE
 #define _ZXY_TINYSTL_STL_TREE
 
-#include <cstddef>
-#include <cstring>
 #include "stl_move.h"
 #include "stl_iterator.h"
 #include "type_traits.h"
-#include "allocator.h"
 #include "stl_exception.h"
 #include "stl_utility.h"
 #include "stl_algobase.h"
 #include "config.h"
+#include "noncopyable.h"
+#include "allocator.h"
+
+#include <cstddef>
+#include <cstring>
+#include <assert.h>
 
 #ifdef RBTREE_DEBUG
 #include <iostream>
 #endif
 
-#ifdef RBTREE_DEBUG
-template<typename >
-class RBTreeTest;
-#endif
+namespace TinySTL {
 
-namespace TinySTL{
-
-/*
+/**
  * @enum RBTreeColor
- * @brief provide color of node : red, black
- * satifies the property: every node either red or black
+ * @brief 
+ * Provide color of node is either red or black
+ * to satifies the property: every node either red or black
  */
 enum class RBTreeColor : bool {
-	Red = true, Black = false
+	Red = true, 
+  Black = false
 };
 
-/*
+/**
  * @struct RBTreeBaseNode
  * @brief base RBTree node type
  * there are two advantage:
@@ -49,7 +40,7 @@ enum class RBTreeColor : bool {
  * (2) unqualified type, so related algorithm can reuse for all type
  * e.g. RBTree<Val=int> and RBTree<Val=char>， their algorithm is same
  */
-struct RBTreeBaseNode{
+struct RBTreeBaseNode {
 	using BasePtr = RBTreeBaseNode*;
 	using ConstBasePtr = RBTreeBaseNode const*;
 
@@ -85,9 +76,9 @@ struct RBTreeBaseNode{
 
 };
 
-/*
+/**
  * @struct RBTreeNode
- * @tparam Val : value type
+ * @tparam Val value type
  * @brief actual RBTree node type
  */
 template<typename Val>
@@ -110,12 +101,12 @@ struct RBTreeNode : public RBTreeBaseNode{
 	Val val;
 };
 
-/*
+/**
  * @struct RBTreeHeader
  * @brief as RBTree.end(), the left link to the minimum, and the right link to the maximum,
  * maintain the node count, the root node is the parent of each other
  */
-struct RBTreeHeader{
+struct RBTreeHeader {
 	RBTreeBaseNode header;
 	std::size_t node_count;
 
@@ -124,7 +115,6 @@ struct RBTreeHeader{
 		Reset();
 	}
 
-#if __cplusplus >= 201103L
 	RBTreeHeader(RBTreeHeader && other) noexcept{
 		if(other.header.parent != nullptr)
 			MoveData(other);
@@ -133,21 +123,23 @@ struct RBTreeHeader{
 			Reset();
 		}
 	}
-#endif
 
 protected:
 	void MoveData(RBTreeHeader& from){
 		header.color = from.header.color;
 		header.left = from.header.left;
 		header.right = from.header.right;
-		header.parent = from.header.parent;
-		header.parent->parent = &header;
+		header.parent = from.header.parent; // root
+		header.parent->parent = &header; // reset header
+
+		// FIXME test if error occur
+		from.header.parent->parent = nullptr;		
 
 		node_count = from.node_count;
 	}
 
-	/*
-	 * @berif: reset the link
+	/**
+	 * @berif: reset the link to uninitialzied state
 	 */
 	void Reset(){
 		header.parent = nullptr;
@@ -158,7 +150,7 @@ protected:
 	}
 };
 
-/* @fn
+/**
  * @brief find the successor and predecessor of given node
  * the detail implementation of iterator operator++ and operator--
  * @see https://conzxy.github.io/2021/01/25/CLRS/Search-Tree/BinarySearchTree/
@@ -168,13 +160,13 @@ RBTreeBaseNode const* RBTreeIncrement(RBTreeBaseNode const* node) noexcept;
 RBTreeBaseNode* RBTreeDecrement(RBTreeBaseNode* node) noexcept;
 RBTreeBaseNode const* RBTreeDecrement(RBTreeBaseNode const* node) noexcept;
 
-/*
+/**
  * @struct RBTreeIterator
- * @tparam T : value type
+ * @tparam T value type
  * @note begin() = header.left, end() = header
  */
 template<typename T>
-struct RBTreeIterator{
+struct RBTreeIterator {
 	using value_type = T;
 	using reference = T&;
 	using pointer = T*;
@@ -193,7 +185,7 @@ struct RBTreeIterator{
 	RBTreeIterator(BasePtr p)
 		: node_(p)
 	{}
-	
+  
 	LinkType node() noexcept {
 		return static_cast<LinkType>(node_);
 	}
@@ -237,16 +229,16 @@ struct RBTreeIterator{
 	}
 
 	friend bool operator!=(Self const& lhs, Self const& rhs) noexcept{
-		return lhs.node != rhs.node_;	//!(lhs == rhs)
+		return lhs.node_ != rhs.node_;	//!(lhs == rhs)
 	}
 
 	BasePtr node_;
 };
 
-/*
+/**
  * @struct RBTreeConstIterator
- * @tparam T : value type
- * @note RBTreeIterator can convert into RBTreeConstIterator
+ * @tparam T value type
+ * @note RBTreeIterator must be able to convert into RBTreeConstIterator
  */
 template<typename T>
 struct RBTreeConstIterator{
@@ -320,10 +312,9 @@ struct RBTreeConstIterator{
 	BasePtr node_;
 };
 
-/*
+/**
  * @struct KeyCompare
- * @tparam Compare : functor used to compare two key
- * @deprecated Compare is linkly a empty type
+ * @tparam Compare functor used to compare two key
  */
 template<typename Compare>
 struct KeyCompare{
@@ -336,44 +327,44 @@ struct KeyCompare{
 		: key_compare_(cmp)
 	{ }
 
-#if __cplusplus >= 201103L
 	KeyCompare(KeyCompare const&) = default;
 	
-	KeyCompare(KeyCompare&& cmp)
-		: key_compare_(TinySTL::move(cmp.key_comapre_))
-	{ }
-#endif
+	KeyCompare(KeyCompare&& cmp) = default;
 };
 
-/*
+/**
  * @brief relink inserted node and its parent and fixup to maintain red-black property
  * @param insert_left indicate if insert left(i.e. left must be null)
  * @param x inserted node
  * @param p parents of x
  * @param header header sentinel pointing to leftmost, rightmost and root
  */
-void RBTreeInsertAndFixup(const bool insert_left,
-		RBTreeBaseNode* x,
-		RBTreeBaseNode* p,
-		RBTreeBaseNode* header) noexcept;
+void RBTreeInsertAndFixup(
+	const bool insert_left,
+	RBTreeBaseNode* x,
+	RBTreeBaseNode* p,
+	RBTreeBaseNode* header) noexcept;
 
-/*
+/**
  * @brief Red-Black rebalance algorithm for delete
  * @param x node to be deleted
  * @param root root of rbtree
  * @param leftmost the most left node of rbtree
  * @param rightmost the most right node of rbtree
  * @return actual deleted node location(i.e. x)
- * @note the reason why return x instead of void is that delete RBTreeBaseNode is imcompleted
+ * @note 
+ * the reason why return x instead of void is that delete RBTreeBaseNode is imcompleted
  * because RBTreeBaseNode destructor is non-virtual
  * @see https://conzxy.github.io/2021/01/26/CLRS/Search-Tree/BlackRedTree/
  */
 RBTreeBaseNode* 
-RBTreeEraseAndFixup(RBTreeBaseNode* x, RBTreeBaseNode*& root
-									 , RBTreeBaseNode*& leftmost
-									 , RBTreeBaseNode*& rightmost);
+RBTreeEraseAndFixup(
+	RBTreeBaseNode* x, 
+	RBTreeBaseNode*& root,
+	RBTreeBaseNode*& leftmost,
+	RBTreeBaseNode*& rightmost);
 
-/*
+/**
  * @brief get the black height of given node
  * @param node given node
  * @param root root of rbtree
@@ -392,6 +383,7 @@ inline std::size_t BH(RBTreeBaseNode const* node, RBTreeBaseNode const* root) no
 		return bh + BH(node->parent, root);
 }
 
+// For debug
 #ifdef RBTREE_DEBUG
 #define TEST_RB_PROPERTY(rbtree) \
 	do{ \
@@ -403,18 +395,18 @@ inline std::size_t BH(RBTreeBaseNode const* node, RBTreeBaseNode const* root) no
 	}while(0)	
 #endif
 
-/*
+/**
  * @class RBTree
  * @brief implemetation of Red-Black tree
- * @tparam Key : key type
- * @tparam Val : value type
- * @tparam GetKey : callable that can get the key
- * @tparam Compare : predicate that compare element
- * @tparam Alloc : allocator
+ * @tparam Key key type
+ * @tparam Val value type
+ * @tparam GetKey callable that can get the key
+ * @tparam Compare predicate that compare element
+ * @tparam Alloc allocator
  */
 template<typename Key, typename Val, typename GetKey, typename Compare,
 	typename Alloc = TinySTL::allocator<Val>>
-class RBTree{
+class RBTree {
 public:
 	using key_type = Key;
 	using value_type = Val;
@@ -428,6 +420,7 @@ public:
 	using difference_type = std::ptrdiff_t;
 	
 private:
+  using get_key = GetKey;
 	using NodeAllocator = typename Alloc::template rebind<RBTreeNode<Val>>;
 	using AllocTraits = allocator_traits<NodeAllocator>;
 
@@ -438,93 +431,108 @@ protected:
 	using ConstLinkType = RBTreeNode<Val> const*;
 
 public:
-	/*
+	/**
 	 * @class ReuseOrAlloc
-	 * @brief reuse original nodes, destroy and reconstruct
+	 * @brief 
+	 * reuse original nodes, destroy and reconstruct
 	 * when no nodes, plain alloc
 	 */
-	class ReuseOrAlloc{
-	public:
-		explicit ReuseOrAlloc(RBTree& tree)
-			: root_(tree.Root())
-			, nodes_(tree.RightMost())
-			, tree_(tree)
-			  
-		{
-			if(root_){
-				root_->parent = nullptr;
-				if(nodes_->left)
-					nodes_ = nodes_->left;
-			}else
-				nodes_ = nullptr;
-		}
+  struct ReuseOrAlloc : noncopyable {
+  public:
+    explicit ReuseOrAlloc(RBTree& rbtree) 
+      : rbtree_{ rbtree }
+      , node_{ rbtree.RightMost() }
+      , root_{ rbtree.Root() }
+    {
+      if (root_) {
+        // for Extract()
+        root_->parent = nullptr;
+        // node is rightmost, so left subtree
+        // have a red child at most
+        if (node_->left) {
+          node_ = node_->left;
+        }
+      } else {
+        // if root_ is NULL, node_ is header
+        node_ = nullptr;
+      }
+    }
 
-#if __cpluscplus > 201103L
-		ReuseOrAlloc(ReuseOrAlloc const&) = delete;
-#endif
+    ~ReuseOrAlloc() noexcept {		
+  #ifdef RBTREE_DEBUG
+      printf("reused node count: %lu\n", count_);
+  #endif
 
-		~ReuseOrAlloc(){
-#ifdef RBTREE_DEBUG
-		printf("reused node count: %lu\n", count_);
-#endif
-			tree_.Erase(static_cast<LinkType>(root_));
-		}
-		
-		template<typename ...Args>
-		LinkType operator()(Args&&... args){
-			auto node = static_cast<LinkType>(Extract());
+      // if root_ is not NULL, there are some nodes can't be reused
+      // we can only destroy and free them
+      if (root_) {
+        rbtree_.Erase(static_cast<LinkType>(root_));
+      }
+    }
 
-			if(node){
-#ifdef RBTREE_DEBUG
-				++count_;
-#endif
-				tree_.DestroyNode(node);
-				tree_.ConstructNode(node, STL_FORWARD(Args, args)...);
-				return node;
-			}else
-				return tree_.CreateNode(STL_FORWARD(Args, args)...);
-		}
+    template<typename... Args>
+    LinkType operator()(Args&&... args) noexcept {
+      auto reuse_node = static_cast<LinkType>(Extract());
 
-	private:
-		BasePtr Extract() noexcept {
-			if(! nodes_)
-				return nodes_;
-			
-			auto node = nodes_;
-			nodes_ = nodes_->parent;
+      if (reuse_node) {
+  #ifdef RBTREE_DEBUG
+        ++count_;
+  #endif
+        rbtree_.DestroyNode(reuse_node);
+        rbtree_.ConstructNode(reuse_node, STL_FORWARD(Args, args...)...);
+        return reuse_node;
+      } else {
+        return rbtree_.CreateNode(STL_FORWARD(Args, args)...);
+      }
+    }
 
-			if(nodes_){
-				if(nodes_->right == node){
-					nodes_->right = nullptr;
+  private:
+    BasePtr Extract() noexcept {
+      if (node_) {
+        auto reuse_node = node_;
+        node_ = reuse_node->parent;
 
-					if(nodes_->left){
-						nodes_ = nodes_->left;
+        if (node_) {
+          if (node_->right == reuse_node) {
+						node_->right = nullptr;
 
-						while(nodes_->right)
-							nodes_ = nodes_->right;
+            if (node_->left) {
+              node_ = node_->left;
 
-						if(nodes_->left)
-							nodes_ = nodes_->left;
-					}
-				}else
-					nodes_->left = nullptr;
-			}else{
-				root_ = nullptr;
-			}
+              while (node_->right) {
+                node_ = node_->right;
+              }
 
-			return node;
-		}
+              if (node_->left) {
+                node_ = node_->left;
+              }
+            }
+          } else { // end if node->right == reuse_node
+            node_->left = nullptr;
+          }
+        } else { // end if node_
+          // reuse_node parent is NULL, set root_ to NULL
+          // to avoid destroy root in top-down in destructor
+          root_ = nullptr;
+        }
 
-		BasePtr root_;
-		BasePtr nodes_;
-		RBTree& tree_;
+        return reuse_node; 
+      }
 
-#ifdef RBTREE_DEBUG
-		size_t count_ = 0;
-#endif
-	};
+      return nullptr;
+    }
 
-	/*
+    RBTree& rbtree_;
+    BasePtr node_;
+    BasePtr root_;
+
+  #ifdef RBTREE_DEBUG
+    size_t count_ = 0;
+  #endif
+  };
+
+
+	/**
 	 * @class PlainAlloc
 	 */
 	class PlainAlloc{
@@ -605,15 +613,17 @@ protected:
 		return policy(val);
 	}
 
-	/*
+	/**
 	 * @class RBTreeImpl
 	 * @brief detail field of RBTree
 	 * @note use a technique : EBCO
 	 */
 	struct RBTreeImpl
 	: public NodeAllocator
-	, public key_compare
+	, public KeyCompare<Compare>
 	, public RBTreeHeader{
+		using CompBase = KeyCompare<Compare>;
+
 		RBTreeImpl()
 		 : NodeAllocator()
 		{ }
@@ -623,21 +633,15 @@ protected:
 		{ }
 
 		RBTreeImpl(key_compare const& cmp)
-		 : key_compare(cmp)
+			: CompBase(cmp)
 		{ }
 
 		RBTreeImpl(RBTreeImpl const&) = default;
-#if __cpluscplus > 201103L
 		RBTreeImpl(RBTreeImpl&&) = default;
-#endif
 
 		using RBTreeHeader::Reset;
+		using CompBase::key_compare_;
 	};
-
-#ifdef RBTREE_DEBUG
-	template<typename >
-	friend class ::RBTreeTest;
-#endif
 
 protected:
 	BasePtr Header() noexcept {
@@ -750,9 +754,9 @@ public:
 	using const_reverse_iterator = TinySTL::reverse_iterator<const_iterator>;
 
 	Compare key_comp() const noexcept {
-		return Compare();
+		return impl_.key_compare_;
 	}
-
+  
 	iterator begin() noexcept {
 		return iterator(impl_.header.left);
 	}
@@ -820,16 +824,16 @@ public:
 	RBTree() = default;
 	
 	~RBTree(){
-		if(!Root())
+		if(Root())
 			Erase(static_cast<LinkType>(Root()));
 	}
 
-	RBTree(RBTree const& rhs) noexcept
-	{
-		Copy(rhs);
+	RBTree(RBTree const& rhs) {
+		PlainAlloc policy(*this);
+		Copy(rhs, policy);
 	}
 	
-	RBTree(RBTree&& rhs)
+	RBTree(RBTree&& rhs) noexcept
 		: impl_(TinySTL::move(rhs.impl_))
 	{
 		rhs.Header()->Reset;
@@ -861,46 +865,139 @@ public:
 	///////////////////////////////
 	////////INSERT_MODULE//////////
 	///////////////////////////////
-	/*
+	/**
 	 * @brief Insert new node whose value is given value
-	 * @param val : given value
+	 * @param arg given value
 	 * @return a pair value, 
 	 * the first value is iterator indicate inserted location
 	 * and the second value is a boolean if insert successfully
 	 */
-	template<typename VT>
-	pair<iterator, bool> InsertUnique(VT&& val)
-	{ return EmplaceUnique(STL_FORWARD(VT, val)); }
+	template<typename Arg>
+	pair<iterator, bool> InsertUnique(Arg&& arg) {
+    auto res = GetInsertUniquePos(GetKey()(arg));
+    
+    if (res.second == nullptr) {
+      return TinySTL::make_pair(iterator(res.first), false);
+    }
 
-	template<typename VT>
-	iterator InsertEqual(VT&& val)
-	{ return EmplaceEqual(STL_FORWARD(VT, val)); }
-	
+    return TinySTL::make_pair(
+        InsertAux(STL_FORWARD(Arg, arg), res.first, res.second),
+        true);
+  }
+
+	template<typename Arg>
+	iterator InsertEqual(Arg&& arg) {
+    auto res = GetInsertUniquePos(GetKey()(arg));
+    return InsertAux(STL_FORWARD(Arg, arg), res.first, res.second);
+  }
+
+	template<
+	typename II, 
+	typename = Enable_if_t<is_input_iterator<II>::value>>
+	void InsertUnique(II first, II last) {
+		for (; first != last; ++first) {
+			InsertUnique(*first);
+		}
+	}	
+
+	template<
+	typename II, 
+	typename = Enable_if_t<is_input_iterator<II>::value>>
+	void InsertEqual(II first, II last) {
+		for (; first != last; ++first) {
+			InsertEqual(*first);
+		}
+	}	
+
 	template<typename ...Args>
 	pair<iterator, bool> EmplaceUnique(Args&&... args) {
-		return InsertUniqueNoAlloc(CreateNode(STL_FORWARD(Args, args)...));
-	}
+    auto new_node = CreateNode(STL_FORWARD(Args, args)...);
+    
+    STL_TRY { 
+      auto res = GetInsertUniquePos(_Key(new_node));
+      assert(res.first == nullptr);
+      if (res.second) {
+        return make_pair(EmplaceAux(new_node, res.first, res.second), true);
+      } else {
+        DropNode(new_node);
+        return make_pair(iterator(res.first), false);
+      }
+    } CATCH_ALL {
+      DropNode(new_node); 
+      RETHROW
+    }
+  }
 
 	template<typename ...Args>
 	iterator EmplaceEqual(Args&&... args) {
-		return InsertEqualNoAlloc(CreateNode(STL_FORWARD(Args, args)...));
+    auto new_node = CreateNode(STL_FORWARD(Args, args)...);
+
+    STL_TRY {
+      auto res = GetInsertUniquePos(_Key(new_node));
+      assert(res.first == nullptr);
+    
+      return EmplaceAux(new_node, res.first, res.second); 
+    } CATCH_ALL {
+      DropNode(new_node);
+      RETHROW
+    }
 	}
-	
-	template<typename Arg>
-	pair<iterator, bool> InsertHintUnique(const_iterator pos, Arg&& arg)
-	{ return EmplaceUnique(pos, STL_FORWARD(Arg, arg)); }
 
 	template<typename Arg>
-	iterator InsertHintEqual(const_iterator pos, Arg&& arg)
-	{ return EmplaceEqual(pos, STL_FORWARD(Arg, arg)); }
+	pair<iterator, bool> InsertHintUnique(const_iterator pos, Arg&& arg) {
+    auto res = GetInsertUniqueHintPos(pos, GetKey()(arg));
+  
+    if (res.second == nullptr) {
+      return make_pair(iterator(res.first), false);
+    } 
+
+    return make_pair(
+        InsertAux(STL_FORWARD(Arg, arg), res.first, res.second),
+        true);
+  }
+  
+	template<typename Arg>
+	iterator InsertHintEqual(const_iterator pos, Arg&& arg) {
+    auto res = GetInsertEqualHintPos(pos, GetKey()(arg));
+
+    return InsertAux(STL_FORWARD(Arg, arg), res.first, res.second);
+  }
 
 	template<typename ...Args>
-	pair<iterator, bool> EmplaceHintUnique(const_iterator pos,
-											Args&&... args);
+	pair<iterator, bool> EmplaceHintUnique(
+		const_iterator pos,
+		Args&&... args) {
+    auto new_node = CreateNode(STL_FORWARD(Args, args)...);
+    auto res = GetInsertUniqueHintPos(pos, _key(new_node));
+
+    if (res.second == nullptr) {
+      return make_pair(res.first, false);
+    }
+  
+    STL_TRY {
+      return make_pair(
+          EmplaceAux(new_node, res.first, res.second),
+          true);
+    } CATCH_ALL {
+      DropNode(new_node);
+      RETHROW
+    }
+  }
 
 	template<typename ...Args>
-	iterator EmplaceHintEqual(const_iterator pos,
-							Args&&... args);
+	iterator EmplaceHintEqual(
+		const_iterator pos,
+		Args&&... args) {
+    auto new_node = CreateNode(STL_FORWARD(Args, args)...);
+    auto res = GetInsertEqualHintPos(pos, _Key(new_node));
+    
+    STL_TRY {
+      return InsertAux(new_node, res.first, res.second);
+    } CATCH_ALL {
+      DropNode(new_node);
+      RETHROW
+    }
+  }
 
 	//////////////////////////////
 	/////////ERASE MODULE/////////
@@ -910,11 +1007,11 @@ public:
 		assert(pos != end());
 
 #ifdef RBTREE_DEBUG
-		printf("erase node: %d\n", *pos);
-		Print();
+		//printf("erase node: %d\n", *pos);
+		//Print();
 		TEST_RB_PROPERTY((*this));
 #endif
-		auto next = Next_Iter(pos).ConstCast();
+		auto next = NextIter(pos).ConstCast();
 		EraseAux(pos);
 		return next;
 	}
@@ -944,20 +1041,18 @@ public:
 	///////////////////////////////
 	/////////LOOPUP MODULE/////////
 	///////////////////////////////
-	/*
+	/**
 	 * @brief find given key if in RBTree
 	 * @exception Compare object may throw
 	 * @return not found return end() otherwise return iterator which indicate key location
 	 */
-
-	// FIXME: find and some algorithm have logic problem
 	const_iterator find(Key const& key) const{
 		auto y = Header(); //last node which is not less than key
 		auto x = Root(); //current node
 
 		while(x){
 			//x >= key
-			if(!key_comp()(_Key(x), key)){
+			if(!impl_.key_compare_(_Key(x), key)) {
 				y = x;
 				x = x->left;
 			}
@@ -965,7 +1060,7 @@ public:
 		}
 
 		const_iterator j(y);
-		return (j == end() || key_comp()(key, _Key(y))) ?
+		return (j == end() || impl_.key_compare_(key, _Key(y))) ?
 				end() : j;
 	}
 
@@ -974,7 +1069,7 @@ public:
 		auto x = Root();
 
 		while(x){
-			if(!key_comp()(_Key(x), key)){
+			if(!impl_.key_compare_(_Key(x), key)){
 				y = x;
 				x = x->left;
 			}
@@ -982,18 +1077,19 @@ public:
 		}
 
 		iterator j(y);
-		return (j = end() || key_comp()(key, _Key(y))) ?
+		return (j == end() || impl_.key_compare_(key, _Key(y))) ?
 				end() : j;
+
 	}
 	
-	/*
+	/**
 	 * @brief wrap find, just predicate if contains given key
 	 */
 	bool contains(Key const& k) const {
 		return find(k) != end();
 	}
 	
-	/*
+	/**
 	 * @brief acquire an iterator pointing to the first element
 	 * that is greater than key
 	 */
@@ -1017,7 +1113,7 @@ public:
 		auto x = Root();
 
 		while(x){
-			if(key_comp()(key, _Key(x))){
+			if(impl_.key_compare_(key, _Key(x))){
 				y = x;
 				x = x->right;
 			}
@@ -1027,8 +1123,8 @@ public:
 		return y;
 	}
 	
-	/*
-	 * @breif return an iterator pointing to the first 
+	/**
+	 * @brief return an iterator pointing to the first 
 	 * element that is not less than given key
 	 */
 	iterator lower_bound(Key const& key){
@@ -1036,7 +1132,7 @@ public:
 		auto x = Root();
 
 		while(x){
-			if(key_comp()(_Key(x), key)){
+			if(impl_.key_compare_(_Key(x), key)){
 				y = x;
 				x = x->left;
 			}
@@ -1051,7 +1147,7 @@ public:
 		auto x = Root();
 
 		while(x){
-			if(key_comp()(_Key(x), key)){
+			if(impl_.key_compare_(_Key(x), key)){
 				y = x;
 				x = x->left;
 			}
@@ -1061,19 +1157,19 @@ public:
 		return y;
 	}
 
-	/*
+	/**
 	 * @brief return a range containing all elements
 	 * with the given key in the container
 	 */
 	pair<iterator, iterator> equal_range(Key const& key){
-		return make_pair(lower_bound(), upper_bound());
+		return make_pair(lower_bound(key), upper_bound(key));
 	}
 
 	pair<const_iterator, const_iterator> equal_range(Key const& key) const {
-		return make_pair(lower_bound(), upper_bound());
+		return make_pair(lower_bound(key), upper_bound(key));
 	}
 
-	/*
+	/**
 	 * @brief the number of elements with key
 	 */
 	size_type count(Key const& key) const {
@@ -1081,28 +1177,73 @@ public:
 		return distance(range.first, range.second);
 	}
 
+#ifdef RBTREE_DEBUG
+	/**
+	 * @brief print RBTree as a directory tree
+	 */
+	void Print(std::ostream& os = std::cout) const;
+
+	/**
+	 * @brief verify RBTree if requires red-black property
+	 * @return a pair, the first value is a boolean indicate if requred, and the second indicate violated details
+	 */
+	pair<bool, const char*> IsRequired() const;
+#endif
 
 private:
 	///////////////////
 	/////INSERT_AUX////
 	///////////////////
-	/*
-	 * @brief relink new_node and parent
-	 * @param cur indicate right if null
-	 * @return new_node position
-	 */
-	iterator InsertAux(LinkType new_node, BasePtr cur, BasePtr p){
+   template<typename Arg, typename = TinySTL::Enable_if_t<
+	 	Is_convertible<Arg, value_type>::value>>
+	//template<typename Arg>
+	iterator InsertAux(Arg&& arg, BasePtr cur, BasePtr p) {
+    auto new_node = CreateNode(STL_FORWARD(Arg, arg));
+
+    STL_TRY {
+      EmplaceAux(new_node, cur, p);
+    } CATCH_ALL {
+      DropNode(new_node);
+      RETHROW
+    }
+
+    return new_node;
+	}
+
+  iterator EmplaceAux(LinkType new_node, BasePtr cur, BasePtr p) {
+		// insert_left used for RBTreeInsertAndFixup() to reset link
+		//
+    // If cur is not nullptr, we can think caller insert into left
+    // !This property can be used for GetInsertXXXPos() to reduce the 
+		// overhead of one compare 
+		//
+		// if cur is nullptr, and it is not header, we should use key_comp()
+		// to determine if insert into left or right
+
+		assert(new_node);
 		bool insert_left = cur || p == Header() ||
-				key_comp()(_Key(new_node), _Key(p));
-		
+				impl_.key_compare_(_Key(new_node), _Key(p));
+     
 		RBTreeInsertAndFixup(insert_left, new_node, p, Header());
 		++impl_.node_count;
 
 		return new_node;
-	}
-	
-	pair<iterator, bool> InsertUniqueNoAlloc(LinkType new_node) noexcept;
-	iterator InsertEqualNoAlloc(LinkType new_node) noexcept;
+  }
+
+  // The reason why I Set GetXXXPos() interface is that
+  // when we pass constructed value to insert(), we can determine if
+  // construct a new node in tree.
+  // But for emplace(), we can't do it, because we don't know it's key from the
+  // parameters that are used for constructing value
+  pair<BasePtr, BasePtr> GetInsertUniquePos(key_type const& key);
+  pair<BasePtr, BasePtr> GetInsertEqualPos(key_type const& key);
+  pair<BasePtr, BasePtr> GetInsertUniqueHintPos(
+      const_iterator pos, 
+      key_type const& key);
+
+  pair<BasePtr, BasePtr> GetInsertEqualHintPos(
+      const_iterator pos,
+      key_type const& key);
 
 	////////////////
 	/////COPY///////
@@ -1112,23 +1253,25 @@ private:
 
 	template<typename Policy>
 	void Copy(RBTree const& rb, Policy& policy){
-		if(!rb.Root()) return ;
+		if(rb.Root()) {
+      Root() = Copy(
+          static_cast<LinkType>(const_cast<BasePtr>(rb.Root())),
+          Header(),
+          policy);
 
-		Root() = Copy(static_cast<LinkType>(const_cast<BasePtr>(rb.Root())), Header(), policy);
-		LeftMost() = Minimum(Root());
-		RightMost() = Maximum(Root());
-		impl_.node_count = rb.impl_.node_count;
-	}
-
-	void Copy(RBTree const& rb){
-		PlainAlloc policy(*this);
-		Copy(rb, policy);
+      LeftMost() = Minimum(Root());
+      RightMost() = Maximum(Root());
+      impl_.node_count = rb.impl_.node_count;
+    } else {
+      clear();
+      impl_.Reset(); 
+    }
 	}
 
 	////////////////////
 	//////ERASE AUX/////
 	////////////////////
-	/*
+	/**
 	 * @brief erase all node from root top-down
 	 * @complexity O(h^2) = O((lgn)^2)
 	 */
@@ -1138,23 +1281,10 @@ private:
 	/////////////////////
 	/////DEBUG HELPER////
 	/////////////////////
-#ifdef RBTREE_DEBUG
-	/*
-	 * @brief verify RBTree if requires red-black property
-	 * @return a pair, the first value is a boolean indicate if requred, and the second indicate violated details
-	 */
-	pair<bool, const char*> IsRequired() const;
-	
+#ifdef RBTREE_DEBUG	
 	void PrintRoot(ConstLinkType root,  std::ostream& os) const;
 	void PrintSubTree(ConstLinkType root, std::ostream& os, std::string const& prefix = "") const;
-	/*
-	 * @brief print RBTree as a directory tree
-	 */
-	void Print(std::ostream& os = std::cout) const;
-	
 #endif
-
-
 	friend inline bool operator==(RBTree const& lhs, RBTree const& rhs) noexcept {
 		return lhs.size() == rhs.size()
 			&& TinySTL::equal(lhs.begin(), lhs.end(), rhs.begin());
@@ -1184,164 +1314,219 @@ protected:
 	RBTreeImpl impl_;
 };
 
+
+/******* implemetation ********/
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
 inline void swap(RBTree<K, V, GK, CP, Alloc> const& lhs, RBTree<K, V, GK, CP, Alloc> const& rhs) noexcept {
 	return lhs.swap(rhs);
 }
 
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
-pair<typename RBTree<K, V, GK, CP, Alloc>::iterator, bool>
-RBTree<K, V, GK, CP, Alloc>::InsertUniqueNoAlloc(LinkType new_node) noexcept {
+auto RBTree<K, V, GK, CP, Alloc>::GetInsertUniquePos(key_type const& key) 
+-> pair<BasePtr, BasePtr> {
+	// use y as a trailing pointer to track the new_node
 	auto y = Header();
 	auto x = Root();
-	
-	bool cmp_res = false;
+
+	// indicate new_node will insert into left or right
+	// that is, position of "hole"	
+	bool cmp_res = true;
 	while(x){
 		y = x;
-		cmp_res = key_comp()(_Key(new_node), _Key(x));
+		cmp_res = impl_.key_compare_(key, _Key(x));
 		x = cmp_res ? x->left : x->right;
 	}
 
-	iterator pre(y);
+	// if cmp_res is false, is is just a y
+	// otherwise it is predecessor of y when y is not leftmost node
+	iterator pre(y); 
 
-	//Predecessor(p) < val < p.val
-	//if key_comp(pre.val, val) is false indicates that exists a value = val
-	//becase predecessor is just less than p.val
-	//only pre.val < val prove val is unique
-	//that is, there is a "hole" in the sorted sequence
-	if(cmp_res){
+	// if cmp_res is true,  <1>
+	// there two cases:
+	// 1) left is hole
+	// we must compare new_node with predecessor of y
+	// because it in right subtree of seccessor, i.e., less than or equal it.
+	// But, if y is leftmost node, it is no need to compare and just insert.
+  //
+	// 2) y is header
+	// just insert root to its left and reset leftmost and rightmost
+	//
+	// Why that must be a unique key?
+	// suppose cmp_res is true and not case2,
+	// then we have a inequality: Predecessor(p) <= val < p.val,
+	// if not val >= predecessor(p), we can't get val < p.val(proof by contradiction)
+	// if key_comp(pre.val, val) is false indicates that exists a value = val,
+	// Therefore, pre.val < val can prove val is unique,
+	// that is, there is a unique "hole" in the sorted sequence.
+  typedef TinySTL::pair<BasePtr, BasePtr> Res;
+
+	if(cmp_res){ // <1>
+		// there are two cases:
+		// 1) y is header(only when tree is empty)
+		// 2) y is real leftmost
+		// but can return the same result
+		// @see comments of EmplaceAux()
 		if(y == LeftMost())
-			return make_pair(InsertAux(new_node, x, y), true);
+			return Res{ x, y };
 		else
 			--pre;
 	}
 
-	if(key_comp()(_Key(pre.node_), _Key(new_node)))
-		return make_pair(InsertAux(new_node, x, y), true);
-	else {
-		DropNode(new_node);
-		return make_pair(pre, false);
-	}
+	assert(!x);
+
+	// if cmp_res is false and pre is header(i.e. end())
+	// we should exclude it, and also insert it, beacuse it have not key field
+	if (impl_.key_compare_(_Key(pre.node_), key)) { // <2>
+    // @note 
+    // we don't reset root here, just forward RBTreeInsertAndFixup()
+    // it will use the y to determine whether reset root
+		return Res{ cmp_res ? y : x, y };
+  }
+
+	// return nullptr
+	//  -- for insert, don't create new node
+	//  -- for emplace, drop created node
+	return Res{ pre.node_, nullptr };
 
 }
 
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
-typename RBTree<K, V, GK, CP, Alloc>::iterator
-RBTree<K, V, GK, CP, Alloc>::InsertEqualNoAlloc(LinkType new_node) noexcept {
+auto RBTree<K, V, GK, CP, Alloc>::GetInsertEqualPos(key_type const& key)
+-> pair<BasePtr, BasePtr> {
 	auto y = Header();
 	auto x = Root();
 
 	while(x){
 		y = x;
-		x = key_comp()(_Key(new_node), _Key(x)) ? x->left : x->right;
+		x = impl_.key_compare_(key, _Key(x)) ? x->left : x->right;
 	}
 
-	return InsertAux(new_node, x, y);
+	return make_pair(x, y);
 }
 
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
-template<typename ...Args>
-pair<typename RBTree<K, V, GK, CP, Alloc>::iterator, bool>
-RBTree<K, V, GK, CP, Alloc>::EmplaceHintUnique(const_iterator pos_,
-												Args&&... args)	{
+auto RBTree<K, V, GK, CP, Alloc>::GetInsertUniqueHintPos(
+	const_iterator pos_,
+  key_type const& key)
+-> pair<BasePtr, BasePtr> {
 	auto pos = pos_.ConstCast();
-	auto new_node = CreateNode(STL_FORWARD(Args, args)...);
+  
+  typedef TinySTL::pair<BasePtr, BasePtr> Res;
 
-	STL_TRY{
-		if(pos == end()) {
-			if(size() > 0 
-					&& key_comp()(_Key(new_node), _Key(RightMost())))
-				return InsertAux(new_node, nullptr, RightMost());
-			else
-				return InsertUniqueNoAlloc(new_node);
+	// FIXME make a end_iterator to insert sorted element may be useful
+	if(pos == end()) {
+		// >= rightmost
+		if(size() > 0 &&
+			impl_.key_compare_(_Key(RightMost()), key)) {
+			return Res{ nullptr, RightMost() };
+		} else {
+			return GetInsertUniquePos(key);
 		}
-		else if (key_comp()(_Key(new_node), GK()(*pos))) {
-			//first find before
-			auto before = pos;
-			if(pos == begin())
-				return InsertAux(new_node, LeftMost(), LeftMost());
-			else if(key_comp()(GK()(*(--before))), _Key(new_node)) {
-				//pos pointing left subtree's rightmost or least ancestor whose right child is also ancestor
-				if(before->right == nullptr)
-					return InsertAux(new_node, nullptr, before.node_);
-				else
-					return InsertAux(new_node, pos.node_, pos.node_);
-			}else
-				return InsertUniqueNoAlloc(new_node);
-		}else if (key_comp()(GK()(*pos), _Key(new_node))) {
-			//first find after
-			auto after = pos;
-			if(pos.node_ == RightMost())
-				return InsertAux(new_node, RightMost(), RightMost());
-			else if(key_comp()(_Key(new_node), GK()(*(++after)))) {
-				if(after->right == nullptr)
-					return InsertAux(new_node, nullptr, pos.node_);
-				else
-					return InsertAux(new_node, after.node_, after.node_);
-			}else
-				return InsertUniqueNoAlloc(new_node);
-		}else //key equal pos
-			return make_pair(pos, false);
+	} else if (impl_.key_compare_(key, GK()(*pos))) {
+    // compare with predesessor of pos,
+    // if pre(pos) < key < pos, there a empty hole, to fill it.
+    // if pos is begin()(pre(pos) must be not exists), just insert into left of leftmost to be new begin()
+		auto before = pos;
+		if(pos == begin()) {
+			return Res{ LeftMost(), LeftMost() };
+		} else if(impl_.key_compare_(GK()(*(--before)), key)) {
+			// rightmost in left subtree
+			if(before.node_->right == nullptr) {
+				// insert into right hole of the rightmost
+				return Res{ nullptr, before.node_ };
+			}
+			// the least ancestor whose right child is also an ancestor
+			// insert into left of pos, it must be null
+			else {
+				return Res{ pos.node_, pos.node_ };
+			}
+		} else {
+			return GetInsertUniquePos(key);
+		}
+	// symmetic case
+	} else if (impl_.key_compare_(GK()(*pos), key)) {
+		auto after = pos;
+		if(pos.node_ == RightMost()) {
+			return Res{ nullptr, RightMost() };
+		}
+		else if(impl_.key_compare_(key, GK()(*(++after)))) {
+			// after is leftmost of right subtree
+			if(after.node_->left == nullptr) {
+				return Res{ after.node_, after.node_ };
+			} else {
+				// predecessor is an ancestor
+				// insert right hole of pos, it must be null
+				return Res{ nullptr, pos.node_ };
+			}
+		}else {
+			return GetInsertUniquePos(key);
+		}
+	} else {
+		// key equal pos
+    // second is nullptr indicate there are have equal key element in tree
+		return Res{ pos.node_, nullptr };
 	}
-	CATCH_ALL_UNWIND(DropNode(new_node))
 }
 
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
-template<typename ...Args>
-typename RBTree<K, V, GK, CP, Alloc>::iterator
-RBTree<K, V, GK, CP, Alloc>::EmplaceHintEqual(const_iterator pos_, Args&&... args) {
+auto RBTree<K, V, GK, CP, Alloc>::GetInsertEqualHintPos(
+	const_iterator pos_, 
+	key_type const& key) 
+-> pair<BasePtr, BasePtr> {
 	auto pos = pos_.ConstCast();
-	auto new_node = CreateNode(STL_FORWARD(Args, args)...);
 
-	STL_TRY{
-		if(pos == end()) {
-			if(size() > 0
-					&& !key_comp()(_Key(new_node), _Key(RightMost())))
-				return InsertAux(new_node, nullptr, RightMost());
-			else
-				return InsertEqualNoAlloc(new_node);
-		}
-		else if (!key_comp()(GK()(*pos), _Key(new_node))) {
-			auto before = pos;
-			
-			if(before == begin())
-				return InsertAux(new_node, LeftMost(), LeftMost());
-			else if(!key_comp()(_Key(new_node), GK()(*(--before)))) {
-				if(before->right == nullptr)
-					return InsertAux(new_node, nullptr, before.node_);
-				else
-					return InsertAux(new_node, pos.node_, pos.node_);
-			}else
-				return InsertEqualNoAlloc(new_node);
-		}
-		else if (!key_comp()(_key(new_node), GK()(*pos))) {
-			auto after = pos;
-
-			if(after.node_ == RightMost())
-				return InsertAux(new_node, RightMost(), RightMost());
-			else if(!key_comp()(GK()(*(++after)), _key(new_node))) {
-				if(after->right == nullptr)
-					return InsertAux(new_node, nullptr, pos.node_);
-				else
-					return InsertAux(new_node, after.node_, after.node_);
-			}else
-				return nullptr;
-		}
+	typedef TinySTL::pair<BasePtr, BasePtr> Res;
+  
+  // the same logic as GetInsertEqualHintPos(),
+  // but it allow same key value and no need to return nullptr to indicate failure
+	if(pos == end()) {
+		if(size() > 0
+				&& !impl_.key_compare_(key, _Key(RightMost())))
+			return Res{ nullptr, RightMost() };
+		else
+			return GetInsertEqualPos(key);
 	}
-	CATCH_ALL_UNWIND(DropNode(new_node))
+  // key <= pos
+	else if (!impl_.key_compare_(GK()(*pos), key)) {
+		auto before = pos;
+		
+		if(before == begin())
+			return Res{ LeftMost(), LeftMost() };
+		else if(!impl_.key_compare_(key, GK()(*(--before)))) {
+			if(before.node_->right == nullptr)
+				return Res{ nullptr, before.node_ };
+			else
+				return Res{ pos.node_, pos.node_ };
+		}else
+			return GetInsertEqualPos(key);
+	}
+  // key >= pos
+	else if (!impl_.key_compare_(key, GK()(*pos))) {
+		auto after = pos;
+
+		if(after.node_ == RightMost())
+      return Res{ nullptr, RightMost() };
+		else if(!impl_.key_compare_(GK()(*(++after)), key)) {
+			if(after.node_->left == nullptr)
+        return Res{ after.node_, after.node_ };
+			else
+        return Res{ nullptr, pos.node_ };
+		}else
+      return GetInsertEqualPos(key);
+	}
 }
 
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
 void RBTree<K, V, GK, CP, Alloc>::EraseAux(const_iterator pos) noexcept {
-	auto node = static_cast<LinkType>(RBTreeEraseAndFixup(const_cast<BasePtr>(pos.node_),
-															 Root(), LeftMost(), RightMost()));
+	auto node = static_cast<LinkType>(
+      RBTreeEraseAndFixup(const_cast<BasePtr>(pos.node_),
+													Root(), LeftMost(), RightMost()));
 
 	DropNode(node);
 	--impl_.node_count;
 }
 
 #ifdef RBTREE_DEBUG
-
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
 pair<bool, const char*> RBTree<K, V, GK, CP, Alloc>::IsRequired() const {
 	if(size() == 0)
@@ -1381,7 +1566,7 @@ pair<bool, const char*> RBTree<K, V, GK, CP, Alloc>::IsRequired() const {
 	if(RightMost() != Maximum(Root()))
 		return make_pair(false, "right most isn't maximum");
 	if(LeftMost() != Minimum(Root()))
-		return make_pair(false, "left most isn't mimumum");
+		return make_pair(false, "left most isn't minimum");
 
 	return make_pair(true, "");
 }
@@ -1430,43 +1615,46 @@ void RBTree<K, V, GK, CP, Alloc>::Print(std::ostream& os) const {
     PrintSubTree(root, os);
 }
 
-#endif //RBTREE_DEBUG
+#endif
 
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
 template<typename Policy>
 typename RBTree<K, V, GK, CP, Alloc>::LinkType
 RBTree<K, V, GK, CP, Alloc>::Copy(LinkType x, BasePtr p, Policy& policy){
-	auto top = CloneNode(Value(x), policy);
-	top->parent = p;
+  auto top = CloneNode(Value(x), policy);
+  top->parent = p;
 
-	STL_TRY{
-		//because rbtree is also a binary tree, so copy one direction in recursion
-		//just handle one direction
-		if(x->right)
-			top->right = Copy(Right(x), top, policy);
-		p = top;
-		x = Left(x);
-		
-		while(x){
-			auto y = CloneNode(Value(x), policy);
-			p->left = y;
-			y->parent = p;
+  STL_TRY{
+    //because rbtree is also a binary tree, so copy one direction in recursion
+    //just handle one direction
+    if(x->right)
+      top->right = Copy(Right(x), top, policy);
+    p = top;
+    x = Left(x);
+    
+    // x  
+    while(x){
+      auto y = CloneNode(Value(x), policy);
+      p->left = y;
+      y->parent = p;
 
-			if(x->right)
-				y->right = Copy(Right(x), y, policy);
-			p = y;
-			x = Left(x);
-		}
-	}
-	CATCH_ALL_UNWIND(erase(top));
+      if(x->right)
+        y->right = Copy(Right(x), y, policy);
+      p = y;
+      x = Left(x);
+    }
+  } CATCH_ALL {
+    erase(top);
+  }
 
-	return top;
+  return top;
 }
 
 template<typename K, typename V, typename GK, typename CP, typename Alloc>
 void RBTree<K, V, GK, CP, Alloc>::Erase(LinkType root) noexcept {
 	//no rebalance
 	while(root){
+    // erase right subtree on the left child line
 		Erase(Right(root));
 		auto y = Left(root);
 		DropNode(root);
