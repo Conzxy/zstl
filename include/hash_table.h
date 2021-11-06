@@ -1,272 +1,601 @@
-#ifndef _HASH_TABLE_H
-#define _HASH_TABLE_H
+#ifndef TINYSTL_HASH_TABLE_H
+#define TINYSTL_HASH_TABLE_H
 
-#define TEMPLATE_HASHTABLE(Type) \
-template<typename V,typename K,typename H,typename GK,typename EK,typename Alloc> \
-Type HashTable<V,K,H,GK,EK,Alloc>::\
+#include "stl_exception.h"
+#include "config.h"
+#include "allocator.h"
+#include "user_allocator.h"
+#include "vector.h"
+#include "hash_aux.h"
 
-#define HASH_ITERATOR \
-typename HashTable<V,K,H,GK,EK,Alloc>::iterator \
+#ifdef HASH_DEBUG
+#include <iostream>
+#endif 
 
-#define HASH_CONST_ITERATOR \
-typename HashTable<V,K,H,GK,EK,Alloc>::const_iterator \
+namespace TinySTL {
 
-#define HASHTABLE HashTable<V,K,H,GK,EK,A>
+/**
+ * @class HashTable
+ * @tparam V value type
+ * @tparam K key type
+ * @tparam H hash function which convertion key to natural number
+ * @tparam GK method which get key from value
+ * @tparam EK method which compares two key whether them is equivalent
+ * @tparam Alloc Allocator type(default is TinySTL::allocator)
+ * @brief 
+ * Implementation of hash table.
+ * Its average time complexity of search is O(1)
+ * @see <<Introdunction To Algorithms>> 11.2
+ */
+template<
+typename V,typename K,typename H,typename GK,typename EK,
+typename Alloc=TinySTL::allocator<V>>
+class HashTable;
 
-#include <stl_exception.h>
-#include <config.h>
-#include <allocator.h>
-#include <user_allocator.h>
-#include <vector.h>
-#include <hash_fun.h>
+/**
+ * @struct HashNode
+ * @tparam T value type of hashtable
+ * @brief node of linked list which used in chaining hashtable
+ */
+template<typename T>
+struct HashNode {
+    T val;
+    struct HashNode* next;
 
-namespace TinySTL{
-    //fwd 
-    //以便iterator关联hash table
-    template<typename V,typename K,typename H,typename GK,typename EK,
-        typename Alloc=STL_ alloc>
-    class HashTable;
+    explicit HashNode(T const& v, struct HashNode* n = nullptr)
+        : val{ v }
+        , next{ n }
+    { }
 
-    template<typename T>
-    struct HashNode{
-        T val_;
-        struct HashNode* next_;
+    explicit HashNode(T&& v, struct HashNode* n = nullptr)
+        : val{ STL_MOVE(v) }
+        , next{ n }
+    { }  
+};
 
-        explicit HashNode(const T& val,HashNode* next=nullptr)
-            : val_{val},next_{next}{}
+/**
+ * @class HashConstIterator
+ * @tparam V value type
+ * @tparam K key type
+ * @tparam H hash function which convertion key to natural number
+ * @tparam GK method which get key from value
+ * @tparam EK method which compares two key whether them is equivalent
+ * @tparam Alloc Allocator type(default is TinySTL::allocator)
+ * @brief
+ * Used for iterating hashtable
+ */
+template<
+typename V, typename K, typename H, typename GK, typename EK,
+typename Alloc>
+class HashConstIterator{
+public:
+    using value_type      = V;
+    using reference       = V const &;
+    using pointer         = V const *;
+    using difference_type = std::ptrdiff_t;
+    using size_type       = std::size_t;
+    using iterator        = HashConstIterator<V, K, H, GK, EK, Alloc>;
+    using const_iterator  = HashConstIterator<V, K, H, GK, EK, Alloc>;
+    using self            = HashConstIterator;
+    using node            = HashNode<V>;
+    using hash_table      = HashTable<V, K, H, GK, EK, Alloc>;
 
-        explicit HashNode(T&& val=T{},HashNode* next=nullptr)
-            : val_{STL_MOVE(val)},next_{next}{}
-    };
+    HashConstIterator(node *cur, hash_table const &ht)
+        : cur_{ cur }
+        , ht_{ ht }
+    { }
 
-    template<typename V,typename K,typename H,typename GK,typename EK,typename Alloc>
-    class HashConstIterator{
-    public:
-        using value_type                =V;
-        using reference                 =V const&;
-        using pointer                   =V const*;
-        using difference_type           =STD_ ptrdiff_t;
-        using size_type                 =STD_ size_t;
+    reference operator*() const TINYSTL_NOEXCEPT 
+    { return cur_->val; }
+    pointer   operator->() const TINYSTL_NOEXCEPT
+    { return cur_; }
 
-        using iterator                  =HashConstIterator<V,K,H,GK,EK,Alloc>;
-        using const_iterator            =HashConstIterator<V,K,H,GK,EK,Alloc>;
-        using self                      =HashConstIterator;
+    self& operator++() {
+        const auto old_node = cur_;
+        cur_ = cur_->next;
 
-        using node              =HashNode<V>;
-        using hash_table        =HashTable<V,K,H,GK,EK,Alloc>;
+        if (!cur_) {
+            auto hash_val = ht_.hashVal(old_node->val) + 1;
 
-        HashConstIterator(node* cur,hash_table const& ht) : cur_{cur},ht_{ht}{}
-
-        reference operator*() const { return cur_->val_; }
-        pointer   operator->() const {return cur_; }
-        self& operator++() {
-            node const* old_node=cur_;
-            cur_=cur_->next_;
-            if(!cur_){
-                size_t now_num=ht_.hash_val(old_node->val_);
-                while(!cur_ && ++now_num < ht_.table_size())
-                    cur_=ht_.table_[now_num];
+            for (; hash_val < ht_.tableSize(); ++hash_val) {
+                cur_ = ht_.table()[hash_val]->next;
+                if (cur_)
+                    break;
             }
-            return *this;
         }
+        return *this;
+    }
 
-        self operator++(int) {
-            auto tmp=*this;
-            ++*this;
-            return tmp;
+    self operator++(int) {
+        auto tmp=*this;
+        ++*this;
+        return tmp;
+    }
+
+    friend bool operator==(HashConstIterator const& lhs,HashConstIterator const& rhs){
+        return (lhs.cur_ == rhs.cur_) ;//&& (lhs.ht_ == rhs.ht_);
+    }
+
+    friend bool operator!=(HashConstIterator const& lhs,HashConstIterator const& rhs){
+        return !(lhs == rhs);
+    }
+
+protected:
+    node* cur_;
+    hash_table const& ht_;
+
+    friend class HashTable<V,K,H,GK,EK,Alloc>;
+};
+
+/**
+ * @class HashIterator
+ * @inheritby HashConstIterator
+ * @tparam V value type
+ * @tparam K key type
+ * @tparam H hash function which convertion key to natural number
+ * @tparam GK method which get key from value
+ * @tparam EK method which compares two key whether them is equivalent
+ * @tparam Alloc Allocator type(default is TinySTL::allocator)
+ */
+template <
+typename V, typename K, typename H, typename GK, typename EK, 
+typename Alloc>
+class HashIterator : public HashConstIterator<V, K, H, GK, EK, Alloc>
+{
+public:
+    using iterator          = HashIterator<V,K,H,GK,EK,Alloc>;
+    using const_iterator    = HashIterator<V,K,H,GK,EK,Alloc>;
+    using self              = HashIterator;
+
+    using reference         = V&;
+    using pointer           = V*;
+
+    using base              = HashConstIterator<V,K,H,GK,EK,Alloc>;
+    using node              = typename base::node;
+    using hash_table        = typename base::hash_table;
+
+    HashIterator(node *cur, hash_table const &ht)
+        : base::HashConstIterator(cur, ht)
+    { }
+
+    reference operator*() const TINYSTL_NOEXCEPT 
+    { return cur_->val; }
+    pointer   operator->() const TINYSTL_NOEXCEPT
+    { return cur_; }
+
+    self& operator++() {
+        const auto old_node = cur_;
+        cur_ = cur_->next;
+
+        if (!cur_) {
+            auto hash_val = ht_.hashVal(old_node->val) + 1;
+
+            for (; hash_val < ht_.tableSize(); ++hash_val) {
+                cur_ = ht_.table()[hash_val]->next;
+                if (cur_)
+                    break;
+            }
         }
+        return *this;
+    }
 
-        friend bool operator==(HashConstIterator const& lhs,HashConstIterator const& rhs){
-            return (lhs.cur_ == rhs.cur_) ;//&& (lhs.ht_ == rhs.ht_);
-        }
+    self operator++(int) {
+        auto tmp=*this;
+        ++*this;
+        return tmp;
+    }
 
-        friend bool operator!=(HashConstIterator const& lhs,HashConstIterator const& rhs){
-            return !(lhs == rhs);
-        }
+    friend class HashTable<V,K,H,GK,EK,Alloc>;
 
-        friend bool operator==(HashConstIterator const& lhs,STD_ nullptr_t ){
-            return lhs.cur_ == nullptr;
-        }
+    using base::cur_;
+    using base::ht_;
+};
 
-        friend bool operator!=(HashConstIterator const& lhs,STD_ nullptr_t){
-            return lhs.cur_ !=nullptr;
-        }
-    protected:
-        node* cur_;
-        hash_table const& ht_;
+template<
+typename V,typename K,typename H,typename GK,typename EK,
+typename Alloc>
+class HashTable {
+    using Node                     = HashNode<V>;
+    using NodeAllocator            = typename Alloc::template rebind<Node>;
+    using NodeAllocTraits          = allocator_traits<NodeAllocator>;
+    using HashMethod               = uint64_t(*)(uint64_t, uint64_t);
+    using Table                    = Vector<Node*>;
+public:
+    //type alias
+    using value_type      = V;
+    using reference       = V&;
+    using const_reference = const V&;
+    using pointer         = V*;
+    using const_pointer   = V const*;
+    using size_type       = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using allocator_type  = Alloc;
+    using key_type        = K;
+    using hash_fun_type   = H;
+    using get_key_type    = GK;
+    using equal_key_type  = EK;
+    using iterator        = typename HashIterator<V, K, H, GK, EK, Alloc>::iterator;
+    using const_iterator  = typename HashConstIterator<V, K, H, GK, EK, Alloc>::const_iterator;
+    using Self            = HashTable;
 
-        friend class HashTable<V,K,H,GK,EK,Alloc>;
-    };
+    //contruct/copy/deconsturct
+    HashTable() 
+        : impl_{ 0 }
+    { }
 
-    template<typename V,typename K,typename H,typename GK,typename EK,typename Alloc>
-    class HashIterator : public HashConstIterator<V,K,H,GK,EK,Alloc>{
-    public:
-        using iterator          =HashIterator<V,K,H,GK,EK,Alloc>;
-        using const_iterator    =HashIterator<V,K,H,GK,EK,Alloc>;
-        using self              =HashIterator;
+    explicit HashTable(size_type const n)
+        : impl_{ n }
+    { initTable(n); }
 
-        using reference         =V&;
-        using pointer           =V*;
+    ~HashTable() { clear(); }
+    // HashTable(HashTable const &);
+    // HashTable(HashTable &&);
+    // HashTable &operator=(HashTable const &);
+    // HashTable &operator=(HashTable &&);
 
-        using base              =HashConstIterator<V,K,H,GK,EK,Alloc>;
-        using node              =typename base::node;
-        using hash_table        =typename base::hash_table;
+    //modifiers
+    template<typename... Args>
+    TinySTL::pair<iterator, bool> insertUnique(Args&&... args);
 
-        HashIterator(node* cur,hash_table const& ht)
-            : base::HashConstIterator(cur,ht){}
+    void clear();
 
-        friend class HashTable<V,K,H,GK,EK,Alloc>;
-    };
+    // position interface
+    iterator begin() TINYSTL_NOEXCEPT
+    { return makeIter(getFirstList()); }
 
-    //V=value,K=key,H=hash function,GK=get_key,EK=equal_key
-    template<typename V,typename K,typename H,typename GK,typename EK,
-            typename Alloc>
-    class HashTable{
-    public:
-        //type alias
-        using value_type                =V;
-        using reference                 =V&;
-        using const_reference           =const V&;
-        using pointer                   =V*;
-        using const_pointer             =V const*;
-        using size_type                 =STD_ size_t;
-        using difference_type           =STD_ ptrdiff_t;
-        using allocator_type            =Alloc;
-        using key_type                  =K;
-        using hash_fun_type             =H;
-        using get_key_type              =GK;
-        using equal_key_type            =EK;
-        using iterator                  =typename HashIterator<V,K,H,GK,EK,Alloc>::iterator;
-        using const_iterator            =typename HashConstIterator<V,K,H,GK,EK,Alloc>::const_iterator;
-        
-        //contruct/copy/deconsturct
-        HashTable()=default;
-        ~HashTable(){ clear(); }
-        HashTable(HashTable const&);
-        HashTable(HashTable &&);
-        HashTable& operator=(HashTable const&);
-        HashTable& operator=(HashTable&&);
+    iterator end() TINYSTL_NOEXCEPT
+    { return makeIter(nullptr); }
+
+    const_iterator begin() const TINYSTL_NOEXCEPT
+    { return makeConstIter(getFirstList()); }
+
+    const_iterator end() const TINYSTL_NOEXCEPT
+    { return makeConstIter(nullptr); }
+
+    const_iterator cbegin() const TINYSTL_NOEXCEPT
+    { return makeConstIter(getFirstList()); }
+
+    const_iterator cend() const TINYSTL_NOEXCEPT
+    { return makeConstIter(nullptr); }
+
+    // reverse_iterator is wrapped by adapter
+
+
+    // field information:
+    size_type size() const TINYSTL_NOEXCEPT
+    { return impl_.numElements; }
+
+    bool empty() const TINYSTL_NOEXCEPT 
+    { return size(); }
+
+    size_type max_size() const TINYSTL_NOEXCEPT
+    { return PRIME_LIST[PRIMES_NUM-1]; }
+
+    Table const& table() const TINYSTL_NOEXCEPT
+    { return impl_.table; }    
+
+    size_type tableSize() const TINYSTL_NOEXCEPT
+    { return impl_.table.size(); }
+
+    EK equalKey() const TINYSTL_NOEXCEPT
+    { return impl_.equalKey; }
+
+    GK getKey() const TINYSTL_NOEXCEPT
+    { return impl_.getKey; }
+
+    H hash() const TINYSTL_NOEXCEPT
+    { return impl_.hashFun; }
+
+    HashMethod hashMethod() const TINYSTL_NOEXCEPT
+    { return impl_.hashMethod; }
+
+    size_type table_num(key_type const& key) const;
+    size_type table_count(size_type table_num) const;
+
+    // special search operation
+    iterator find(key_type const& key);
+    // size_type count(key_type const& key);
+    // pair<iterator,iterator> equal_range(key_type const& key);
+    // pair<const_iterator,const_iterator> equal_range(key_type const& key) const;
 
     
-        explicit HashTable(size_type const n) : num_elements_{0}{ init_table(n); }
+    // rehash
+    void rehash(size_type hint);
 
-        //modifiers
-        pair<iterator,bool> insert_unique(value_type const& val);
-        pair<iterator,bool> insert_unique(value_type && val);
-        iterator insert_unique(const_iterator hint,value_type const& value);
-        iterator insert_unique(const_iterator hint,value_type && value);
-        template<typename II>
-        void insert_unique(II first,II last);
-        void insert_unique(STD_ initializer_list<value_type> list);
-        
-        iterator insert_equal(value_type const& val);
-        iterator insert_equal(value_type &&val);
-        iterator insert_equal(const_iterator hint,value_type const& value);
-        iterator insert_equal(const_iterator hint,value_type && value);
-        template<typename II>
-        void insert_equal(II first,II last);
-        void insert_equal(STD_ initializer_list<value_type> list);
+    double load_factor() const TINYSTL_NOEXCEPT
+    { return static_cast<double>(size()) / tableSize(); }
 
-        iterator erase(const_iterator pos);
-        size_type erase(key_type const& key);
-        iterator erase(const_iterator first,const_iterator last);        
-        void clear();
+    // allocator
+    allocator_type&
+    get_allocator() const TINYSTL_NOEXCEPT 
+    { return impl_; }
 
-        //position interface
-        iterator begin() noexcept 
-        { return iterator(begin_aux(),*this); }
+    TINYSTL_CONSTEXPR size_type 
+    hashKey(key_type const& key) const TINYSTL_NOEXCEPT;
 
-        iterator end() noexcept 
-        { return iterator(nullptr,*this); }
+    TINYSTL_CONSTEXPR size_type 
+    hashVal(value_type const& val) const TINYSTL_NOEXCEPT;
 
-        const_iterator begin() const noexcept
-        { return const_iterator(begin_aux(),*this); }
+    // debug helper
+    #ifdef HASH_DEBUG
+    void printTableLayout() const;
+    #endif
 
-        const_iterator end() const noexcept
-        { return const_iterator(nullptr,*this); }
-        
-        const_iterator cbegin() const noexcept
-        { return const_iterator(begin_aux(),*this); }
+    friend bool operator==(HashTable const& lhs,HashTable const& rhs) noexcept;
+    friend bool operator!=(HashTable const& lhs,HashTable const& rhs) noexcept;
+private:
+    NodeAllocator&
+    getNodeAllocator() 
+    { return impl_; }
 
-        const_iterator cend() const noexcept
-        { return const_iterator(nullptr,*this); }
+    void initTable(size_type const n);
+    Node* getFirstList() const;
 
-        //attributes interface
-        //Nonmodifying operation
-        size_type size() const { return num_elements_; }
-        bool empty() const noexcept { return num_elements_; }
-        size_type max_size() const noexcept { return PRIME_LIST[PRIMES_NUM-1]; }
-        friend bool operator==(HashTable const& lhs,HashTable const& rhs) noexcept;
-        friend bool operator!=(HashTable const& lhs,HashTable const& rhs) noexcept;
+    Table& table() TINYSTL_NOEXCEPT
+    { return impl_.table; }
 
-        //table interface
-        size_type table_size() const { return table_.size(); }
-        size_type table_num(key_type const& key) const;
-        size_type table_count(size_type table_num) const;
+    void reclaimSentinel(Table& table);
 
-        //special search operation
-        size_type count(key_type const& key);
-        iterator find(key_type const& key);
-        pair<iterator,iterator> equal_range(key_type const& key);
-        pair<const_iterator,const_iterator> equal_range(key_type const& key) const;
+    void incElemensNum(size_type n) TINYSTL_NOEXCEPT
+    { impl_.numElements += n; }
 
-        
-        //rehash
-        void rehash(size_type element_num_hint);
-        float load_factor() const noexcept { return static_cast<float>(num_elements_)/table_size(); }
+    void decElementNums(size_type n) TINYSTL_NOEXCEPT
+    { impl_.numElement -= n; }
 
-        //allocator
-        allocator_type&& get_allocator() const { return allocator_type(); }
+    template<typename Args> pair<iterator,bool> insert_unique_norehash(Args&& val);
+    template<typename Args> iterator insert_unique_norehash(const_iterator hint,Args&& val);
 
-    private:
-        using node                      =HashNode<V>;
-        using node_allocator            =UserAllocator<node,Alloc>;
+    template<typename Args> iterator insert_equal_norehash(Args&& val);
+    template<typename Args> iterator insert_equal_norehash(const_iterator hint,Args&& val);
     
-        void init_table(size_type const n);
-        size_type next_size(size_type n) const { return next_prime(n); }
+    // hash function forward
 
-        template<typename Args> pair<iterator,bool> insert_unique_norehash(Args&& val);
-        template<typename Args> iterator insert_unique_norehash(const_iterator hint,Args&& val);
+    //linked list helper
+    template<typename ...Args> 
+    Node* newNode(Args&&... val);
+    void destroyNode(Node* node);
 
-        template<typename Args> iterator insert_equal_norehash(Args&& val);
-        template<typename Args> iterator insert_equal_norehash(const_iterator hint,Args&& val);
-        
-        node* begin_aux() const;
+    //iterator construct helper
+    iterator 
+    makeIter(Node* node) const TINYSTL_NOEXCEPT
+    { return iterator(node,*this); }
 
-        //hash handle
-        size_type hash_key(key_type const& key,size_type table_size) const
-        { return hash_fun_(key)%table_size; }
 
-        size_type hash_key(key_type const& key) const
-        { return hash_key(key,table_size()); }
+    const_iterator 
+    makeConstIter(Node* node) const TINYSTL_NOEXCEPT
+    { return const_iterator(node,*this); }
 
-        size_type hash_val(value_type const& val,size_type table_size) const
-        { return hash_key(get_key_(val),table_size); }
+    //friend declaration
+    friend class HashIterator<V,K,H,GK,EK,Alloc>;
+    friend class HashConstIterator<V,K,H,GK,EK,Alloc>;
 
-        size_type hash_val(value_type const& val) const
-        { return hash_key(get_key_(val),table_size()); }
+private:
+    struct Impl 
+    : NodeAllocator
+    , Alloc {
+        explicit Impl(
+            size_type n, 
+            H hashFun_ = H{},
+            HashMethod hashMethod_ = &hashDivision)
+            : hashFun{ hashFun_ }
+            , hashMethod{ hashMethod_ }
+            , numElements{ 0 }
+            , table{ n, nullptr }
+        { }
 
-        //linked list helper
-        template<typename ...Args>
-        node* new_node(Args&&... val);
-        void destroy_node(node* _node);
-
-        //iterator construct helper
-        iterator make_iterator(node* _node) { return iterator(_node,*this); }
-        const_iterator make_const_iterator(node* _node) const { return const_iterator(_node,*this); }
-
-        //friend declaration
-        friend class HashIterator<V,K,H,GK,EK,Alloc>;
-        friend class HashConstIterator<V,K,H,GK,EK,Alloc>;
-    protected:
-        GK get_key_;
-        EK equal_key_;
-        H hash_fun_;
-        size_type num_elements_; 
-        vector<node*> table_;
+        GK getKey;
+        EK equalKey;
+        H hashFun;
+        HashMethod hashMethod;
+        size_type numElements;
+        Vector<Node*> table;
     };
 
-    
+    Impl impl_;
+};
+
+#define TEMPLATE_OF_HASHTABLE \
+    template<typename V, typename K, typename H, typename GK, typename EK, typename Alloc> \
+
+#define HASHTABLE \
+    HashTable<V, K, H, GK, EK, Alloc>
+
+TEMPLATE_OF_HASHTABLE
+TINYSTL_CONSTEXPR auto
+HASHTABLE::hashKey(key_type const& key) const TINYSTL_NOEXCEPT
+-> size_type {
+    return hashMethod()(hash()(key), tableSize());
 }
+
+TEMPLATE_OF_HASHTABLE
+TINYSTL_CONSTEXPR auto
+HASHTABLE::hashVal(value_type const& val) const TINYSTL_NOEXCEPT
+-> size_type {
+    return hashKey(getKey()(val));
+}
+
+TEMPLATE_OF_HASHTABLE
+template<typename ...Args>
+auto
+HASHTABLE::insertUnique(Args&& ...args) 
+-> TinySTL::pair<iterator, bool> {
+    rehash(size() + 1);
+
+    const auto node = newNode(STL_FORWARD(Args, args)...);
+    auto hashcode = hashVal(node->val);
+    assert(hashcode < tableSize() && hashcode >= 0);
+
+    auto head = table()[hashcode];
+    // check if there are value with same key in linked list
+    for (auto h = head->next; h != nullptr; h = h->next) {
+        if (equalKey()(getKey()(h->val), node->val)) {
+            // exist same key
+            // destory newly constructed node
+            // and return status code(denoetd in pair::second)
+            destroyNode(node);
+            return TinySTL::make_pair(makeIter(h), false);
+        }
+    }
+
+    // insert the newly node to linked list
+    // ensure it is unique key in this linked list
+    node->next = head->next;
+    head->next = node;
+    incElemensNum(1);
+
+    return TinySTL::make_pair(makeIter(node), true);
+}
+
+TEMPLATE_OF_HASHTABLE
+auto
+HASHTABLE::find(key_type const& key) 
+-> iterator {
+    const auto hashcode = hashKey(key);
+    assert(hashcode >= 0 && hashcode < tableSize());
+
+    auto head = table()[hashcode];
+
+    for (; head->next != nullptr; head = head->next) {
+        if (equalKey()(getKey()(head->val), key)) {
+            return makeIter(head);
+        }
+    }
+
+    return end();
+}
+
+TEMPLATE_OF_HASHTABLE
+inline void 
+HASHTABLE::rehash(size_type hint) {
+    // If load_factor > 1.0, 
+    // we expand the slots num
+    if (hint > tableSize()) {
+        const auto oldSize = tableSize();
+        const auto nextSize = nextPrime(hint);
+
+        Table oldTable;
+        oldTable.swap(table());
+
+        table().resize(nextSize);
+        initTable(tableSize());
+        // Since the tableSize() has changed, 
+        // we should reset the linked list to proper location.
+        // It is difficult to set in previous table directly,
+        // we use a new table then swap them to complete.
+        for (auto head : oldTable) {
+            auto real = head->next;
+            for (; real; real = head->next) {
+                auto newHashcode = hashVal(real->val);
+
+                auto newHead = table()[newHashcode];
+
+                // remove the node from the old linked list
+                head->next = real->next;
+
+                // insert the old node to new linked list
+                real->next = newHead->next;
+                newHead->next = real;
+            }
+        }
+
+        reclaimSentinel(oldTable);
+    }
+}
+
+TEMPLATE_OF_HASHTABLE
+inline auto
+HASHTABLE::getFirstList() const
+-> Node* {
+    for (auto& head : table()) {
+        if (head->next) {
+            return head->next;
+        }
+    }
+
+    return nullptr;
+}
+
+TEMPLATE_OF_HASHTABLE
+inline void
+HASHTABLE::initTable(size_type n) {
+    for (auto& head : table()) {
+        // create sentinel(dummy node):
+        // To make implemetation of single linked list operation easier
+        head = newNode();
+    }
+}
+
+TEMPLATE_OF_HASHTABLE
+inline void
+HASHTABLE::reclaimSentinel(Table& table) {
+    for (auto head : table) {
+        assert(head->next == nullptr);
+        destroyNode(head);
+    }
+}
+
+TEMPLATE_OF_HASHTABLE
+void
+HASHTABLE::clear() {
+    for (auto& head : table()) {
+        while (head->next) {
+            auto tmp = head->next;
+            head->next = tmp->next;
+
+            destroyNode(tmp);
+        }                
+    }
+    
+    reclaimSentinel(table());
+}
+
+TEMPLATE_OF_HASHTABLE
+template<typename ...Args>
+inline auto
+HASHTABLE::newNode(Args&&... args)
+-> Node* {
+    Node* node = NodeAllocTraits::allocate(
+        getNodeAllocator(), sizeof(Node));
+    TRY_BEGIN
+        NodeAllocTraits::construct(
+            getNodeAllocator(),
+            node,
+            value_type(STL_FORWARD(Args, args)...));
+    TRY_END
+    CATCH_ALL_BEGIN
+        NodeAllocTraits::deallocate(
+            getNodeAllocator(), node);
+        RETHROW
+    CATCH_END
+
+    return node;
+}
+
+TEMPLATE_OF_HASHTABLE
+inline void
+HASHTABLE::destroyNode(Node* node) {
+    NodeAllocTraits::destroy(getNodeAllocator(), node);
+    NodeAllocTraits::deallocate(getNodeAllocator(), node);
+}
+
+#ifdef HASH_DEBUG
+TEMPLATE_OF_HASHTABLE
+void
+HASHTABLE::printTableLayout() const {
+    for (int i = 0; i != tableSize(); ++i) {
+        printf("[%d]: ", i);
+        for (auto head = table()[i]->next;
+             head != nullptr;
+             head = head->next) {
+            std::cout << "(" << head->val << ")";
+            if (head->next != nullptr)
+                std::cout << " -> ";
+        }
+        puts("");
+    }
+}
+#endif
+
+} // namespace TinySTL
 
 #endif
