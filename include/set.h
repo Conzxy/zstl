@@ -9,7 +9,7 @@ namespace TinySTL{
 template<typename T, 
 	 typename Compare = TinySTL::less<T>,
 	 typename Alloc = TinySTL::allocator<T>>
-class set{
+class Set{
 //TODO: BINARY_CALLABLE_CHECK
 public:
 	using Rep = RBTree<T, T, identity<T>, Compare, Alloc>;
@@ -27,27 +27,16 @@ public:
 	using const_iterator = typename Rep::const_iterator;
 	using reverse_iterator = typename Rep::reverse_iterator;
 	using const_reverse_iterator = typename Rep::const_reverse_iterator;
+  using Res = TinySTL::pair<iterator, bool>;
 
-	set(){ }
-	~set() { }
+	Set() = default;
+	~Set() = default;
+	Set(Set const& rhs) = default;
+	Set& operator=(Set const& rhs) = default;
 
-	set(set const& rhs) : rb_(rhs.rb_) { }
-	set& operator=(set const& rhs){
-		rb_ = rhs.rb_;
-		return *this;
-	}
-	
-	
-#if __cplusplus > 201103L
-	set(set&& rhs) noexcept 
-		: rb_(STL_MOVE(rhs.rb_)) { }
+	Set(Set&& rhs) noexcept = default;
+	Set& operator=(Set&& rhs) noexcept = default;
 
-	set& operator=(set&& rhs) noexcept {
-		rb_ = STL_MOVE(rhs.rb_);
-		return *this;
-	}
-#endif
-	
 	Alloc get_allocator() const noexcept 
 	{ return Alloc(); }
 
@@ -93,18 +82,21 @@ public:
 	void clear() noexcept 
 	{ rb_.clear(); }
 
-	TinySTL::pair<iterator, bool> insert(value_type const& x)
+	Res insert(value_type const& x)
 	{ return rb_.InsertUnique(x); }
 
-	TinySTL::pair<iterator, bool> insert(value_type&& x)
+	Res insert(value_type&& x)
 	{ return rb_.InsertUnique(STL_MOVE(x)); }
-
-	iterator insert(const_iterator hint, value_type const& val)	
+  
+	Res insert(const_iterator hint, value_type const& val)	
 	{ return rb_.InsertHintUnique(hint, val); }
+  
+	Res insert(const_iterator hint, value_type&& val)	
+	{ return rb_.InsertHintUnique(hint, STL_MOVE(val)); }
 
 	template<typename II>
-	void insert(II first, II last)
-	{ rb_.Insert(first, last); }
+	void insert(II first, II last) 
+	{ return rb_.InsertUnique(first, last); }
 
 	template<typename... Args>
 	TinySTL::pair<iterator, bool> emplace(Args&&... args)
@@ -115,15 +107,15 @@ public:
 	{ return rb_.EmplaceHintUnique(hint, STL_FORWARD(Args, args)...); }
 	
 	iterator erase(const_iterator pos)
-	{ return rb_.Erase(pos); }
+	{ return rb_.erase(pos); }
 
 	iterator erase(const_iterator first, const_iterator last)
-	{ return rb_.Erase(first, last); }
+	{ return rb_.erase(first, last); }
 
 	size_type erase(key_type const& key)
-	{ return rb_.Erase(key); }
+	{ return rb_.erase(key); }
 
-	void swap(set& rhs) noexcept(noexcept(this->rb_.swap(rhs.rb_)))
+	void swap(Set& rhs) noexcept(noexcept(this->rb_.swap(rhs.rb_)))
 	{ rb_.swap(rhs.rb_); }
 
 	// lookup
@@ -160,16 +152,19 @@ public:
 	{ return rb_.upper_bound(key); }
 	
 	key_compare key_comp() const
-	{ return key_compare{}; }
+	{ return rb_.key_comp(); }
 
+	Rep& rep() noexcept {
+		return rb_;
+	}
 private:
 	Rep rb_;
 };
 
 template<typename T, typename Compare, typename Alloc>
 bool operator==(
-		set<T, Compare, Alloc> const& lhs,
-		set<T, Compare, Alloc> const& rhs)
+		Set<T, Compare, Alloc> const& lhs,
+		Set<T, Compare, Alloc> const& rhs)
 { 
 	return lexicographical_compare(lhs.begin(), lhs.end(),
 									rhs.begin(), rhs.end());
@@ -177,8 +172,8 @@ bool operator==(
 
 template<typename T, typename Compare, typename Alloc>
 bool operator!=(
-		set<T, Compare, Alloc> const& lhs,
-		set<T, Compare, Alloc> const& rhs)
+		Set<T, Compare, Alloc> const& lhs,
+		Set<T, Compare, Alloc> const& rhs)
 { return !(lhs == rhs); }
 
 		

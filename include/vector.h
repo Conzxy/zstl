@@ -109,12 +109,12 @@ public:
 	using AllocTraits            = typename base::AllocTraits;
 public:
 	// ctors:
-	Vector()=default;
+	Vector() = default;
 
 	Vector(const size_type n,value_type const& val)
 		: base(n)
 	{
-		uninitialized_fill_n(begin(),n,val);
+		TinySTL::uninitialized_fill_n(begin(),n,val);
 	}
 	
 	// if T is deleted default constructor, we just alloc space for it
@@ -141,11 +141,13 @@ public:
 
 	// dtor:	
 	// deallocate is delegated to base class
-	~Vector(){ destroy(begin(),end()); }
+	~Vector()
+	{ destroy(begin(),end()); }
 
 	// copy & move ctor
 	Vector(Vector const& rhs)
-		: Vector(rhs.begin(),rhs.end()){}
+		: Vector(rhs.begin(),rhs.end())
+	{ }
 
 	Vector(Vector&& rhs) TINYSTL_NOEXCEPT 
 		:  base(STL_MOVE(rhs))
@@ -156,7 +158,8 @@ public:
 	template<typename U, typename =
 		TinySTL::Enable_if_t<Is_convertible<U, T>::value>>
 	Vector(std::initializer_list<U> il)
-		: Vector(il.begin(),il.end()){}
+		: Vector(il.begin(),il.end())
+	{ }
 	
 	// operator=:
 	Vector& operator=(Vector const&);
