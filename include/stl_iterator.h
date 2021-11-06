@@ -1,4 +1,4 @@
-/*
+/**
  * @version: 0.1 2021-5-16
  * @author: Conzxy
  * @Description:
@@ -246,6 +246,20 @@ template<class Input_iterator,typename Distance>
 inline void
 advance(Input_iterator &i,Distance n){
 	_advance(i,n,iterator_category(i));
+}
+
+/**
+ * @fn advanceIter
+ * @brief advance a iterator, but return result iterator(of cource, iterator is passed by value)
+ * @note
+ * STL does not provide the API
+ * just I need somewhere.
+ */
+template<typename II, typename D>
+inline II
+advanceIter(II i, D n) {
+	TinySTL::advance(i, n);
+	return i;
 }
 
 //Reverse Iterator
