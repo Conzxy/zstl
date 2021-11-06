@@ -3,6 +3,7 @@
 
 #include "stl_construct.h"
 #include "stl_algorithm.h"
+#include "stl_iterator.h"
 #include "type_traits.h"
 #include "stl_exception.h"
 
@@ -54,7 +55,7 @@ namespace TinySTL{
     template<class ForwardIterator,typename Size,typename T>
     ForwardIterator uninitialized_fill_n_dispatch(ForwardIterator first,Size n,
                                      T const& x, _true_type){
-        return fill_n(first,n,x);
+        return TinySTL::fill_n(first,n,x);
     }
 
     template<class ForwardIterator,typename Size,typename T>
@@ -63,7 +64,7 @@ namespace TinySTL{
         auto cur=first;
         TRY_BEGIN
 			for(;n>0;--n,++cur){
-				construct(&*cur,x);
+				TinySTL::construct(&*cur,x);
 			}
 		TRY_END
         CATCH_ALL_BEGIN 
@@ -90,7 +91,7 @@ namespace TinySTL{
     template<class InputIterator,class ForwardIterator>
     ForwardIterator uninitialized_copy_dispatch(InputIterator first,InputIterator last,
                                                 ForwardIterator result,_true_type){
-        return copy(first,last,result);
+        return TinySTL::copy(first,last,result);
     }
 
     template<class InputIterator,class ForwardIterator>
@@ -160,6 +161,14 @@ namespace TinySTL{
         using TrivialType = Conjunction_t<Is_trivial<ValueType>, Is_copy_constructible<ValueType>>;
         return uninitialized_move_dispatch(first,last,result, TrivialType{});
     }
+
+	template<typename II, typename FI>
+	inline FI uninitialized_move_if_noexcept(II first, II last, FI result) {
+		return TinySTL::uninitialized_copy(
+				MAKE_MOVE_IF_NOEXCEPT_ITERATOR(first), 
+				MAKE_MOVE_IF_NOEXCEPT_ITERATOR(last), 
+				result);
+	}
 
 }
 #endif //TINYSTL_STL_UNINITIALIZED_H
