@@ -30,8 +30,8 @@ struct ForwardListIterator : std::iterator<std::forward_iterator_tag, T> {
 
   Ref& operator*() noexcept { return extract()->val; }
   ConstRef operator*() const noexcept { return extract()->val; }
-  Pointer operator&() noexcept { return &extract()->val; }
-  ConstPointer operator&() const noexcept { return &extract()->val; }
+  Pointer operator->() noexcept { return &(extract()->val); }
+  ConstPointer operator->() const noexcept { return &(extract()->val); }
 
   Self& operator++() noexcept
   {
@@ -80,8 +80,8 @@ struct ForwardListConstIterator : std::iterator<std::forward_iterator_tag, T> {
 
   Ref& operator*() noexcept { return extract()->val; }
   ConstRef operator*() const noexcept { return extract()->val; }
-  Pointer operator&() noexcept { return &extract()->val; }
-  ConstPointer operator&() const noexcept { return &extract()->val; }
+  Pointer operator->() noexcept { return &(extract()->val); }
+  ConstPointer operator->() const noexcept { return &(extract()->val); }
 
   Self& operator++() noexcept
   {
