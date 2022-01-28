@@ -1,12 +1,12 @@
-#ifndef TINYSTL_TYPE_TRAITS_H
-#define TINYSTL_TYPE_TRAITS_H
+#ifndef ZSTL_TYPE_TRAITS_H
+#define ZSTL_TYPE_TRAITS_H
 
 #include <cstddef>
 #include <cstdint>
 #include "stl_type_traits_base.h"
 #include "typelist.h"
 
-namespace TinySTL {
+namespace zstl {
 //check if a given type member exists
 #define DEFINE_HAS_TYPE(Memtype)						        \
 template<typename,typename =Void_t<>>				            \
@@ -2041,6 +2041,6 @@ struct HasMemberT_##Member<T,Void_t<decltype(&T::Member)>>      \
 	template<typename B,typename D>
 	constexpr bool Is_base_of_v=detail::Is_base_of_<B, D>::value;
 #endif
-} //namespace TinySTL
+} //namespace zstl
 
-#endif //TINYSTL_TYPE_TRAITS_H
+#endif //ZSTL_TYPE_TRAITS_H

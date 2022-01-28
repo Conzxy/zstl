@@ -1,10 +1,10 @@
-#ifndef TINYSTL_ALLOC_H
-#define TINYSTL_ALLOC_H
+#ifndef ZSTL_ALLOC_H
+#define ZSTL_ALLOC_H
 
 #include <cstddef>
 #include <cstdlib>
 //空间配置器，以字节为单位分配
-namespace TinySTL{
+namespace zstl{
     class alloc{
     private:
         static std::size_t const ALIGN=8;
@@ -45,4 +45,4 @@ namespace TinySTL{
         static void* reallocate(void* ptr,std::size_t old_sz,std::size_t new_sz);
     };
 }
-#endif //TINYSTL_ALLOC_H
+#endif //ZSTL_ALLOC_H

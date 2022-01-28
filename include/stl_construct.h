@@ -1,5 +1,5 @@
-#ifndef TINYSTL_STL_CONSTRUCT_H
-#define TINYSTL_STL_CONSTRUCT_H
+#ifndef ZSTL_STL_CONSTRUCT_H
+#define ZSTL_STL_CONSTRUCT_H
 
 //该头文件主要包含两个函数：
 //construct：负责对象的构造
@@ -9,7 +9,7 @@
 #include "stl_iterator.h"
 #include "stl_move.h"
 
-namespace TinySTL {
+namespace zstl {
     template<typename T1, typename T2>
     inline void construct(T1 *ptr1, T2 const &value) {
         //::new((void*)ptr1) T1(value);
@@ -19,7 +19,7 @@ namespace TinySTL {
     //实际上，由于通用引用重载过于“贪婪”，上面这个重载基本不会被选择
     template<typename T1,typename...Args>
     inline void construct(T1* ptr1,Args&&... args){
-        ::new(ptr1) T1(TinySTL::forward<Args>(args)...);
+        ::new(ptr1) T1(zstl::forward<Args>(args)...);
     }
 
     template<class T>
@@ -67,4 +67,4 @@ namespace TinySTL {
     */
 }
 
-#endif //TINYSTL_STL_CONSTRUCT_H
+#endif //ZSTL_STL_CONSTRUCT_H

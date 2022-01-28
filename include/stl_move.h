@@ -1,10 +1,10 @@
-#ifndef TINYSTL_STL_MOVE_H
-#define TINYSTL_STL_MOVE_H
+#ifndef ZSTL_STL_MOVE_H
+#define ZSTL_STL_MOVE_H
 
 #include "type_traits.h"
 #include "config.h"
 
-namespace TinySTL{
+namespace zstl{
    
 	// need remove_reference of T to avoid reference collapse 
     template<typename T>
@@ -13,12 +13,12 @@ namespace TinySTL{
         return static_cast<Remove_reference_t<T>&&>(t);
     }
 
-#define STL_MOVE(val) TinySTL::move(val)
+#define STL_MOVE(val) zstl::move(val)
 
     // trick: reference collapse
 	// you should use it with universal reference
 	// e.g.
-	// template<typename T> void g(T&& x) { return f(TinySTL::forward<T>(x)) }
+	// template<typename T> void g(T&& x) { return f(zstl::forward<T>(x)) }
     template<typename T>
     constexpr T&& forward(Remove_reference_t<T>& t) noexcept{
         return static_cast<T&&>(t);
@@ -33,7 +33,7 @@ namespace TinySTL{
         return static_cast<T&&>(t);
     }//overload 2
 
-#define STL_FORWARD(type, args) TinySTL::forward<type>(args)
+#define STL_FORWARD(type, args) zstl::forward<type>(args)
 
 	// addressof
 	template<typename T>
@@ -64,7 +64,7 @@ namespace TinySTL{
 	constexpr Conditional_t<move_if_noexcept_cond<T>::value,  
 	T const&, T&&>
 	move_if_noexcept(T&& x) noexcept
-	{ return TinySTL::move(x); }
+	{ return zstl::move(x); }
 
 	// swap
 	template<typename T>
@@ -88,8 +88,8 @@ namespace TinySTL{
 			swap(x[i], y[i]);
 	}
 
-#define STL_SWAP(val1,val2) TinySTL::swap(val1,val2)
+#define STL_SWAP(val1,val2) zstl::swap(val1,val2)
 
-} // namespace TinySTL
+} // namespace zstl
 
-#endif //TINYSTL_STL_MOVE_H
+#endif //ZSTL_STL_MOVE_H

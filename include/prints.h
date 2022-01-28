@@ -1,5 +1,5 @@
-#ifndef TINYSTL_PRINTS_H
-#define TINYSTL_PRINTS_H
+#ifndef ZSTL_PRINTS_H
+#define ZSTL_PRINTS_H
 
 #include <iostream>
 #include "vector.h"
@@ -55,7 +55,7 @@ std::ostream& TL_PRINTS(std::ostream& os=std::cout) {
 
 template<typename T,typename U>
 struct Larger_Type {
-    using type=TinySTL::Conditional_t<(sizeof(T)<sizeof(U)),U,T>;
+    using type=zstl::Conditional_t<(sizeof(T)<sizeof(U)),U,T>;
 };
 
 template<typename T,typename U>
@@ -68,7 +68,7 @@ struct Larger_pred_v {
 };
 
 template<typename T,T X,T Y>
-struct Larger_pred_v<TinySTL::mpl::CValueT<T,X>,TinySTL::mpl::CValueT<T,Y>>{
+struct Larger_pred_v<zstl::mpl::CValueT<T,X>,zstl::mpl::CValueT<T,Y>>{
     static constexpr bool value=(X<Y)?true:false;
 };
-#endif //TINYSTL_PRINTS_H
+#endif //ZSTL_PRINTS_H

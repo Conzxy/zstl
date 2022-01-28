@@ -7,7 +7,7 @@
 #include "stl_algorithm.h"
 #include "type_traits.h"
 
-namespace TinySTL {
+namespace zstl {
 	template<typename T>
 	struct list_node {
 		list_node* prev;
@@ -16,7 +16,7 @@ namespace TinySTL {
 		list_node(T const& d,list_node *p=nullptr,list_node *n=nullptr)
 			:prev(p),next(n),data(d){}
 		list_node(T&& d,list_node* p = nullptr, list_node* n = nullptr)
-			:prev(p), next(n), data(TinySTL::move(d){}
+			:prev(p), next(n), data(zstl::move(d){}
 	};
 
 	template<typename T,typename ref,typename ptr>
@@ -35,7 +35,7 @@ namespace TinySTL {
 		list_iter(link_type n):current(n){}
 
 		list_iter(self const& other) :current(other.current){}
-		//list_const_iter(list_const_iter &&other):current(TinySTL::move(other.current)){}
+		//list_const_iter(list_const_iter &&other):current(zstl::move(other.current)){}
 
 		typename base::reference operator*()const {
 			return current->data;
@@ -99,8 +99,8 @@ namespace TinySTL {
 		using allocator_type			= Alloc;
 		using iterator					= list_iter<T,reference,pointer>;
 		using const_iterator			= list_iter<T,const_reference,const_pointer>;
-		using reverse_iterator			= TinySTL::reverse_iterator<iterator>;
-		using const_reverse_iterator	= TinySTL::reverse_iterator<const_iterator>;
+		using reverse_iterator			= zstl::reverse_iterator<iterator>;
+		using const_reverse_iterator	= zstl::reverse_iterator<const_iterator>;
 	public:
 		//construct/copy/destroy
 		//1.default ctor
@@ -294,7 +294,7 @@ namespace TinySTL {
 		template<typename... Args>
 		link_type create_node(Args&&... args, link_type prev=nullptr, link_type next=nullptr{
 			auto ptr=get_node();
-			node_allocator::construct(ptr,TinySTL::forward<Args>(args)...);
+			node_allocator::construct(ptr,zstl::forward<Args>(args)...);
 			return ptr;
 		}
 
@@ -320,7 +320,7 @@ namespace TinySTL {
 	public:
 		//compare operator:
 		friend bool operator == (list const& x, list const& y{
-			return x.size()==y.size()&&TinySTL::equal(x.begin(), x.end(), y.begin());
+			return x.size()==y.size()&&zstl::equal(x.begin(), x.end(), y.begin());
 		}
 
 		friend bool operator != (list const& x, list const& y) {
@@ -328,7 +328,7 @@ namespace TinySTL {
 		}
 
 		friend bool operator<(list const& x, list const& y) {
-			return TinySTL::lexicographical_compare(x.begin(), x.end(),
+			return zstl::lexicographical_compare(x.begin(), x.end(),
 													y.begin(), y.end());
 		}
 

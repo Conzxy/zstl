@@ -12,7 +12,7 @@
 //lambda expression
 //(*)function pointer to member function/member data
 
-namespace TinySTL{
+namespace zstl{
     template<typename T>
     struct reference_wrapper;
 
@@ -29,23 +29,23 @@ namespace TinySTL{
         {
             if constexpr(Is_member_function_pointer_v<decltype(f)>)
             {
-                if constexpr(Is_base_of_v<B,TinySTL::Decay_t<D>>)
-                    return (TinySTL::forward<D>(obj).*f)(TinySTL::forward<Args>(args)...);
+                if constexpr(Is_base_of_v<B,zstl::Decay_t<D>>)
+                    return (zstl::forward<D>(obj).*f)(zstl::forward<Args>(args)...);
                 else if constexpr(Is_reference_wrapper_v<Decay_t<D>>)
-                    return (obj.get().*f)(TinySTL::forward<Args>(args)...);
+                    return (obj.get().*f)(zstl::forward<Args>(args)...);
                 else
-                    return (*TinySTL::forward<D>(obj).*f)(TinySTL::forward<Args>(args)...);
+                    return (*zstl::forward<D>(obj).*f)(zstl::forward<Args>(args)...);
             }
             else
             {
                 static_assert(Is_member_object_pointer_v<decltype(f)>);
                 static_assert(sizeof...(Args)==0); 
                 if constexpr(Is_base_of_v<B,Decay_t<D>>)
-                    return TinySTL::forward<D>(obj).*f;  
+                    return zstl::forward<D>(obj).*f;  
                 else if constexpr(Is_reference_wrapper_v<Decay_t<D>>)
                     return obj.get().*f;
                 else
-                    return *TinySTL::forward<D>(obj).*f;
+                    return *zstl::forward<D>(obj).*f;
             }
         }
     
@@ -103,18 +103,18 @@ namespace TinySTL{
         template<typename F,typename ...Args>
         constexpr auto
         invoke_impl(F&& f,Args&&... args)
-		-> decltype(TinySTL::forward<F>(f)(TinySTL::forward<Args>(args)...))
+		-> decltype(zstl::forward<F>(f)(zstl::forward<Args>(args)...))
         {
-            return TinySTL::forward<F>(f)(TinySTL::forward<Args>(args)...);
+            return zstl::forward<F>(f)(zstl::forward<Args>(args)...);
         }
     }  // namespace detail
 
     template<typename F,typename ...Args>
     constexpr auto
     invoke(F&& f,Args&&... args) noexcept(noexcept(f))
-	-> decltype(detail::invoke_impl(TinySTL::forward<F>(f),TinySTL::forward<Args>(args)...))
+	-> decltype(detail::invoke_impl(zstl::forward<F>(f),zstl::forward<Args>(args)...))
     {
-        return detail::invoke_impl(TinySTL::forward<F>(f),TinySTL::forward<Args>(args)...);
+        return detail::invoke_impl(zstl::forward<F>(f),zstl::forward<Args>(args)...);
     }
 
 }

@@ -1,11 +1,11 @@
-#ifndef TINYSTL_UNIQUE_PTR_H
-#define TINYSTL_UNIQUE_PTR_H
+#ifndef ZSTL_UNIQUE_PTR_H
+#define ZSTL_UNIQUE_PTR_H
 
 #include <stl_utility.h>
 #include <type_traits.h>
 
 
-namespace TinySTL{
+namespace zstl{
     template<typename T>
     struct default_delete{
         constexpr default_delete()noexcept=default;
@@ -67,7 +67,7 @@ namespace TinySTL{
         //if d is lvalue,d must be copyconstructible
         template<typename Del>
         unique_ptr_impl(pointer p,Del&& d)
-        :data(p),deleter(TinySTL::forward<Del>(d)){}
+        :data(p),deleter(zstl::forward<Del>(d)){}
 
         //因为pointer可能会被用来迭代，故const版本不返回const pointer&
         //又由于bitwise constness，故返回pointer
@@ -113,7 +113,7 @@ namespace TinySTL{
 
         //delete_type is not a reference type
         unique_ptr(pointer p,Remove_reference_t<deleter_type>&& d)noexcept
-        :M_t(TinySTL::move(p),TinySTL::move(d)){
+        :M_t(zstl::move(p),zstl::move(d)){
             static_assert(!Is_reference<deleter_type>::value,
                           "rvalue deleter bound to reference");
         }
@@ -122,7 +122,7 @@ namespace TinySTL{
         //if delete_type is reference type,this deleter is copy constructed from up's deleter
         //otherwise,this deleter is move constructed from up's deleter
         unique_ptr(unique_ptr&& up)noexcept
-        :M_t(up.release(),TinySTL::forward<deleter_type>(up.get_deleter())){}
+        :M_t(up.release(),zstl::forward<deleter_type>(up.get_deleter())){}
 
         //nullptr version
         constexpr unique_ptr(std::nullptr_t)noexcept
@@ -131,7 +131,7 @@ namespace TinySTL{
         //converting constructor
         template<typename U,typename E>
         unique_ptr(unique_ptr<U,E>&& up)noexcept
-        :M_t(up.release(),TinySTL::forward<E>(up.get_deleter())){}
+        :M_t(up.release(),zstl::forward<E>(up.get_deleter())){}
 
         //destructor:
         ~unique_ptr(){
@@ -144,7 +144,7 @@ namespace TinySTL{
         //assignment:
         unique_ptr& operator=(unique_ptr&& up)noexcept{
             reset(up.release());
-            get_deleter()=TinySTL::forward<deleter_type>(up.get_deleter());
+            get_deleter()=zstl::forward<deleter_type>(up.get_deleter());
             return *this;
         }
 
@@ -152,7 +152,7 @@ namespace TinySTL{
         template<typename U,typename E>
         unique_ptr& operator=(unique_ptr<U,E>&& up)noexcept{
             reset(up.release());
-            get_deleter()=TinySTL::forward<E>(up.get_deleter());
+            get_deleter()=zstl::forward<E>(up.get_deleter());
             return *this;
         }
 
@@ -196,7 +196,7 @@ namespace TinySTL{
 
         void reset(pointer p=pointer())noexcept{
             //swap and destroy
-            using TinySTL::swap;
+            using zstl::swap;
             swap(M_t.M_ptr(),p);
 
             if(p!=nullptr)
@@ -204,7 +204,7 @@ namespace TinySTL{
         }
 
         void swap(unique_ptr const& rhs)noexcept{
-            TinySTL::swap(M_t,rhs.M_t);
+            zstl::swap(M_t,rhs.M_t);
         }
 
 
@@ -223,7 +223,7 @@ namespace TinySTL{
     //make function:
     template<typename T,typename... paras>
     unique_ptr<T> make_unique(paras&&... args){
-        return unique_ptr<T>(new T(TinySTL::forward<paras>(args)...));
+        return unique_ptr<T>(new T(zstl::forward<paras>(args)...));
     }
 
     //compare function:
@@ -268,4 +268,4 @@ namespace TinySTL{
         return less<CT>()(x.get(),y.get());
     }*/
 }
-#endif //TINYSTL_UNIQUE_PTR_H
+#endif //ZSTL_UNIQUE_PTR_H

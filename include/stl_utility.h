@@ -1,6 +1,6 @@
-#ifndef TINYSTL_STL_UTILITY_H
-#define TINYSTL_STL_UTILITY_H
+#ifndef ZSTL_STL_UTILITY_H
+#define ZSTL_STL_UTILITY_H
 
 #include "utility.h"
 
-#endif //TINYSTL_STL_UTILITY_H
+#endif //ZSTL_STL_UTILITY_H

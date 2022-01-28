@@ -2,14 +2,14 @@
 // Created by conzxy on 2021/3/20.
 //
 
-#ifndef TINYSTL_QUEUE_H
-#define TINYSTL_QUEUE_H
+#ifndef ZSTL_QUEUE_H
+#define ZSTL_QUEUE_H
 
 #include "deque.h"
 #include <config.h>
 
-namespace TinySTL{
-    template<typename T,typename C = TinySTL::deque<T>>
+namespace zstl{
+    template<typename T,typename C = zstl::deque<T>>
     class queue{
     public:
         using value_type        =typename C::value_type;
@@ -35,7 +35,7 @@ namespace TinySTL{
         void            push(value_type&& x)               { c.push_back(STL_MOVE(x)); }
         template<typename ...Args>
         void emplace(Args&&... args){
-            c.emplace_back(TinySTL::forward<Args>(args)...);
+            c.emplace_back(zstl::forward<Args>(args)...);
         }
         void pop()   { c.pop_front(); }
         void swap(queue<T,C> & other) noexcept{
@@ -76,4 +76,4 @@ namespace TinySTL{
 
 
 }
-#endif //TINYSTL_QUEUE_H
+#endif //ZSTL_QUEUE_H

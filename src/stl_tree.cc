@@ -6,7 +6,7 @@
  */
 #include "../include/stl_tree.h"
 
-namespace TinySTL{
+namespace zstl{
 
 RBTreeBaseNode const* 
 RBTreeIncrement(RBTreeBaseNode const* node) noexcept {
@@ -422,4 +422,4 @@ RBTreeBaseNode* RBTreeEraseAndFixup(
 }
 
 
-}//namespace TinySTL
+}//namespace zstl

@@ -7,15 +7,15 @@
 // you should inherit from this class in proteced(EBCO)
 //
 // FIXME remove others interfaces except for allocate and deallocate
-#ifndef TINYSTL_ALLOCATOR_H
-#define TINYSTL_ALLOCATOR_H
+#ifndef ZSTL_ALLOCATOR_H
+#define ZSTL_ALLOCATOR_H
 
 #include "stl_construct.h"
 #include "stl_utility.h"
 #include "type_traits.h"
 #include <new>
 
-namespace TinySTL{
+namespace zstl{
     template<typename T>
     class allocator{
     public:
@@ -45,17 +45,17 @@ namespace TinySTL{
 
         template<typename...Args, typename U>
         void construct(U* ptr,Args&&... args) const {
-            TinySTL::construct(ptr,TinySTL::forward<Args>(args)...);
+            zstl::construct(ptr,zstl::forward<Args>(args)...);
         }
 
         template<typename U>
         void destroy(U* ptr) const {
-            TinySTL::destroy(ptr);
+            zstl::destroy(ptr);
         }
 
         template<typename U>
         void destroy(U* first,U* last) const {
-            TinySTL::destroy(first,last);
+            zstl::destroy(first,last);
         }
     };
 
@@ -84,7 +84,7 @@ namespace TinySTL{
  
         template<typename... Args, typename U>
         inline static void construct(allocator_type& alloc, U* ptr, Args&&... args){
-            alloc.construct(ptr, TinySTL::forward<Args>(args)...);
+            alloc.construct(ptr, zstl::forward<Args>(args)...);
         }
 
         template<typename U>
@@ -98,6 +98,6 @@ namespace TinySTL{
         }
     };
 
-}//namespace TinySTL
+}//namespace zstl
 
-#endif //TINYSTL_ALLOCATOR_H
+#endif //ZSTL_ALLOCATOR_H

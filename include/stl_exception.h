@@ -1,10 +1,10 @@
-#ifndef TINYSTL_STL_EXCEPTION_H
-#define TINYSTL_STL_EXCEPTION_H
+#ifndef ZSTL_STL_EXCEPTION_H
+#define ZSTL_STL_EXCEPTION_H
 
 #include <stdexcept>
 #include <cassert>
 #include "type_traits.h"
-#define TINYSTL_DEBUG(expr) \
+#define ZSTL_DEBUG(expr) \
         assert(expr)
 
 #define THROW_RANGE_ERROR_IF(expr,what) \
@@ -27,4 +27,4 @@
 		throw; \
 	} 
 
-#endif //TINYSTL_STL_EXCEPTION_H
+#endif //ZSTL_STL_EXCEPTION_H

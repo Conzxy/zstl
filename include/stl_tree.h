@@ -1,5 +1,5 @@
-#ifndef _ZXY_TINYSTL_STL_TREE
-#define _ZXY_TINYSTL_STL_TREE
+#ifndef _ZXY_ZSTL_STL_TREE
+#define _ZXY_ZSTL_STL_TREE
 
 #include "stl_move.h"
 #include "stl_iterator.h"
@@ -19,7 +19,7 @@
 #include <iostream>
 #endif
 
-namespace TinySTL {
+namespace zstl {
 
 /**
  * @enum RBTreeColor
@@ -114,7 +114,7 @@ struct RBTreeHeader {
 		header.color = RBTreeColor::Red;
 		Reset();
 	}
-
+	
 	RBTreeHeader(RBTreeHeader && other) noexcept{
 		if(other.header.parent != nullptr)
 			MoveData(other);
@@ -405,7 +405,7 @@ inline std::size_t BH(RBTreeBaseNode const* node, RBTreeBaseNode const* root) no
  * @tparam Alloc allocator
  */
 template<typename Key, typename Val, typename GetKey, typename Compare,
-	typename Alloc = TinySTL::allocator<Val>>
+	typename Alloc = zstl::allocator<Val>>
 class RBTree {
 public:
 	using key_type = Key;
@@ -599,7 +599,7 @@ protected:
 	template<typename ...Args>
 	LinkType CreateNode(Args&&... args){
 		auto new_node = GetNode();
-		ConstructNode(new_node, TinySTL::forward<Args>(args)...);
+		ConstructNode(new_node, zstl::forward<Args>(args)...);
 		return new_node;
 	}
 
@@ -629,7 +629,7 @@ protected:
 		{ }
 
 		RBTreeImpl(NodeAllocator&& alloc)
-		 : NodeAllocator(TinySTL::move(alloc))
+		 : NodeAllocator(zstl::move(alloc))
 		{ }
 
 		RBTreeImpl(key_compare const& cmp)
@@ -750,8 +750,8 @@ protected:
 public:
 	using iterator = RBTreeIterator<Val>;
 	using const_iterator = RBTreeConstIterator<Val>;
-	using reverse_iterator = TinySTL::reverse_iterator<iterator>;
-	using const_reverse_iterator = TinySTL::reverse_iterator<const_iterator>;
+	using reverse_iterator = zstl::reverse_iterator<iterator>;
+	using const_reverse_iterator = zstl::reverse_iterator<const_iterator>;
 
 	Compare key_comp() const noexcept {
 		return impl_.key_compare_;
@@ -834,7 +834,7 @@ public:
 	}
 	
 	RBTree(RBTree&& rhs) noexcept
-		: impl_(TinySTL::move(rhs.impl_))
+		: impl_(zstl::move(rhs.impl_))
 	{
 		rhs.Header()->Reset;
 	}
@@ -850,7 +850,7 @@ public:
 	
 	RBTree& operator=(RBTree&& rhs) noexcept {
 		if(this != &rhs){
-			impl_.impl_ = TinySTL::move(rhs.impl_);
+			impl_.impl_ = zstl::move(rhs.impl_);
 			rhs.Header()->Reset();
 
 			return *this;
@@ -858,7 +858,7 @@ public:
 	}
 
 	void swap(RBTree const& rhs) noexcept {
-		using TinySTL::swap;
+		using zstl::swap;
 		swap(this->impl_, rhs.impl_);
 	}
 
@@ -877,10 +877,10 @@ public:
     auto res = GetInsertUniquePos(GetKey()(arg));
     
     if (res.second == nullptr) {
-      return TinySTL::make_pair(iterator(res.first), false);
+      return zstl::make_pair(iterator(res.first), false);
     }
 
-    return TinySTL::make_pair(
+    return zstl::make_pair(
         InsertAux(STL_FORWARD(Arg, arg), res.first, res.second),
         true);
   }
@@ -1194,7 +1194,7 @@ private:
 	///////////////////
 	/////INSERT_AUX////
 	///////////////////
-   template<typename Arg, typename = TinySTL::Enable_if_t<
+   template<typename Arg, typename = zstl::Enable_if_t<
 	 	Is_convertible<Arg, value_type>::value>>
 	//template<typename Arg>
 	iterator InsertAux(Arg&& arg, BasePtr cur, BasePtr p) {
@@ -1287,7 +1287,7 @@ private:
 #endif
 	friend inline bool operator==(RBTree const& lhs, RBTree const& rhs) noexcept {
 		return lhs.size() == rhs.size()
-			&& TinySTL::equal(lhs.begin(), lhs.end(), rhs.begin());
+			&& zstl::equal(lhs.begin(), lhs.end(), rhs.begin());
 	}
 	
 	friend inline bool operator!=(RBTree const& lhs, RBTree const& rhs) noexcept {
@@ -1295,7 +1295,7 @@ private:
 	}
 
 	friend inline bool operator<(RBTree const& lhs, RBTree const& rhs) noexcept {
-		return TinySTL::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin());
+		return zstl::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin());
 	}
 
 	friend inline bool operator>=(RBTree const& lhs, RBTree const& rhs) noexcept {
@@ -1358,7 +1358,7 @@ auto RBTree<K, V, GK, CP, Alloc>::GetInsertUniquePos(key_type const& key)
 	// if key_comp(pre.val, val) is false indicates that exists a value = val,
 	// Therefore, pre.val < val can prove val is unique,
 	// that is, there is a unique "hole" in the sorted sequence.
-  typedef TinySTL::pair<BasePtr, BasePtr> Res;
+  typedef zstl::pair<BasePtr, BasePtr> Res;
 
 	if(cmp_res){ // <1>
 		// there are two cases:
@@ -1411,7 +1411,7 @@ auto RBTree<K, V, GK, CP, Alloc>::GetInsertUniqueHintPos(
 -> pair<BasePtr, BasePtr> {
 	auto pos = pos_.ConstCast();
   
-  typedef TinySTL::pair<BasePtr, BasePtr> Res;
+  typedef zstl::pair<BasePtr, BasePtr> Res;
 
 	// FIXME make a end_iterator to insert sorted element may be useful
 	if(pos == end()) {
@@ -1475,7 +1475,7 @@ auto RBTree<K, V, GK, CP, Alloc>::GetInsertEqualHintPos(
 -> pair<BasePtr, BasePtr> {
 	auto pos = pos_.ConstCast();
 
-	typedef TinySTL::pair<BasePtr, BasePtr> Res;
+	typedef zstl::pair<BasePtr, BasePtr> Res;
   
   // the same logic as GetInsertEqualHintPos(),
   // but it allow same key value and no need to return nullptr to indicate failure
@@ -1663,6 +1663,6 @@ void RBTree<K, V, GK, CP, Alloc>::Erase(LinkType root) noexcept {
 }
 
 
-}//namespace TinySTL
+}//namespace zstl
 
-#endif //_ZXY_TINYSTL_STL_TREE
+#endif //_ZXY_ZSTL_STL_TREE

@@ -8,28 +8,26 @@
 
 #include <cstring>
 
-namespace TinySTL {
+namespace zstl {
 
 // FIXME: In C++14, use auto is better?
-//
 template<typename T1,typename T2>
-TINYSTL_CONSTEXPR Common_type_t<T1, T2> 
+ZSTL_CONSTEXPR Common_type_t<T1, T2> 
 max(T1 const& x,T2 const& y) {
 	return x<y?y:x;
 }
 
 template<typename T1,typename T2>
-TINYSTL_CONSTEXPR Common_type_t<T1, T2> 
+ZSTL_CONSTEXPR Common_type_t<T1, T2> 
 min(T1 const& x, T2 const& y) {
 	return x<y?x:y;
 }
 
 /**
- * @fn fill
  * @brief fill range in a given value
  */
 template<typename ForwardIterator,typename T>
-TINYSTL_CONSTEXPR void fill(ForwardIterator first,ForwardIterator last,T const& value){
+ZSTL_CONSTEXPR void fill(ForwardIterator first,ForwardIterator last,T const& value){
 	for(;first!=last;++first)
 		*first=value;
 }
@@ -44,11 +42,10 @@ inline void fill(wchar_t* first,wchar_t* last,wchar_t const& value){
 }
 
 /**
- * @fn fill_n
  * @brief fill number of n after first in given value	
  */
 template<typename OutputIterator,typename Size,typename T>
-TINYSTL_CONSTEXPR OutputIterator fill_n(OutputIterator first, Size n, T const& value){
+ZSTL_CONSTEXPR OutputIterator fill_n(OutputIterator first, Size n, T const& value){
 	for(;n>0;--n,++first){
 		*first=value;
 	}
@@ -56,7 +53,7 @@ TINYSTL_CONSTEXPR OutputIterator fill_n(OutputIterator first, Size n, T const& v
 }
 
 template<typename Size>
-TINYSTL_CONSTEXPR char* fill_n(char* first,Size n,char const& value){
+ZSTL_CONSTEXPR char* fill_n(char* first,Size n,char const& value){
 	std::memset(first,static_cast<unsigned char>(value),n);
 	return first+n;
 }
@@ -68,7 +65,6 @@ wchar_t* fill_n(wchar_t* first,Size n,wchar_t const& value){
 }
 
 /**
- * @fn copy
  * @brief write contents in [first, last) into [result, result + (last - first))
  */
 template<bool isMove, bool isSimple, typename Category>
@@ -285,7 +281,7 @@ template<typename BI_1,typename BI_2>
 BI_2 move_backward_iterator(BI_1 first,BI_1 last,
 							BI_2 result,Bidirectional_iterator_tag){
 	while(first!=last)
-		*--result=TinySTL::move(*--first);
+		*--result=zstl::move(*--first);
 	return result;
 }
 
@@ -293,7 +289,7 @@ template<typename BI_1,typename BI_2>
 BI_2 move_backward_iterator(BI_1 first,BI_1 last,
 							BI_2 result,Random_access_iterator_tag){
 	for(auto n=last-first;n>0;--n,++first,++result){
-		*--result=TinySTL::move(*--first);
+		*--result=zstl::move(*--first);
 	}
 	return result;
 }
@@ -305,7 +301,7 @@ BI_2 move_b_dispatch(BI_1 first,BI_1 last,
 }
 
 template<typename T1,typename T2>
-TinySTL::Enable_if_t<TinySTL::Is_same<TinySTL::Remove_reference_t<T1>,
+zstl::Enable_if_t<zstl::Is_same<zstl::Remove_reference_t<T1>,
 										T2>::value&&
 										_type_traits<T2>
 										::has_trivially_assignment_operator::value,T2*>
@@ -369,14 +365,14 @@ bool lexicographical_compare(II_1 first1, II_2 last1,
 }
 /*****************************swap********************************************/
 
-template<typename FwdIter,typename =TinySTL::Enable_if_t<is_forward_iterator<FwdIter>::value>>
+template<typename FwdIter,typename =zstl::Enable_if_t<is_forward_iterator<FwdIter>::value>>
 void iter_swap(FwdIter iter1,FwdIter iter2){
 	using value_type=Iter_value_type<FwdIter>;
-	value_type tmp=TinySTL::move(*iter2);
-	*iter2=TinySTL::move(*iter1);
-	*iter1=TinySTL::move(tmp);
+	value_type tmp=zstl::move(*iter2);
+	*iter2=zstl::move(*iter1);
+	*iter1=zstl::move(tmp);
 }
 
-} // namespace TinySTL
+} // namespace zstl
 
 #endif // STL_ALGOBASE_H

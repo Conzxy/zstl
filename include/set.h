@@ -1,14 +1,14 @@
-#ifndef _ZXY_TINYSTL_INCLUDE_SET_H_
-#define _ZXY_TINYSTL_INCLUDE_SET_H_
+#ifndef _ZXY_ZSTL_INCLUDE_SET_H_
+#define _ZXY_ZSTL_INCLUDE_SET_H_
 #include "stl_algobase.h"
 #include "stl_tree.h"
 #include "functional.h"
 
-namespace TinySTL{
+namespace zstl{
 
 template<typename T, 
-	 typename Compare = TinySTL::less<T>,
-	 typename Alloc = TinySTL::allocator<T>>
+	 typename Compare = zstl::less<T>,
+	 typename Alloc = zstl::allocator<T>>
 class Set{
 //TODO: BINARY_CALLABLE_CHECK
 public:
@@ -27,7 +27,7 @@ public:
 	using const_iterator = typename Rep::const_iterator;
 	using reverse_iterator = typename Rep::reverse_iterator;
 	using const_reverse_iterator = typename Rep::const_reverse_iterator;
-  using Res = TinySTL::pair<iterator, bool>;
+  using Res = zstl::pair<iterator, bool>;
 
 	Set() = default;
 	~Set() = default;
@@ -99,11 +99,11 @@ public:
 	{ return rb_.InsertUnique(first, last); }
 
 	template<typename... Args>
-	TinySTL::pair<iterator, bool> emplace(Args&&... args)
+	zstl::pair<iterator, bool> emplace(Args&&... args)
 	{ return rb_.EmplaceEqual(STL_FORWARD(Args, args)...); }
 
 	template<typename ...Args>
-	TinySTL::pair<iterator, bool> emplace_hint(const_iterator hint, Args&&... args)
+	zstl::pair<iterator, bool> emplace_hint(const_iterator hint, Args&&... args)
 	{ return rb_.EmplaceHintUnique(hint, STL_FORWARD(Args, args)...); }
 	
 	iterator erase(const_iterator pos)
@@ -131,11 +131,11 @@ public:
 	bool contains(key_type const& key) const
 	{ return contains(key); }
 
-	TinySTL::pair<iterator, iterator>
+	zstl::pair<iterator, iterator>
 	equal_range(key_type const& key)
 	{ return rb_.equal_range(key); }
 
-	TinySTL::pair<const_iterator, const_iterator>
+	zstl::pair<const_iterator, const_iterator>
 	equal_range(key_type const& key) const
 	{ return rb_.equal_range(key); }
 	
@@ -177,7 +177,7 @@ bool operator!=(
 { return !(lhs == rhs); }
 
 		
-} //namespace TinySTL
+} //namespace zstl
 
 
-#endif //_ZXY_TINYSTL_INCLUDE_SET_H
+#endif //_ZXY_ZSTL_INCLUDE_SET_H

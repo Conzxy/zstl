@@ -2,8 +2,8 @@
 //two strengths:
 //* positional interface
 //* can be constructed easily from a typelist
-#ifndef TINYSTL_TUPLE_H
-#define TINYSTL_TUPLE_H
+#ifndef ZSTL_TUPLE_H
+#define ZSTL_TUPLE_H
 
 #include "stl_move.h"
 #include "config.h"
@@ -11,7 +11,7 @@
 #include "typelist.h"
 #include "utility.h"
 
-namespace TinySTL{
+namespace zstl{
     template<typename ...>
     class Tuple;
 
@@ -46,7 +46,7 @@ namespace TinySTL{
     };*/
 
     template<int_ height, typename T, bool = 
-            TinySTL::Is_class<T>::value
+            zstl::Is_class<T>::value
 #if __cplusplus >= 201402L
 				&& ! std::is_final<T>::value>
 #else
@@ -455,4 +455,4 @@ namespace TinySTL{
 		}
 }
 
-#endif //TINYSTL_TUPLE_H
+#endif //ZSTL_TUPLE_H

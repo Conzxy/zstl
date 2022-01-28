@@ -4,8 +4,8 @@
 // CLASS TEMPLATE deque_iterator
 // CLASS TEMPLATE deque
 
-#ifndef TINYSTL_DEQUE_H
-#define TINYSTL_DEQUE_H
+#ifndef ZSTL_DEQUE_H
+#define ZSTL_DEQUE_H
 
 #include "config.h"
 #include "stl_iterator.h"
@@ -20,7 +20,7 @@
 #define DEQUEUE_MAP_INIT_SIZE 8
 #endif
 
-namespace TinySTL {
+namespace zstl {
     //如果buf_size不是默认值(0),我们根据value_sz决定缓冲区大小
     constexpr int_ deque_buffer_size(int_ buf_sz,int_ value_sz){
         return (buf_sz!=0) ? buf_sz : ((value_sz<512) ? 512/value_sz : 1);
@@ -260,8 +260,8 @@ namespace TinySTL {
         //element access
         reference       operator[](size_type index)     { return *(start+index); }
         const_reference operator[](size_type index)const{ return *(start+index); }
-        reference       at(size_type index)     { TINYSTL_DEBUG(index > 0 && index < size()); return *(start+index); }
-        const_reference at(size_type index)const{ TINYSTL_DEBUG(index >0 && index < size()); return *(start+index); }
+        reference       at(size_type index)     { ZSTL_DEBUG(index > 0 && index < size()); return *(start+index); }
+        const_reference at(size_type index)const{ ZSTL_DEBUG(index >0 && index < size()); return *(start+index); }
         reference       front()      { return *start; }
         const_reference front()const { return *start; }
         reference       back()     { return *(finish-1); }
@@ -327,7 +327,7 @@ namespace TinySTL {
     };
 }
 
-namespace TinySTL {
+namespace zstl {
     template<typename T, typename Alloc>
     deque<T, Alloc>::deque() {
         fill_init(0,value_type{});
@@ -368,7 +368,7 @@ namespace TinySTL {
 
     template<typename T,typename Alloc>
     deque<T,Alloc>& deque<T,Alloc>::operator=(deque const& other){
-        using TinySTL::swap;
+        using zstl::swap;
         deque tmp=other;
         swap(*this,tmp);
         return *this;
@@ -376,7 +376,7 @@ namespace TinySTL {
 
     template<typename T,typename Alloc>
     deque<T,Alloc>& deque<T,Alloc>::operator=(deque&& other)noexcept{
-        using TinySTL::swap;
+        using zstl::swap;
         this->~deque();
         swap(*this,other);
         other.map=nullptr;
@@ -919,5 +919,5 @@ namespace TinySTL {
     }
 }
 
-#endif //TINYSTL_DEQUE_H
+#endif //ZSTL_DEQUE_H
 

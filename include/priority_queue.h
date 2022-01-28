@@ -2,8 +2,8 @@
 // Created by 谁敢反对宁宁，我就打爆他狗头！ on 2021/2/11.
 //
 
-#ifndef TINYSTL_PRIORITY_QUEUE_H
-#define TINYSTL_PRIORITY_QUEUE_H
+#ifndef ZSTL_PRIORITY_QUEUE_H
+#define ZSTL_PRIORITY_QUEUE_H
 #include "vector.h"
 #include "config.h"
 #include "functional.h"
@@ -125,4 +125,4 @@ template<typename InputIt,
 priority_queue(InputIt,InputIt,Compare=Compare(),Container=Container())
 ->priority_queue<typename Container::value_type,Container,Compare>;
 
-#endif //TINYSTL_PRIORITY_QUEUE_H
+#endif //ZSTL_PRIORITY_QUEUE_H

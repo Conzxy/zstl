@@ -34,7 +34,7 @@
 #include <cstdint>
 #include "stl_type_traits_base.h"
 
-namespace TinySTL {
+namespace zstl {
 	namespace mpl {
 
 		namespace detail {
@@ -96,8 +96,8 @@ namespace TinySTL {
 
 ///////////////////////////////////////////////////////////
 // class template Select
-// reuse the TinySTL::Conditional
-// because TinySTL::Is_function has used the typelist
+// reuse the zstl::Conditional
+// because zstl::Is_function has used the typelist
 // Invocation(Cond is a predicate ,T and F are types):
 // Select<Cond,T,F>
 ///////////////////////////////////////////////////////////
@@ -826,6 +826,6 @@ namespace TinySTL {
 #endif
 		}	//namespace TL
 	}	//namespace mpl
-}	//namespace TinySTL
+}	//namespace zstl
 
 #endif //TYPELIST_H

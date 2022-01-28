@@ -4,7 +4,7 @@
 #include "stl_list.h"
 #include "functional.h"
 
-namespace TinySTL {
+namespace zstl {
 	//ctor:
 	template<typename T,typename Alloc>
 	list<T, Alloc>::list(size_type n,T const& x):node(empty_init()){
@@ -40,7 +40,7 @@ namespace TinySTL {
 	//assignment:
 	template<typename T,typename Alloc>
 	list<T, Alloc>& list<T, Alloc>::operator=(list const& other) {
-		using TinySTL::swap;
+		using zstl::swap;
 		list tmp(other.begin(),other.end());
 		swap(*this,tmp);
 		return *this;
@@ -56,7 +56,7 @@ namespace TinySTL {
 
 	template<typename T,typename Alloc>
 	list<T, Alloc>& list<T, Alloc>::operator=(std::initializer_list<T> il) {
-		using TinySTL::swap;
+		using zstl::swap;
 		list tmp(il.begin(),il.end());
 		swap(*this,tmp);
 		return *this;
@@ -90,7 +90,7 @@ namespace TinySTL {
 		}
 		else {
 			auto it=begin();
-			TinySTL::advance(it,n);
+			zstl::advance(it,n);
 			erase(it,end());
 		}
 	}
@@ -102,7 +102,7 @@ namespace TinySTL {
 		}
 		else {
 			auto it=begin();
-			TinySTL::advance(it,n);
+			zstl::advance(it,n);
 			erase(it,end());
 		}
 	}
@@ -112,19 +112,19 @@ namespace TinySTL {
 	template<typename... Args>
 	typename list<T, Alloc>::iterator list<T,Alloc>::emplace(const_iterator pos, Args&&... args) {
 		link_type cur=pos.current;
-		return {cur->prev=cur->prev->next=create_node(TinySTL::forward<Args>(args)...,cur->prev,cur)};
+		return {cur->prev=cur->prev->next=create_node(zstl::forward<Args>(args)...,cur->prev,cur)};
 	}
 
 	template<typename T,typename Alloc>
 	template<typename... Args>
 	void list<T, Alloc>::emplace_front(Args&&... args) {
-		emplace(begin(),TinySTL::forward<Args>(args)...);
+		emplace(begin(),zstl::forward<Args>(args)...);
 	}
 
 	template<typename T,typename Alloc>
 	template<typename... Args>
 	void list<T, Alloc>::emplace_back(Args&&... args) {
-		emplace(end(),TinySTL::forward<Args>(args)...);
+		emplace(end(),zstl::forward<Args>(args)...);
 	}
 
 	//insert:
@@ -137,14 +137,14 @@ namespace TinySTL {
 	template<typename T,typename Alloc>
 	typename list<T, Alloc>::iterator list<T, Alloc>::insert(const_iterator pos, T&& x) {
 		link_type cur=pos.current;
-		return {cur->prev=cur->prev->next=create_node(TinySTL::move(x),cur->prev,cur)};
+		return {cur->prev=cur->prev->next=create_node(zstl::move(x),cur->prev,cur)};
 	}
 
 	template<typename T,typename Alloc>
 	typename list<T, Alloc>::iterator list<T, Alloc>::insert(const_iterator pos, size_type n, const T& x) {
 		while(n--)
 			insert(pos,x);
-		TinySTL::advance(pos,-n);
+		zstl::advance(pos,-n);
 		return pos.current;
 	}
 
@@ -153,7 +153,7 @@ namespace TinySTL {
 	typename list<T, Alloc>::iterator list<T, Alloc>::insert(const_iterator pos,II first, II last) {
 		for(;first!=last;++first)
 			insert(pos,*first);
-		TinySTL::advance(pos,-distance(first,last));
+		zstl::advance(pos,-distance(first,last));
 		return pos.current;
 	}
 
@@ -181,13 +181,13 @@ namespace TinySTL {
 	void inline list<T, Alloc>::push_back(T const& x) { insert(end(), x); }
 
 	template<typename T,typename Alloc>
-	void inline list<T,Alloc>::push_back(T&& x){ insert(end(),TinySTL::move(x)); }
+	void inline list<T,Alloc>::push_back(T&& x){ insert(end(),zstl::move(x)); }
 
 	template<typename T,typename Alloc>
 	void inline list<T,Alloc>::push_front(T const& x){insert(begin(),x); }
 
 	template<typename T,typename Alloc>
-	void inline list<T,Alloc>::push_front(T &&x){insert(begin(),TinySTL::move(x)); }
+	void inline list<T,Alloc>::push_front(T &&x){insert(begin(),zstl::move(x)); }
 
 	template<typename T,typename Alloc>
 	void inline list<T,Alloc>::pop_front(){erase(begin()); }
@@ -333,7 +333,7 @@ namespace TinySTL {
 	//merge:
 	template<typename T,typename Alloc>
 	void list<T, Alloc>::merge(list& l) {
-	    merge(l,TinySTL::less<T>{});
+	    merge(l,zstl::less<T>{});
 	}
 
 	template<typename T,typename Alloc>
@@ -379,10 +379,10 @@ namespace TinySTL {
 		auto first=begin().current;
 		auto last=end().current;
 		while (first!=last) {
-			TinySTL::swap(first->prev,first->next);
+			zstl::swap(first->prev,first->next);
 			first=first->prev;
 		}
-		TinySTL::swap(last->prev,last->next);
+		zstl::swap(last->prev,last->next);
 		
 		/*auto first=begin();
 		auto last=end();
@@ -396,7 +396,7 @@ namespace TinySTL {
 	//sort:
 	template<typename T,typename Alloc>
 	void list<T, Alloc>::sort() {
-		sort(TinySTL::less<T>{});
+		sort(zstl::less<T>{});
 	}
 
 	template<typename T,typename Alloc>
@@ -409,7 +409,7 @@ namespace TinySTL {
 		list counter[64];	//最多可容纳2^64-1个元素，即64位数最大值
 		int fill=0;
 
-		using TinySTL::swap;
+		using zstl::swap;
 		while (!empty()) {
 			carry.splice(carry.begin(),*this,begin());
 			int i=0;
@@ -431,7 +431,7 @@ namespace TinySTL {
 	//specilized algorithm:
 	template<typename T,typename Alloc>
 	void inline list<T, Alloc>::swap(list& other)noexcept {
-		TinySTL::swap(node,other.node);
+		zstl::swap(node,other.node);
 	}
 }
 

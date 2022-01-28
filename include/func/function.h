@@ -5,14 +5,14 @@
 #include <exception>
 #include "invoke.h"
 
-namespace TinySTL{
+namespace zstl{
     template<typename T>
     class IsEqualComparable {
     private:
         static void* conv(bool);
         template<typename U>
-        static _true_type test(decltype(conv(TinySTL::declval<U const&>()==TinySTL::declval<U const&>())),
-            decltype(conv(!(TinySTL::declval<U const&>()==TinySTL::declval<U const&>()))));
+        static _true_type test(decltype(conv(zstl::declval<U const&>()==zstl::declval<U const&>())),
+            decltype(conv(!(zstl::declval<U const&>()==zstl::declval<U const&>()))));
         template<typename >
         static _false_type test(...);
     public:
@@ -52,7 +52,7 @@ namespace TinySTL{
     public:
         template<typename FunctorFwd>
         SpecificFunctorBridge(FunctorFwd&& functor)
-            : functor(TinySTL::forward<FunctorFwd>(functor)) {
+            : functor(zstl::forward<FunctorFwd>(functor)) {
         }
 
         virtual SpecificFunctorBridge* clone()const override {
@@ -60,7 +60,7 @@ namespace TinySTL{
         }
 
         virtual R invoke(Args... args)const override {
-            return TinySTL::invoke(Functor(functor),TinySTL::forward<Args>(args)...);
+            return zstl::invoke(Functor(functor),zstl::forward<Args>(args)...);
         }
 
         virtual bool equals(FunctorBridge<R, Args...> const* fb)const override {
@@ -98,7 +98,7 @@ namespace TinySTL{
         function(F&& f):bridge(nullptr) {
             using Functor=Decay_t<F>;
             using Bridge=SpecificFunctorBridge<Functor, R, Args...>;
-            bridge=new Bridge(TinySTL::forward<F>(f));
+            bridge=new Bridge(zstl::forward<F>(f));
         }
 
         function& operator=(function const& other) {

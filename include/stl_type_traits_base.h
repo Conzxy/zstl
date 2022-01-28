@@ -1,5 +1,5 @@
-#ifndef TINYSTL_STL_TYPE_TRAITS_BASE_H
-#define TINYSTL_STL_TYPE_TRAITS_BASE_H
+#ifndef ZSTL_STL_TYPE_TRAITS_BASE_H
+#define ZSTL_STL_TYPE_TRAITS_BASE_H
 
 //helper of _type_traits<>
 #define DEFINE_TYPE_TRAITS(TYPE)                            \
@@ -13,7 +13,7 @@ struct _type_traits<TYPE> {                                 \
 };                                                          \
 
 
-namespace TinySTL{
+namespace zstl{
     
     template<typename T,T val>
     struct Integral_constant{
@@ -64,4 +64,4 @@ namespace TinySTL{
     DEFINE_TYPE_TRAITS(float)
     DEFINE_TYPE_TRAITS(double long)
 }
-#endif //TINYSTL_STL_TYPE_TRAITS_BASE_H
+#endif //ZSTL_STL_TYPE_TRAITS_BASE_H

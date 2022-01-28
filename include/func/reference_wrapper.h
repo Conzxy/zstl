@@ -4,7 +4,7 @@
 #include "../type_traits.h"
 #include <memory>
 
-namespace TinySTL{
+namespace zstl{
     namespace detail{
         template<typename T>
         constexpr T& try_lref(T& t) noexcept { return t; }
@@ -21,8 +21,8 @@ namespace TinySTL{
 
         template<typename U,
                 typename =decltype(
-                    detail::try_lref<T>(TinySTL::declval<U>())),
-                TinySTL::Enable_if_t<!Is_same<self,Remove_cv_t<Remove_reference_t<U>>>::value,int> =0
+                    detail::try_lref<T>(zstl::declval<U>())),
+                zstl::Enable_if_t<!Is_same<self,Remove_cv_t<Remove_reference_t<U>>>::value,int> =0
                 >             
         reference_wrapper(U&& val)
             :ref_{std::addressof(val)}

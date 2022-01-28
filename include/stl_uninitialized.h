@@ -1,5 +1,5 @@
-#ifndef TINYSTL_STL_UNINITIALIZED_H
-#define TINYSTL_STL_UNINITIALIZED_H
+#ifndef ZSTL_STL_UNINITIALIZED_H
+#define ZSTL_STL_UNINITIALIZED_H
 
 #include "stl_construct.h"
 #include "stl_algorithm.h"
@@ -7,7 +7,7 @@
 #include "type_traits.h"
 #include "stl_exception.h"
 
-namespace TinySTL{
+namespace zstl{
     // gcc use class template<IsTrivialType>
     // but according to "the rule of chiel", class template also have cost
     // (just better than function template and SFINAE)
@@ -15,7 +15,7 @@ namespace TinySTL{
     void uninitialized_fill_dispatch(ForwardIterator first,ForwardIterator last,
                                      T const& x,_true_type)
     {
-        TinySTL::fill(first,last,x);
+        zstl::fill(first,last,x);
     }
 
     template<class ForwardIterator,typename T>
@@ -26,11 +26,11 @@ namespace TinySTL{
         TRY_BEGIN
             //FIXME std::__addressof() instead of &*
             for(cur=first;cur!=last;++cur){
-                TinySTL::construct(addressof(cur),x);
+                zstl::construct(addressof(cur),x);
             }
         TRY_END
         CATCH_ALL_BEGIN
-            TinySTL::destroy(first, cur);
+            zstl::destroy(first, cur);
             RETHROW
         CATCH_END
     }
@@ -55,7 +55,7 @@ namespace TinySTL{
     template<class ForwardIterator,typename Size,typename T>
     ForwardIterator uninitialized_fill_n_dispatch(ForwardIterator first,Size n,
                                      T const& x, _true_type){
-        return TinySTL::fill_n(first,n,x);
+        return zstl::fill_n(first,n,x);
     }
 
     template<class ForwardIterator,typename Size,typename T>
@@ -64,7 +64,7 @@ namespace TinySTL{
         auto cur=first;
         TRY_BEGIN
 			for(;n>0;--n,++cur){
-				TinySTL::construct(&*cur,x);
+				zstl::construct(&*cur,x);
 			}
 		TRY_END
         CATCH_ALL_BEGIN 
@@ -91,7 +91,7 @@ namespace TinySTL{
     template<class InputIterator,class ForwardIterator>
     ForwardIterator uninitialized_copy_dispatch(InputIterator first,InputIterator last,
                                                 ForwardIterator result,_true_type){
-        return TinySTL::copy(first,last,result);
+        return zstl::copy(first,last,result);
     }
 
     template<class InputIterator,class ForwardIterator>
@@ -128,7 +128,7 @@ namespace TinySTL{
     template<typename II,typename FI>
     FI uninitialized_move_dispatch(II first,II last,
                           FI result,_true_type){
-        return TinySTL::move(first,last,result);
+        return zstl::move(first,last,result);
     }
 
     template<typename II,typename FI>
@@ -138,7 +138,7 @@ namespace TinySTL{
 
         TRY_BEGIN
             for(;first!=last;++first,++result){
-                construct(&*result,TinySTL::move(*first));
+                construct(&*result,zstl::move(*first));
             }
         TRY_END
         CATCH_ALL_BEGIN
@@ -164,11 +164,11 @@ namespace TinySTL{
 
 	template<typename II, typename FI>
 	inline FI uninitialized_move_if_noexcept(II first, II last, FI result) {
-		return TinySTL::uninitialized_copy(
+		return zstl::uninitialized_copy(
 				MAKE_MOVE_IF_NOEXCEPT_ITERATOR(first), 
 				MAKE_MOVE_IF_NOEXCEPT_ITERATOR(last), 
 				result);
 	}
 
 }
-#endif //TINYSTL_STL_UNINITIALIZED_H
+#endif //ZSTL_STL_UNINITIALIZED_H

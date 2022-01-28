@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include "func/function.h"
 
-namespace TinySTL {
+namespace zstl {
 
 namespace detail {
 // @note
@@ -26,7 +26,7 @@ namespace detail {
 template<typename R, typename... Args>
 struct Callable_
 {
-	constexpr Callable_(TinySTL::function<R(Args...)> const&)
+	constexpr Callable_(zstl::function<R(Args...)> const&)
 	{ }
 };
 
@@ -57,7 +57,7 @@ constexpr bool Is_BinaryCallable(F&& f)
 { return Is_Callable<R, F, A, B>(STL_FORWARD(F, f)); }
 
 template<typename A, typename F>
-constexpr bool Is_UnargPredicate(F&& f)
+constexpr bool Is_UnaryPredicate(F&& f)
 { return Is_UnaryCallable<bool, A, F>(STL_FORWARD(F, f)); }
 
 template<typename A, typename B, typename F>

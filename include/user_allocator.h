@@ -3,7 +3,7 @@
 
 #include "alloc.h"
 
-namespace TinySTL{
+namespace zstl{
 	/*
 	 * @class ByteAllocator
 	 * @brief a simple allocator in bytes
@@ -33,7 +33,7 @@ namespace TinySTL{
 	 * };
 	 * @endcode
 	 *
-	 * now, TinySTL::allocator have a member type alias template named "rebind"
+	 * now, zstl::allocator have a member type alias template named "rebind"
 	 * @code
 	 * template<typename T, typename Alloc=STL_ allocator>
 	 * class deque{
@@ -49,7 +49,7 @@ namespace TinySTL{
     public:
         template<typename ...Args>
         static void construct(T* ptr,Args&&... args){
-            TinySTL::construct(ptr,TinySTL::forward<Args>(args)...);
+            zstl::construct(ptr,zstl::forward<Args>(args)...);
         }
 
         static void construct(T* ptr){
@@ -57,11 +57,11 @@ namespace TinySTL{
         }
 
         static void destroy(T* ptr){
-            TinySTL::destroy(ptr);
+            zstl::destroy(ptr);
         }
 
         static void destroy(T* first,T* last){
-            TinySTL::destroy(first,last);
+            zstl::destroy(first,last);
         }
 
         static T* allocate(size_t n=1){

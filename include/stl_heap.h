@@ -1,5 +1,5 @@
-#ifndef TINYSTL_STL_HEAP_H
-#define TINYSTL_STL_HEAP_H
+#ifndef ZSTL_STL_HEAP_H
+#define ZSTL_STL_HEAP_H
 
 //该文件提供heap相关算法
 #include "config.h"
@@ -7,7 +7,7 @@
 #include "stl_algorithm.h"
 #include "Functional.h"
 
-namespace TinySTL {
+namespace zstl {
     sz_t left(sz_t i){ return 2*i+1; }
     sz_t right(sz_t i){ return 2*i+2; }
     sz_t parent(sz_t i){ return (i-1)/2; }
@@ -164,4 +164,4 @@ namespace TinySTL {
         }
     }
 }
-#endif //TINYSTL_STL_HEAP_H
+#endif //ZSTL_STL_HEAP_H

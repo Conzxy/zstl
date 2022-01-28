@@ -1,13 +1,13 @@
-#ifndef TINYSTL_CONFIG_H
-#define TINYSTL_CONFIG_H
+#ifndef ZSTL_CONFIG_H
+#define ZSTL_CONFIG_H
 
 #include <cstdlib>
 
-#define STL_ TinySTL::
+#define STL_ zstl::
 #define STD_ std::
 #define TL_ mpl::TL::
-#define STL_ENABLE_IF(condition, type) TinySTL::Enable_if_t<(condition), type> = 0
-#define ADDRESSOF TinySTL::addressof
+#define STL_ENABLE_IF(condition, type) zstl::Enable_if_t<condition, type> = 0
+#define ADDRESSOF zstl::addressof
 
 using sz_t=std::size_t;
 
@@ -33,16 +33,16 @@ using sz_t=std::size_t;
 // 2): constexpr function don't allowed to declare local variable and for/while/if
 //
 #ifdef CXX_STANDARD_14
-#define TINYSTL_CONSTEXPR constexpr
+#define ZSTL_CONSTEXPR constexpr
 #else
-#define TINYSTL_CONSTEXPR inline 
+#define ZSTL_CONSTEXPR inline 
 #endif
 
 // Before C++11, should use throw() to indicate the function no throw
 #ifdef CXX_STANDARD_11
-#define TINYSTL_NOEXCEPT noexcept
+#define ZSTL_NOEXCEPT noexcept
 #else
-#define TINYSTL_NOEXCEPT throw()
+#define ZSTL_NOEXCEPT throw()
 #endif
 
-#endif //TINYSTL_CONFIG_H
+#endif //ZSTL_CONFIG_H

@@ -1,5 +1,5 @@
-#ifndef TINYSTL_VARIANT_H
-#define TINYSTL_VARIANT_H
+#ifndef ZSTL_VARIANT_H
+#define ZSTL_VARIANT_H
 
 #include <new> //std::
 #include "typelist.h"
@@ -8,9 +8,9 @@
 #include "stl_move.h"
 #include <exception>
 
-namespace TinySTL{
+namespace zstl{
 
-	using namespace TinySTL::mpl;
+	using namespace zstl::mpl;
 
     //visit helper class
     class ComputedResultType{};
@@ -303,6 +303,6 @@ namespace TinySTL{
 
         this->setDiscriminator(0);
     }
-} //namespace TinySTL
+} //namespace zstl
 
-#endif //TINYSTL_VARIANT__H
+#endif //ZSTL_VARIANT__H
