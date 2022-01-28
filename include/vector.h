@@ -1,7 +1,8 @@
-#ifndef TINYSTL_VECTOR_H
-#define TINYSTL_VECTOR_H
+#ifndef ZSTL_VECTOR_H
+#define ZSTL_VECTOR_H
 
 #include "allocator.h"
+#include "stl_exception.h"
 #include "type_traits.h"
 #include "stl_uninitialized.h"
 #include "stl_iterator.h"
@@ -12,12 +13,12 @@
 #include <stdexcept>
 #include <climits>
 
-namespace TinySTL {
+namespace zstl {
 /**
  * @class VectorBase
  * @tparam T type of element
  * @tparam Allocator type of Allocator
- * @brief memery management implemetation of Vector
+ * @brief memory management implemetation of Vector
  * @note: 
  * Use RAII technique or as base class both is OK,
  * as long as it can delegate the momery management to other part instead of Vector<> itself.
@@ -57,18 +58,18 @@ struct VectorBase : Allocator {
 		first_ = last_ = capa_ = nullptr;
 	}
 
-	VectorBase(VectorBase&& base) TINYSTL_NOEXCEPT
+	VectorBase(VectorBase&& base) ZSTL_NOEXCEPT
 		: first_{base.first_}
 		, last_{base.last_}
 		, capa_{base.capa_} 
 	{ base.first_ = base.last_ = base.capa_ = nullptr; }
 
-	VectorBase& operator=(VectorBase&& base) TINYSTL_NOEXCEPT{
+	VectorBase& operator=(VectorBase&& base) ZSTL_NOEXCEPT{
 		this->swap(base); 
 		return *this; 
 	}
 
-	void swap(VectorBase& rhs) TINYSTL_NOEXCEPT {
+	void swap(VectorBase& rhs) ZSTL_NOEXCEPT {
 		STL_SWAP(first_, rhs.first_);
 		STL_SWAP(last_, rhs.last_);
 		STL_SWAP(capa_, rhs.capa_);
@@ -82,14 +83,14 @@ public:
 /**
  * @class Vector
  * @tparam T type of element
- * @tparam Allocator type of Allocator(default is TinySTL::allocator)
+ * @tparam Allocator type of Allocator(default is zstl::allocator)
  * @brief 
  * Implemetation of linear space which
  * support expand automately.
  * Also, you reserve space by expand space exlicitly.
  * @see https://en.cppreference.com/w/cpp/container/vector for detail
  */
-template<typename T,typename Allocator = TinySTL::allocator<T>>
+template<typename T,typename Allocator = zstl::allocator<T>>
 class Vector : protected VectorBase<T, Allocator> {
 public:
 	using value_type             = T;
@@ -99,8 +100,8 @@ public:
 	using const_reference        = value_type const&;
 	using iterator               = T*;
 	using const_iterator         = T const*;
-	using reverse_iterator       = TinySTL::reverse_iterator<iterator>;
-	using const_reverse_iterator = TinySTL::reverse_iterator<const_iterator>;
+	using reverse_iterator       = zstl::reverse_iterator<iterator>;
+	using const_reverse_iterator = zstl::reverse_iterator<const_iterator>;
 	using allocator_type         = Allocator;
 
 	using size_type              = std::size_t;
@@ -114,7 +115,13 @@ public:
 	Vector(const size_type n,value_type const& val)
 		: base(n)
 	{
-		TinySTL::uninitialized_fill_n(begin(),n,val);
+		STL_TRY {
+			zstl::uninitialized_fill_n(begin(), n, val);
+			this->last_ = this->first_ + n;
+		}
+		catch (...) {
+			RETHROW	
+		}
 	}
 	
 	// if T is deleted default constructor, we just alloc space for it
@@ -136,7 +143,13 @@ public:
 	{
 		// no need to catch exception
 		// because RAII
-		TinySTL::uninitialized_copy(first,last,begin());
+		STL_TRY {
+			zstl::uninitialized_copy(first,last,begin());
+			this->last_ = this->first_ + capacity();
+		}
+		catch (...) {
+			RETHROW
+		}
 	}
 
 	// dtor:	
@@ -149,27 +162,27 @@ public:
 		: Vector(rhs.begin(),rhs.end())
 	{ }
 
-	Vector(Vector&& rhs) TINYSTL_NOEXCEPT 
+	Vector(Vector&& rhs) ZSTL_NOEXCEPT 
 		:  base(STL_MOVE(rhs))
 	{ }
 	
 	// The Enable_if_t is not necessay here, it is just ensure instantiation safe	
 	// (i.e. detect the error in compile time before the run time)
 	template<typename U, typename =
-		TinySTL::Enable_if_t<Is_convertible<U, T>::value>>
+		zstl::Enable_if_t<Is_convertible<U, T>::value>>
 	Vector(std::initializer_list<U> il)
 		: Vector(il.begin(),il.end())
 	{ }
 	
 	// operator=:
 	Vector& operator=(Vector const&);
-	Vector& operator=(Vector&& rhs) TINYSTL_NOEXCEPT {
+	Vector& operator=(Vector&& rhs) ZSTL_NOEXCEPT {
 		this->swap(rhs); 
 		return *this;
 	}
 	
 	template<typename U, typename = 
-		TinySTL::Enable_if_t<Is_convertible<U, T>::value>>
+		zstl::Enable_if_t<Is_convertible<U, T>::value>>
 	Vector& operator=(std::initializer_list<U>);
 
 	// assign operation:	
@@ -178,78 +191,78 @@ public:
 	void assign(InputIterator first,InputIterator last);
 	void assign(size_type n,T const& t);
 
-	allocator_type get_allocator()const TINYSTL_NOEXCEPT
+	allocator_type get_allocator()const ZSTL_NOEXCEPT
 	{ return Allocator(); }
 
 	// iterators:
-	iterator                begin()                     TINYSTL_NOEXCEPT
+	iterator                begin()                     ZSTL_NOEXCEPT
 	{ return iterator(this->first_); }
-	iterator                end()                       TINYSTL_NOEXCEPT
+	iterator                end()                       ZSTL_NOEXCEPT
 	{ return iterator(this->last_); }
-	const_iterator          begin()             const   TINYSTL_NOEXCEPT
+	const_iterator          begin()             const   ZSTL_NOEXCEPT
 	{ return const_iterator(this->first_); }
-	const_iterator          end()               const   TINYSTL_NOEXCEPT
+	const_iterator          end()               const   ZSTL_NOEXCEPT
 	{ return const_iterator(this->last_); }  
-	reverse_iterator        rbegin()                    TINYSTL_NOEXCEPT
+	reverse_iterator        rbegin()                    ZSTL_NOEXCEPT
 	{ return reverse_iterator(end()); }
-	const_reverse_iterator  rbegin()            const   TINYSTL_NOEXCEPT
+	const_reverse_iterator  rbegin()            const   ZSTL_NOEXCEPT
 	{ return const_reverse_iterator(end()); }
-	reverse_iterator        rend()                      TINYSTL_NOEXCEPT
+	reverse_iterator        rend()                      ZSTL_NOEXCEPT
 	{ return reverse_iterator(begin()); }
-	const_reverse_iterator  rend()              const   TINYSTL_NOEXCEPT
+	const_reverse_iterator  rend()              const   ZSTL_NOEXCEPT
 	{ return const_reverse_iterator(begin()); }
 
-	const_iterator          cbegin()            const   TINYSTL_NOEXCEPT
+	const_iterator          cbegin()            const   ZSTL_NOEXCEPT
 	{ return begin(); }
-	const_iterator          cend()              const   TINYSTL_NOEXCEPT
+	const_iterator          cend()              const   ZSTL_NOEXCEPT
 	{ return end(); }
-	const_reverse_iterator  crbegin()           const   TINYSTL_NOEXCEPT
+	const_reverse_iterator  crbegin()           const   ZSTL_NOEXCEPT
 	{ return rbegin(); }
-	const_reverse_iterator  crend()             const   TINYSTL_NOEXCEPT
+	const_reverse_iterator  crend()             const   ZSTL_NOEXCEPT
 	{ return rend(); }
 
 	// capacity:
-	size_type   size()               const   TINYSTL_NOEXCEPT
+	size_type   size()               const   ZSTL_NOEXCEPT
 	{ return end()-begin(); }
-	size_type   max_size()           const   TINYSTL_NOEXCEPT
+	size_type   max_size()           const   ZSTL_NOEXCEPT
 	{ return size_type(UINT_MAX/sizeof(T)); }
 	void        resize(size_type sz);
 	void        resize(size_type sz,T const& c);
-	size_type   capacity()              const   TINYSTL_NOEXCEPT
+	size_type   capacity()              const   ZSTL_NOEXCEPT
 	{ return this->capa_ - this->first_; }
-	bool        empty()                 const   TINYSTL_NOEXCEPT
+	bool        empty()                 const   ZSTL_NOEXCEPT
 	{return begin() == end(); }
 	void        reserve(size_type n);
 
 	void        shrink_to_fit();
 
 	// element access:
-	reference           operator[](size_type n) TINYSTL_NOEXCEPT
+	reference           operator[](size_type n) ZSTL_NOEXCEPT
 	{ return *(begin()+n); }
-	const_reference     operator[](size_type n)const TINYSTL_NOEXCEPT
+	const_reference     operator[](size_type n)const ZSTL_NOEXCEPT
 	{ return *(cbegin()+n); }
 	reference           at(size_type n);
 	const_reference     at(size_type n)const;
-	reference           front() TINYSTL_NOEXCEPT
+	reference           front() ZSTL_NOEXCEPT
 	{ return *begin(); }
-	const_reference     front() const TINYSTL_NOEXCEPT
+	const_reference     front() const ZSTL_NOEXCEPT
 	{ return *begin(); }
-	reference           back() TINYSTL_NOEXCEPT
+	reference           back() ZSTL_NOEXCEPT
 	{ return *(end()-1); }
-	const_reference     back()const TINYSTL_NOEXCEPT
+	const_reference     back()const ZSTL_NOEXCEPT
 	{ return *(end()-1); }
 
 	// data access:
-	T*          data()  TINYSTL_NOEXCEPT
+	T*          data()  ZSTL_NOEXCEPT
 	{ return this->first_; }
-	T const*    data()  const TINYSTL_NOEXCEPT
+	T const*    data()  const ZSTL_NOEXCEPT
 	{ return this->first_; }
 
 	// modifiers:
 	template<typename...Args>
 	void emplace_back(Args&&... args);
 	void push_back(T const& x);
-	void push_back(T&& x){ emplace_back(TinySTL::move(x)); }
+	void push_back(T&& x){ emplace_back(zstl::move(x)); }
 
 	template<typename... Args> iterator emplace(const_iterator position,Args&&... args);
 
@@ -262,14 +275,14 @@ public:
 					InputIterator first,InputIterator last);
 
 	template<typename U, typename = 
-		TinySTL::Enable_if_t<Is_convertible<U, T>::value>>
+		zstl::Enable_if_t<Is_convertible<U, T>::value>>
 	iterator insert(const_iterator position,std::initializer_list<U> il);
-	void pop_back() TINYSTL_NOEXCEPT;
+	void pop_back() ZSTL_NOEXCEPT;
 
 	iterator erase(const_iterator position);
 	iterator erase(const_iterator first,const_iterator last);
 
-	void swap(Vector& rhs)TINYSTL_NOEXCEPT
+	void swap(Vector& rhs)ZSTL_NOEXCEPT
 	{ this->base::swap(rhs); }
 
 	// @warning clear() don't free space.
@@ -277,7 +290,7 @@ public:
 	// also you can use Vector(v).swap(v)(used before c++11).
 	// But the second approach is not recommended,
 	// because 
-	void clear() TINYSTL_NOEXCEPT
+	void clear() ZSTL_NOEXCEPT
 	{ erase(begin(),end()); }
 
 private:
@@ -294,12 +307,18 @@ private:
 	iterator eraseAux(iterator first,iterator last);
 	iterator eraseAux(iterator position);
 	
-	template<typename U, TinySTL::Enable_if_t<Is_default_constructible<U>::value, char> = 0>
+	template<typename U, zstl::Enable_if_t<Is_default_constructible<U>::value, char> = 0>
 	void Vector_aux(size_type n) {
-		TinySTL::uninitialized_fill_n(this->first_, n, U{});
+		STL_TRY {
+			zstl::uninitialized_fill_n(this->first_, n, U{});
+			this->last_ = this->first_ + n;
+		}
+		catch (...) {
+			RETHROW
+		}
 	}
 		
-	template<typename U, TinySTL::Enable_if_t<!Is_default_constructible<U>::value, int> = 0>
+	template<typename U, zstl::Enable_if_t<!Is_default_constructible<U>::value, int> = 0>
 	void Vector_aux(size_type )
 	{ }
 
@@ -307,7 +326,7 @@ private:
 	// we use realloc() to reallocate then no need to move old element to new space
 	static constexpr bool useReallocPolicy = 
 		Conjunction_t<
-			Is_same<Allocator, TinySTL::allocator<T>>,
+			Is_same<Allocator, zstl::allocator<T>>,
 			Is_trivially_copyable<T>>::value;
 
 };
@@ -316,7 +335,7 @@ template<typename T,typename Allocator>
 inline bool 
 operator==(Vector<T,Allocator> const& x,Vector<T,Allocator> const& y) {
 	return x.size()==x.size() &&
-			TinySTL::equal(x.begin(),x.end(),y.begin());
+			zstl::equal(x.begin(),x.end(),y.begin());
 }
 
 template<typename T,typename Allocator>
@@ -327,7 +346,7 @@ operator!=(Vector<T,Allocator> const& x,Vector<T,Allocator> const& y)
 template<typename T,typename Allocator>
 inline bool 
 operator <(Vector<T,Allocator> const& x,Vector<T,Allocator> const& y) {
-	return TinySTL::lexicographical_compare(
+	return zstl::lexicographical_compare(
 		x.begin(), x.end(), y.begin(), y.end());
 }
 
@@ -351,7 +370,7 @@ operator<=(Vector<T,Allocator> const& x,Vector<T,Allocator> const& y)
 template<typename T,typename Allocator>
 inline void 
 swap(Vector<T,Allocator>& x,Vector<T,Allocator>& y) 
-TINYSTL_NOEXCEPT(TINYSTL_NOEXCEPT(x.swap(y)))
+ZSTL_NOEXCEPT(ZSTL_NOEXCEPT(x.swap(y)))
 { x.swap(y); }
 
 template<typename T,typename Alloc>
@@ -370,18 +389,18 @@ Vector<T,Alloc>::operator=(Vector const& rhs){
 			swap(tmp);
 		} else if (new_sz <= size()) {
 			this->last_ 
-				= TinySTL::copy
+				= zstl::copy
 				(rhs.begin(), rhs.end(), this->first_);
 
 			AllocTraits::destroy(*this, this->last_, this->first_+old_sz);
 		} else {
 			// size() < new_sz < capacity()
 			this->last_ 
-				= TinySTL::copy
+				= zstl::copy
 				(rhs.begin(), rhs.begin()+size(), begin());
 
 			this->last_ 
-				= TinySTL::uninitialized_copy
+				= zstl::uninitialized_copy
 				(rhs.begin()+size(), rhs.end(), this->last_);
 				
 
@@ -469,13 +488,13 @@ Vector<T,Alloc>::reserve(size_type n){
 		}
 		else {
 			new_first = AllocTraits::allocate(*this, n);
-			// In fact, TinySTL::copy use __builtin_memmove() when 
+			// In fact, zstl::copy use __builtin_memmove() when 
 			// * iterator is pointer(so, it must be RandomAccessIterator)
 			// * value_type of range iteraot and result is same
 			// * value_type is trivially_copyable
 			// @see stl_algobase.h
 			TRY_BEGIN	
-				TinySTL::uninitialized_copy(
+				zstl::uninitialized_copy(
 						MAKE_MOVE_IF_NOEXCEPT_ITERATOR(begin()),
 						MAKE_MOVE_IF_NOEXCEPT_ITERATOR(end()),
 						new_first);
@@ -502,7 +521,7 @@ template<typename T,typename Alloc>
 void 
 Vector<T,Alloc>::shrink_to_fit(){
 	Vector<T, Alloc> self(size());
-	TinySTL::uninitialized_move_if_noexcept(begin(), end(), self.begin());
+	zstl::uninitialized_move_if_noexcept(begin(), end(), self.begin());
 	this->swap(self);
 }
 
@@ -517,7 +536,7 @@ Vector<T,Alloc>::emplace(const_iterator position,Args&&...args)
 
 	if(this->last_ < this->capa_ ){
 		if(position == end())
-			emplace_back(TinySTL::forward<Args>(args)...);
+			emplace_back(zstl::forward<Args>(args)...);
 		else{
 			AllocTraits::construct(*this, end(),STL_MOVE(back()));
 			//avoid the intersection of source interval and destination interval
@@ -526,7 +545,7 @@ Vector<T,Alloc>::emplace(const_iterator position,Args&&...args)
 				MAKE_MOVE_IF_NOEXCEPT_ITERATOR(pos),
 				MAKE_MOVE_IF_NOEXCEPT_ITERATOR(this->last_-1),
 				this->last_);
-			*position = value_type(TinySTL::forward<Args>(args)...);
+			*position = value_type(zstl::forward<Args>(args)...);
 			++this->last_;
 		}
 	}
@@ -542,7 +561,7 @@ template<typename...Args>
 void 
 Vector<T,Alloc>::emplace_back(Args&&... args){
 	if (this->last_ < this->capa_) {
-		AllocTraits::construct(*this, ADDRESSOF(*end()), TinySTL::forward<Args>(args)...);
+		AllocTraits::construct(*this, ADDRESSOF(*end()), zstl::forward<Args>(args)...);
 		++this->last_;
 	} else {
 		//expandAndEmplace(end(), STL_FORWARD(Args, args)...);
@@ -589,7 +608,7 @@ Vector<T, Alloc>::insert(const_iterator position, std::initializer_list<U> il)
 
 template<typename T, typename Alloc>
 inline void
-Vector<T, Alloc>::pop_back() TINYSTL_NOEXCEPT {
+Vector<T, Alloc>::pop_back() ZSTL_NOEXCEPT {
 	checkSize();
 	--this->last_;
 	AllocTraits::destroy(*this, this->last_);
@@ -618,7 +637,7 @@ Vector<T,Alloc>::insertAux(iterator position,T const& x)
 	const auto offset = position - begin();
 	if(this->last_ < this->capa_) {
 		AllocTraits::construct(*this, ADDRESSOF(*end()), STL_MOVE(back()));
-		TinySTL::copy_backward(
+		zstl::copy_backward(
 			MAKE_MOVE_IF_NOEXCEPT_ITERATOR(position),
 			MAKE_MOVE_IF_NOEXCEPT_ITERATOR(end() - 1),
 			end());
@@ -643,18 +662,18 @@ Vector<T,Alloc>::insertFillNAux(iterator position,size_type n,T const& x)
 
 		if (remaining_storage >= n) {
 			if (eles_after_pos <= n) {
-				auto tmp = TinySTL::uninitialized_move_if_noexcept(position, end(), position+n);
-				TinySTL::fill_n(position, eles_after_pos, x);
-				TinySTL::uninitialized_fill_n(end(), n - eles_after_pos, x);
+				auto tmp = zstl::uninitialized_move_if_noexcept(position, end(), position+n);
+				zstl::fill_n(position, eles_after_pos, x);
+				zstl::uninitialized_fill_n(end(), n - eles_after_pos, x);
 				this->last_ = tmp;	
 			} else {
-				auto tmp = TinySTL::uninitialized_move_if_noexcept(end()-n, end(), end());
-				TinySTL::copy_backward(
+				auto tmp = zstl::uninitialized_move_if_noexcept(end()-n, end(), end());
+				zstl::copy_backward(
 						MAKE_MOVE_IF_NOEXCEPT_ITERATOR(position), 
 						MAKE_MOVE_IF_NOEXCEPT_ITERATOR(
 							position + eles_after_pos - n), 
 						position+n);
-				TinySTL::fill_n(position, n, x);
+				zstl::fill_n(position, n, x);
 				this->last_ = tmp;
 			}
 		} else {
@@ -663,9 +682,9 @@ Vector<T,Alloc>::insertFillNAux(iterator position,size_type n,T const& x)
 			const auto new_first = AllocTraits::allocate(*this, new_capa);
 			iterator tmp = new_first;
 			TRY_BEGIN
-				tmp = TinySTL::uninitialized_move_if_noexcept(begin(), position, tmp);
-				tmp = TinySTL::uninitialized_fill_n(tmp, n, x);
-				tmp = TinySTL::uninitialized_move_if_noexcept(position, end(), tmp);
+				tmp = zstl::uninitialized_move_if_noexcept(begin(), position, tmp);
+				tmp = zstl::uninitialized_fill_n(tmp, n, x);
+				tmp = zstl::uninitialized_move_if_noexcept(position, end(), tmp);
 			TRY_END
 			CATCH_ALL_BEGIN
 				// No need to call destroy because uninitialized_* has handle this case
@@ -690,7 +709,7 @@ auto
 Vector<T, Alloc>::insertRangeAux(iterator position, II first, II last) 
 -> iterator {
 	const size_type offset = position - begin();
-	const size_type n = TinySTL::distance(first, last);
+	const size_type n = zstl::distance(first, last);
 
 	if (n > 0) {
 		const size_type remaining_storage = capacity() - size();
@@ -698,18 +717,18 @@ Vector<T, Alloc>::insertRangeAux(iterator position, II first, II last)
 
 		if (remaining_storage >= n) {
 			if (eles_after_pos <= n) {
-				auto tmp = TinySTL::uninitialized_move_if_noexcept(position, end(), position+n);
-				auto tmp2 = TinySTL::advanceIter(first, eles_after_pos);
-				TinySTL::copy(first, tmp2, position);
-				TinySTL::uninitialized_copy(tmp2, last, begin() + eles_after_pos);
+				auto tmp = zstl::uninitialized_move_if_noexcept(position, end(), position+n);
+				auto tmp2 = zstl::advance_iter(first, eles_after_pos);
+				zstl::copy(first, tmp2, position);
+				zstl::uninitialized_copy(tmp2, last, begin() + eles_after_pos);
 				this->last_ = tmp;	
 			} else {
-				auto tmp = TinySTL::uninitialized_move_if_noexcept(end()-n, end(), end());
-				TinySTL::copy_backward(
+				auto tmp = zstl::uninitialized_move_if_noexcept(end()-n, end(), end());
+				zstl::copy_backward(
 						MAKE_MOVE_IF_NOEXCEPT_ITERATOR(position), 
 						MAKE_MOVE_IF_NOEXCEPT_ITERATOR(position + eles_after_pos - n), 
 						position+n);
-				TinySTL::copy(first, last, position);
+				zstl::copy(first, last, position);
 				this->last_ = tmp;
 			}
 		} else {
@@ -718,9 +737,9 @@ Vector<T, Alloc>::insertRangeAux(iterator position, II first, II last)
 			const auto new_first = AllocTraits::allocate(*this, new_capa);
 			iterator tmp = new_first;
 			TRY_BEGIN
-				tmp = TinySTL::uninitialized_move_if_noexcept(begin(), position, tmp);
-				tmp = TinySTL::uninitialized_copy(first, last, tmp);
-				tmp = TinySTL::uninitialized_move_if_noexcept(position, end(), tmp);
+				tmp = zstl::uninitialized_move_if_noexcept(begin(), position, tmp);
+				tmp = zstl::uninitialized_copy(first, last, tmp);
+				tmp = zstl::uninitialized_move_if_noexcept(position, end(), tmp);
 			TRY_END
 			CATCH_ALL_BEGIN
 				// No need to call destroy because uninitialized_* has handle this case
@@ -752,10 +771,10 @@ Vector<T, Alloc>::expandAndEmplace(const_iterator pos, Args&&... args) {
 	auto tmp = new_first;
 
 	TRY_BEGIN
-		tmp = TinySTL::uninitialized_move_if_noexcept(
+		tmp = zstl::uninitialized_move_if_noexcept(
 			begin(), position, tmp);
 		AllocTraits::construct(*this, tmp, STL_FORWARD(Args, args)...);
-		tmp = TinySTL::uninitialized_move_if_noexcept(
+		tmp = zstl::uninitialized_move_if_noexcept(
 			position, end(), tmp + 1);
 	TRY_END
 	CATCH_ALL_BEGIN
@@ -774,7 +793,7 @@ auto
 Vector<T,Alloc>::eraseAux(iterator first,iterator last)
 -> iterator {
 	const auto offset = first - begin();
-	auto tmp = TinySTL::copy(
+	auto tmp = zstl::copy(
 		MAKE_MOVE_IF_NOEXCEPT_ITERATOR(last),
 		MAKE_MOVE_IF_NOEXCEPT_ITERATOR(end()),
 		first);
@@ -795,7 +814,7 @@ Vector<T,Alloc>::eraseAux(iterator position)
 -> iterator {
 	const auto offset = position - begin();
 	if (NextIter(position) != end())  {
-		TinySTL::copy(
+		zstl::copy(
 			MAKE_MOVE_IF_NOEXCEPT_ITERATOR(position + 1),
 			MAKE_MOVE_IF_NOEXCEPT_ITERATOR(end()),
 			position);
@@ -846,6 +865,6 @@ Vector<T,Alloc>::getNewCapacity(size_type len)const
 	//return 2 * capacity() + len;
 }
 
-} // namespace TinySTL
+} // namespace zstl
 
-#endif // TINYSTL_VECTOR_H
+#endif // ZSTL_VECTOR_H
