@@ -1,12 +1,13 @@
 #pragma once
-#include <algorithm>
 #ifndef STL_SUP_FORWARD_LIST_IMPL_H
 #define STL_SUP_FORWARD_LIST_IMPL_H
 
 #include "forward_list_fwd.h"
 #include "algorithm.h"
-#include <vector>
 #include "zassert.h"
+
+#include <algorithm>
+#include <utility>
 
 #ifdef FORWARD_LIST_DEBUG
 #include <iostream>
@@ -17,44 +18,97 @@
 namespace zstl {
 
 template<typename T, typename A>
+void FORWARD_LIST_TEMPLATE::resize(SizeType n)
+{
+  if (size() <= n) {
+    auto diff = n - size();
+
+    while (diff--) {
+      push_back(T{});
+    }
+  }
+  else {
+    auto it = zstl::advance_iter(before_begin(), n);
+
+    while (it.next() != end()) {
+      erase_after(it);
+    }
+  }
+}
+
+template<typename T, typename A>
+void FORWARD_LIST_TEMPLATE::resize(SizeType n, ValueType const& val)
+{
+  if (size() <= n) {
+    auto diff = n - size();
+
+    while (diff--) {
+      push_back(val);
+    }
+  }
+  else {
+    auto it = zstl::advance_iter(before_begin(), n);
+
+    while (it.next() != end()) {
+      erase_after(it);
+    }
+  }
+}
+
+template<typename T, typename A>
+void FORWARD_LIST_TEMPLATE::assign(SizeType count, ValueType const& value)
+{
+  Iterator beg;
+  for (beg = before_begin(); count != 0 && beg.next() != end(); ++beg) {
+    AllocTraits::destroy(*this, &*beg.next());
+    AllocTraits::construct(*this, &*beg.next(), value);
+    --count;
+  }
+  
+  // count > size() 
+  if (count > 0) {
+    while(count--) {
+      push_front(value);
+    }
+  }
+  else if (count < 0) {
+    // count < size()
+    while (beg.next() != end()) {
+      erase_after(beg); 
+    }
+  }
+}
+
+template<typename T, typename A>
+template<typename InputIterator, typename>
+void FORWARD_LIST_TEMPLATE::assign(InputIterator first, InputIterator last)
+{
+  Iterator beg;
+  for (beg = before_begin(); beg.next() != end() && first != last; ++beg, ++first) {
+    AllocTraits::destroy(*this, &*beg.next());
+    AllocTraits::construct(*this, &*beg.next(), *first);
+  }
+  
+  // size() < distance(first, last) 
+  if (beg.next() == end()) {
+    while (first != last) {
+      // insert_after(beg, *first);
+      push_back(*first++);
+    }  
+  }
+  else if (first == last) {
+    // size() > distance(first, last)
+    while (beg.next() != end()) {
+      erase_after(beg);
+    }
+  }
+}
+
+template<typename T, typename A>
 auto FORWARD_LIST_TEMPLATE::operator=(Self const& other)
  -> Self&
 {
-  Iterator beg;
-  auto obeg = other.begin();
-  if (size() <= other.size()) {
-    beg = begin();
-
-    for (SizeType i = 0; i < size(); ++i) {
-      AllocTraits::destroy(*this, &beg);
-      AllocTraits::construct(*this, &beg, *obeg);
-      ++beg; ++obeg;
-    }
-
-    for (SizeType i = other.size() - size();
-          i > 0; --i)
-    {
-      push_back(*obeg++);
-    }
-
-    assert(size() == other.size());
-  }
-  else {
-    for (SizeType i = size() - other.size(); i > 0; --i) {
-      auto old_node = header_->next;
-      header_->next = old_node->next;
-      drop_node(old_node);
-    }
-
-    beg = begin();
-    for (SizeType i = 0; i < other.size(); ++i) {
-
-      AllocTraits::destroy(*this, &beg);
-      AllocTraits::construct(*this, &beg, *obeg);
-      ++beg; ++obeg;
-    }
-  }
-
+  assign(other.begin(), other.end());
   return *this;
 }
 
@@ -331,12 +385,7 @@ void FORWARD_LIST_TEMPLATE::sort()
   ForwardList equal;
   ForwardList larger;
   
-  if (size() <= 2) {
-    // reverse
-    if (size() == 2) {
-      push_back(extract_front());
-    }
-
+  if (size() < 2) {
     return ;
   } 
 

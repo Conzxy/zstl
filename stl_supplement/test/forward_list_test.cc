@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <gtest/gtest.h>
 #include <algorithm>
+#include <random>
 
 #include "iterator.h"
 
@@ -236,14 +237,17 @@ TEST(forward_list, copy_assign) {
 
   FL<int> l2{ 2, 3, 4 };
   EXPECT_EQ(l2 = l1, l1);
+  EXPECT_EQ(*l2.before_end(), 6);
   puts("copy_assign less pass(1)");
 
   FL<int> l3{ 1, 1, 1, 1, 1, 1, 1 };
   EXPECT_EQ(l3 = l1, l1);
+  EXPECT_EQ(*l3.before_end(), 6);
   puts("copy_assign larger pass(2)");
 
   FL<int> l4;
   EXPECT_EQ(l4 = l1, l1);
+  EXPECT_EQ(*l4.before_end(), 6);
   puts("copy_assign empty pass(3)");
 }
 
@@ -253,6 +257,32 @@ TEST(forward_list, sort) {
   l1.sort();
 
   EXPECT_TRUE(std::is_sorted(l1.begin(), l1.end()));
+
+  FL<int> l2;
+  
+  std::random_device r;
+  std::default_random_engine e(r());
+  std::uniform_int_distribution<int> uniform_dist(0, 100000);
+  std::generate_n(std::back_inserter(l2), 10000, [&]() { return uniform_dist(e); });
+  l2.sort();
+
+  EXPECT_TRUE(std::is_sorted(l2.begin(), l2.end()));
+}
+
+TEST(forward_list, resize) {
+  FL<int> l1;
+
+  l1.resize(10, 2);
+  equal_list(l1, { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 });
+  puts("resize empty <- (10, 2) pass");
+
+  l1.resize(2, 1);
+  equal_list(l1, { 2, 2 });
+  puts("resize (10, 2) <- (2, 1) pass");
+
+  l1.resize(2, 0);
+  equal_list(l1, { 2, 2 });
+  puts("resize (2, 2) <- (2, 0) pass");
 }
 
 int main() 

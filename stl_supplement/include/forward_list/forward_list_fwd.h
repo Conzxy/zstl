@@ -82,12 +82,24 @@ class ForwardList : protected forward_list_detail::ForwardListBase<T, Alloc> {
   using Self = ForwardList;
   using Base = forward_list_detail::ForwardListBase<T, Alloc>;
 public: 
+  // STL compatible
+  using value_type      = T;
+  using allocator_type  = Alloc;
+  using size_type       = std::size_t;
+  using difference_type = std::ptrdiff_t;
+  using reference       = value_type&;
+  using const_reference = value_type const&;
+  using pointer         = typename std::allocator_traits<Alloc>::pointer;
+  using const_pointer   = typename std::allocator_traits<Alloc>::const_pointer;
+  using iterator        = ForwardListIterator<value_type>;
+  using const_iterator  = ForwardListConstIterator<value_type>;
+
   using ValueType     = T;
   using SizeType      = std::size_t;
   using Ref           = T&;
   using ConstRef      = T const&;
-  using Pointer       = T*;
-  using ConstPointer  = T const*;
+  using Pointer       = typename std::allocator_traits<Alloc>::pointer;
+  using ConstPointer  = typename std::allocator_traits<Alloc>::const_pointer;
   using Iterator      = ForwardListIterator<T>;
   using ConstIterator = ForwardListConstIterator<T>;
   using BaseNode      = typename Iterator::BaseNode;
@@ -114,7 +126,7 @@ public:
   ForwardList(std::initializer_list<E> il)
    : ForwardList(il.begin(), il.end())
   { }
-
+  
   /**
    * Special member function
    */
@@ -138,6 +150,17 @@ public:
     this->swap(other);
     return *this;
   }
+  
+  allocator_type get_allocator() const noexcept { return allocator_type{}; }
+
+  void assign(SizeType count, ValueType const& value);
+  template<typename InputIterator,
+    typename = zstl::enable_if_t<zstl::is_input_iterator<InputIterator>::value>>
+  void assign(InputIterator first, InputIterator last);
+  template<typename U>
+  void assign(std::initializer_list<U> il) { assign(il.begin(), il.end()); }
+  void resize(SizeType n);
+  void resize(SizeType n, ValueType const& val);
 
   // Insert after header
   template<typename ...Args>
@@ -216,6 +239,7 @@ public:
   ConstRef back() const noexcept { return GET_LINKED_NODE_VALUE(header_->prev); }
 
   // capacity
+  SizeType max_size() const noexcept { return static_cast<SizeType>(-1); }
   bool empty() const noexcept { return header_->next == nullptr; }
   // STL don't provide the size() API
   // Not standard required
