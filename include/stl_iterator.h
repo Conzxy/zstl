@@ -11,21 +11,21 @@
  *   reverse_iterator: iterator adapter
  */
 
-#ifndef TINYSTL_STL_ITERATOR_H
-#define TINYSTL_STL_ITERATOR_H
+#ifndef ZSTL_STL_ITERATOR_H
+#define ZSTL_STL_ITERATOR_H
 
 #include <cstddef>
 #include "type_traits.h"
 #include "stl_move.h"
 #include "config.h"
 
-namespace TinySTL {
+namespace zstl {
 
 struct Input_iterator_tag{};
 struct Output_iterator_tag{};
-struct Forward_iterator_tag:Input_iterator_tag{};
-struct Bidirectional_iterator_tag:Forward_iterator_tag{};
-struct Random_access_iterator_tag: Bidirectional_iterator_tag{};
+struct Forward_iterator_tag : Input_iterator_tag{};
+struct Bidirectional_iterator_tag : Forward_iterator_tag{};
+struct Random_access_iterator_tag : Bidirectional_iterator_tag{};
 
 template<class Category,class T,class Distance=ptrdiff_t,
 		class Pointer=T*,class Reference=T&>
@@ -37,8 +37,11 @@ struct iterator{
 	using reference         =Reference;
 };
 
-//SFINAE-friendly
-//ensure iterator_traits<iterator> must be instantiated such that no hard error
+// SFINAE-friendly
+// Ensure iterator_traits<iterator> must be instantiated such that no hard error
+// The hard error is typename iterator::XXX since type alias is declaration, 
+// there is no partial instantiation
+#if 1
 template<typename iterator,typename =Void_t<>>
 struct iterator_traits_helper{
 };
@@ -60,6 +63,18 @@ struct iterator_traits_helper<iterator,Void_t<
 template<typename iterator>
 struct iterator_traits:iterator_traits_helper<iterator>{};
 
+#else
+template<typename iterator>
+struct iterator_traits {
+	using iterator_category        =typename iterator::iterator_category;
+	using value_type               =typename iterator::value_type;
+	using difference_type          =typename iterator::difference_type;
+	using pointer                  =typename iterator::pointer;
+	using reference                =typename iterator::reference;
+};
+
+#endif
+
 template<typename T>
 struct iterator_traits<T*>{
 	typedef Random_access_iterator_tag iterator_category;
@@ -80,11 +95,11 @@ struct iterator_traits<T const*>{
 
 
 //SFINAE-friendly predicate
-template<typename iter,typename= Void_t<>>
-struct has_iterator_helper:_false_type {
-};
+// template<typename iter,typename= Void_t<>>
+// struct has_iterator_helper:_false_type {
+// };
 
-// NOTE: typename iterator_traits<iter>::iterator_category is non-SFINAE context
+// NOTE: the base class is non-SFINAE context
 // so provide has_iterator(SFINAE wrapper) predicate to avoid hard error
 //template<typename iter>
 //struct has_iterator_helper<iter,Void_t<
@@ -103,13 +118,15 @@ struct has_iterator_helper:_false_type {
 
 // Sure, you can use Void_t instead of has_iterator, because Void_t is SFINAE context
 // more simple and elegent
-
-template<typename iter,typename U,typename =Void_t<>>
+template<typename iter,typename U,typename =void>
 struct has_iterator_of:_false_type{};
 
 template<typename iter,typename U>
-struct has_iterator_of<iter,U,Void_t<Is_convertible<
-		typename iterator_traits<iter>::iterator_category,U>>>:_true_type{};
+struct has_iterator_of<iter,U,Void_t<
+	Enable_if_t<Is_convertible<
+		typename iterator_traits<iter>::iterator_category,U>::value>
+		>
+	>:_true_type{};
 
 //iterator predicate:
 #define is_XXX_iterator_TEMPLATE(name, tag) \
@@ -169,7 +186,7 @@ template<typename Iter>
 using Iter_category=typename iterator_traits<Iter>::iterator_category;
 
 template<typename Iter>
-using Iter_diff_type=typename iterator_traits<Iter>::differnece_type;
+using Iter_diff_type=typename iterator_traits<Iter>::difference_type;
 
 //yep...you should use Iter_category, Iter_diff_type and Iter_value_type to get typename
 template<class Iterator>
@@ -249,7 +266,7 @@ advance(Input_iterator &i,Distance n){
 }
 
 /**
- * @fn advanceIter
+ * @fn advance_iter
  * @brief advance a iterator, but return result iterator(of cource, iterator is passed by value)
  * @note
  * STL does not provide the API
@@ -257,8 +274,8 @@ advance(Input_iterator &i,Distance n){
  */
 template<typename II, typename D>
 inline II
-advanceIter(II i, D n) {
-	TinySTL::advance(i, n);
+advance_iter(II i, D n) {
+	zstl::advance(i, n);
 	return i;
 }
 
@@ -283,14 +300,18 @@ public:
 	using pointer               =typename iterator_traits<Iterator>::pointer;
 
 public:
-	reverse_iterator():current(){};
-	explicit reverse_iterator(Iterator x):current(x){}
-	template<class U>
-			reverse_iterator(reverse_iterator<U> const& u)
-			:current(u.current){}
-	template<class U>
-			reverse_iterator& operator=(reverse_iterator<U> const& u){
-		current=u.base();
+	reverse_iterator()
+    : current(){};
+	explicit reverse_iterator(Iterator x)
+    : current(x){}
+
+	template<typename U>
+  reverse_iterator(reverse_iterator<U> const& u)
+  : current(u.current){}
+
+	template<typename U>
+  reverse_iterator& operator=(reverse_iterator<U> const& u){
+		current = u.base();
 		return *this;
 	};
 
@@ -451,22 +472,22 @@ public:
 	operator*() const noexcept
 	{ return STL_MOVE(*base_); }
 	
-	TINYSTL_CONSTEXPR pointer
+	ZSTL_CONSTEXPR pointer
 	operator->() const noexcept
 	{ return base_; }
 	
-	TINYSTL_CONSTEXPR reference
+	ZSTL_CONSTEXPR reference
 	operator[](difference_type n) const noexcept
 	{ return STL_MOVE(*(*this + n)); }
 
-	TINYSTL_CONSTEXPR Self&
+	ZSTL_CONSTEXPR Self&
 	operator++()
 	{
 		++base_;
 		return *this;
 	}
 
-	TINYSTL_CONSTEXPR Self
+	ZSTL_CONSTEXPR Self
 	operator++(int)
 	{
 		Self tmp = *this;
@@ -474,14 +495,14 @@ public:
 		return tmp;
 	}
 	
-	TINYSTL_CONSTEXPR Self&
+	ZSTL_CONSTEXPR Self&
 	operator--()
 	{
 		--base_;
 		return *this;
 	}
 
-	TINYSTL_CONSTEXPR Self
+	ZSTL_CONSTEXPR Self
 	operator--(int)
 	{
 		Self tmp = *this;
@@ -489,31 +510,31 @@ public:
 		return tmp;
 	}
 	
-	TINYSTL_CONSTEXPR Self
+	ZSTL_CONSTEXPR Self
 	operator+(difference_type n)
 	{
 		return base_ + n;
 	}
 
-	TINYSTL_CONSTEXPR Self
+	ZSTL_CONSTEXPR Self
 	operator-(difference_type n)
 	{
 		return base_ - n;
 	}
 
-	TINYSTL_CONSTEXPR Self
+	ZSTL_CONSTEXPR Self
 	operator+=(difference_type n)
 	{
 		return base_ += n;
 	}
 
-	TINYSTL_CONSTEXPR Self
+	ZSTL_CONSTEXPR Self
 	operator-=(difference_type n)
 	{
 		return base_ -= n;
 	}
 
-	TINYSTL_CONSTEXPR Iterator 
+	ZSTL_CONSTEXPR Iterator 
 	base() const noexcept
 	{ return base_; }
 protected:
@@ -606,6 +627,6 @@ struct Is_MoveIterator <MoveIterator<Base>> : _true_type {};
 
 #define MAKE_MOVE_IF_NOEXCEPT_ITERATOR(x) detail::make_move_if_noexcept_iterator(x)
 
-} // namespace TinySTL
+} // namespace zstl
 
-#endif //TINYSTL_STL_ITERATOR_H
+#endif //ZSTL_STL_ITERATOR_H
