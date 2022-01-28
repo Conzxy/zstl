@@ -1,5 +1,5 @@
-#ifndef TINYSTL__TOOL_H
-#define TINYSTL__TOOL_H
+#ifndef ZSTL__TOOL_H
+#define ZSTL__TOOL_H
 
 #include <iostream>
 #include <random>
@@ -53,4 +53,4 @@ void emplace_backLoop(T& cont, unsigned n, V const& v) {
 		cont.emplace_back(v);
 }
 
-#endif //TINYSTL__TOOL_H
+#endif //ZSTL__TOOL_H
