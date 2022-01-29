@@ -135,7 +135,7 @@ public:
   ForwardList(ForwardList const& other)
    : Base()
   {
-    insert_after(cbegin(), other.cbegin(), other.cend());
+    insert_after(cbefore_begin(), other.cbegin(), other.cend());
   }
 
   ForwardList(ForwardList&& other) noexcept
@@ -244,7 +244,7 @@ public:
   // STL don't provide the size() API
   // Not standard required
   SizeType size() const noexcept { return header_->count; }
-  inline void swap(Self& other) const noexcept;
+  inline void swap(Self& other) noexcept;
 
   // Search the before iterator of the given value.
   // It's useful for calling erase_after() and insert_after().
@@ -283,13 +283,14 @@ public:
   // In C++20, the return type is modified to size_type(i.e. SizeType here).
   // It indicates the number of removed elements
   SizeType unique();
-  template<typename UnaryPred>
-  SizeType unique();
+  template<typename BinaryPred>
+  SizeType unique(BinaryPred pred);
 
   void sort();
   template<typename Compare>
   void sort(Compare cmp);
-
+  
+  void sort2();
 #ifdef FORWARD_LIST_DEBUG
   // For Debugging
   void print() const noexcept;

@@ -251,22 +251,31 @@ TEST(forward_list, copy_assign) {
   puts("copy_assign empty pass(3)");
 }
 
+#define N 100000
 TEST(forward_list, sort) {
-  FL<int> l1{ 2, 3, 1, 6, 8, 7, 4, 0 };
-
-  l1.sort();
-
-  EXPECT_TRUE(std::is_sorted(l1.begin(), l1.end()));
-
   FL<int> l2;
   
   std::random_device r;
   std::default_random_engine e(r());
-  std::uniform_int_distribution<int> uniform_dist(0, 100000);
-  std::generate_n(std::back_inserter(l2), 10000, [&]() { return uniform_dist(e); });
+  std::uniform_int_distribution<int> uniform_dist(0, N);
+  std::generate_n(std::back_inserter(l2), N, [&]() { return uniform_dist(e); });
   l2.sort();
 
   EXPECT_TRUE(std::is_sorted(l2.begin(), l2.end()));
+}
+
+TEST(forward_list, sort1) {
+  FL<int> l3;
+  std::random_device r;
+  std::default_random_engine e(r());
+  std::uniform_int_distribution<int> uniform_dist(0, N);
+  std::generate_n(std::back_inserter(l3), N, [&]() { return uniform_dist(e); });
+
+  l3.sort2();
+  //l3.print();
+
+  EXPECT_TRUE(std::is_sorted(l3.begin(), l3.end()));
+
 }
 
 TEST(forward_list, resize) {
@@ -289,4 +298,4 @@ int main()
 {
   testing::InitGoogleTest();
   return RUN_ALL_TESTS();
-}
+} 

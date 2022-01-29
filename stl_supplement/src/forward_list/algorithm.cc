@@ -45,7 +45,6 @@ BaseLinkedNode* extract_front(Header* header) noexcept
     header->prev = header;
   }
   
-  // Don't drop old node
   // Reset returned node, to avoid construct loop in some cases
   ret->next = nullptr;
 
@@ -55,9 +54,9 @@ BaseLinkedNode* extract_front(Header* header) noexcept
 void insert_after(Header* header, BaseLinkedNode* pos, BaseLinkedNode* new_node) noexcept
 {
   // Push to back, update header_->prev
-  if (pos == header->prev || 
-      (pos == static_cast<BaseLinkedNode*>(header) 
-       && FORWARD_LIST_EMPTY)) {
+  // If pos == header, and FORWARD_LIST_EMPTY == true
+  // pos == heaer->prev also equal to true
+  if (pos == header->prev) {
     header->prev = new_node;
   }
 
@@ -69,6 +68,8 @@ BaseLinkedNode* extract_after(Header* header, BaseLinkedNode* pos) noexcept
 {
   ZASSERT(pos != nullptr, "The position argument must not be end()");
   ZASSERT(!FORWARD_LIST_EMPTY, "ForwardList must be not empty");
+  ZASSERT(pos->next != nullptr, "The next node of the position argument mustn't be nullptr");
+
   auto ret = pos->next;
 
   // If pos->next is last element, update it

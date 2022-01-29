@@ -263,6 +263,33 @@ template<typename T, typename A>
 template<typename BinaryPred>
 void FORWARD_LIST_TEMPLATE::merge(Self& list, BinaryPred pred)
 {
+  if (list.empty()) return;
+
+  BaseNode* beg = header_;
+  BaseNode* obeg = list.header_;
+  
+  while (beg->next != nullptr && obeg->next != nullptr) {
+    if (pred(GET_LINKED_NODE_VALUE(obeg->next), GET_LINKED_NODE_VALUE(beg->next))) {
+      auto old_node = obeg->next->next;
+      insert_after(beg, list.extract_after(obeg));
+      beg = beg->next;
+      obeg->next = old_node;
+    }
+    else {
+      beg = beg->next;
+    }
+  }
+
+  if (beg->next == nullptr) {
+    while (obeg->next != nullptr) {
+      auto old_node = obeg->next->next;
+      push_back(list.extract_after(obeg));
+      obeg->next = old_node;
+    }
+  }
+
+  assert(list.empty());
+  list.reset();
 }
 
 template<typename T, typename A>
@@ -286,12 +313,12 @@ void FORWARD_LIST_TEMPLATE::merge(Self& list)
   }
 
   if (beg->next == nullptr) {
-    while (obeg->next != nullptr) {
-      auto old_node = obeg->next->next;
-      push_back(list.extract_after(obeg));
-      obeg->next = old_node;
-    }
+    // It's also ok when list is empty
+    splice_after(before_end(), list);
   }
+
+  assert(list.empty());
+  list.reset();
 }
 
 template<typename T, typename A>
@@ -312,13 +339,14 @@ void FORWARD_LIST_TEMPLATE::splice_after(ConstIterator pos, Self& list, ConstIte
 template<typename T, typename A>
 void FORWARD_LIST_TEMPLATE::splice_after(ConstIterator pos, Self& list)
 {
+  // If list is empty,
+  // it is wrong to update prev.
   if (list.empty()) return ;
 
   auto pos_node = pos.to_iterator().extract();
   auto old_next = pos_node->next;
 
-  if ((pos == before_begin() && empty())||
-       pos == before_end()) 
+  if (pos == before_end()) 
   {
     header_->prev = list.before_end().extract();
   }
@@ -341,6 +369,23 @@ auto FORWARD_LIST_TEMPLATE::remove(ValueType const& val)
     ++count;
     erase_after(it);
     it = search_before(val, it);
+  }
+
+  return count;
+}
+
+template<typename T, typename A>
+template<typename UnaryPred>
+auto FORWARD_LIST_TEMPLATE::remove_if(UnaryPred pred)
+ -> SizeType
+{
+  SizeType count = 0;
+
+  auto it = search_before(pred);
+  while (it != end()) {
+    ++count;
+    erase_after(it);
+    it = search_before(pred, it);
   }
 
   return count;
@@ -379,8 +424,111 @@ auto FORWARD_LIST_TEMPLATE::unique()
 }
 
 template<typename T, typename A>
+template<typename BinaryPred>
+auto FORWARD_LIST_TEMPLATE::unique(BinaryPred pred)
+ -> SizeType
+{
+  SizeType count = 0;
+  for (BaseNode* beg = header_; beg->next != nullptr && beg->next->next != nullptr; ) {
+    // Adjacent node with same value
+    if (pred(GET_LINKED_NODE_VALUE(beg->next), GET_LINKED_NODE_VALUE(beg->next->next))) {
+      erase_after(beg->next);
+      ++count;
+    }
+    else {
+      beg = beg->next;
+      if (beg == nullptr) break;
+    }
+  }
+
+  return count;
+}
+
+template<typename T, typename A>
 void FORWARD_LIST_TEMPLATE::sort()
 {
+  // TODO Optimization
+  // lists store non-header list
+  // To small list, maybe better a little.
+  // It is not significant for large list.
+  Self lists[64];
+  Self list;  
+  int8_t end_of_lists = 0;
+
+  while (!empty()) {
+    list.push_front(extract_front());
+    
+    for (int8_t i = 0; ; ++i) {
+      if (lists[i].empty() || i == end_of_lists) {
+        list.swap(lists[i]);
+        if (i == end_of_lists) end_of_lists++;
+        break;
+      } 
+      else {
+        // Merge non-empty list
+        // larger list merge shorter list
+        if (lists[i].size() > list.size()) {
+          lists[i].merge(list);
+          list.swap(lists[i]);
+        }
+        else
+          list.merge(lists[i]);
+      }
+    }
+  } 
+    
+  list = std::move(lists[end_of_lists]);
+
+  for (int i = end_of_lists - 1; i >= 0; --i) {
+    list.merge(lists[i]);
+  }
+
+  *this = std::move(list);
+}
+
+template<typename T, typename A>
+template<typename Compare>
+void FORWARD_LIST_TEMPLATE::sort(Compare cmp)
+{
+  Self lists[64];
+  Self list;  
+  int8_t end_of_lists = 0;
+
+  while (!empty()) {
+    list.push_front(extract_front());
+    
+    for (int8_t i = 0; ; ++i) {
+      if (lists[i].empty() || i == end_of_lists) {
+        list.swap(lists[i]);
+        if (i == end_of_lists) end_of_lists++;
+        break;
+      } 
+      else {
+        // Merge non-empty list
+        // larger list merge shorter list
+        if (lists[i].size() > list.size()) {
+          lists[i].merge(list, cmp);
+          list.swap(lists[i]);
+        }
+        else
+          list.merge(lists[i], cmp);
+      }
+    }
+  } 
+    
+  list = std::move(lists[end_of_lists]);
+
+  for (int i = end_of_lists - 1; i >= 0; --i) {
+    list.merge(lists[i], cmp);
+  }
+
+  *this = std::move(list);
+}
+
+template<typename T, typename A>
+void FORWARD_LIST_TEMPLATE::sort2() 
+{
+
   ForwardList less;
   ForwardList equal;
   ForwardList larger;
@@ -388,6 +536,14 @@ void FORWARD_LIST_TEMPLATE::sort()
   if (size() < 2) {
     return ;
   } 
+
+  if (size() == 2) {
+    if (!(*begin() < *begin().next())) {
+      push_back(extract_front());
+    }
+
+    return ;
+  }
 
   auto pivot = *begin();
   Node* tmp;
@@ -417,11 +573,9 @@ void FORWARD_LIST_TEMPLATE::sort()
 }
 
 template<typename T, typename A>
-void FORWARD_LIST_TEMPLATE::swap(Self& other) const noexcept
+void FORWARD_LIST_TEMPLATE::swap(Self& other) noexcept
 {
-  std::swap(other.header_->prev, this->header_->prev);
-  std::swap(other.header_->next, this->header_->next);
-  std::swap(other.header_->count, this->header_->count);
+  std::swap(this->header_, other.header_);
 }
 
 template<typename T, typename A>
