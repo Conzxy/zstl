@@ -181,11 +181,11 @@ public:
   // Insert after given position(presented by iterator)
   template<typename ...Args> 
   void emplace_after(ConstIterator pos, Args&&... args) 
-  { insert_after(pos, ConstIterator(create_node(STD_FORWARD(Args, args)...))); }
+  { insert_after(pos, create_node(STD_FORWARD(Args, args)...)); }
   void insert_after(ConstIterator pos, ValueType const& val) 
-  { insert_after(pos, ConstIterator(create_node(val))); }
+  { insert_after(pos, create_node(val)); }
   void insert_after(ConstIterator pos, ValueType&& val) 
-  { insert_after(pos, ConstIterator(create_node(std::move(val)))); }
+  { insert_after(pos, create_node(std::move(val))); }
 
   // Based on Node, thus we can reuse extracted node(throught call extract_xxx())
   // Maybe this is the implementation function of std::forward_list<>
@@ -257,6 +257,13 @@ public:
   Iterator search_before(UnaryPred pred) { return search_before(pred, cbefore_begin()); }
 
   // Operations
+  
+  /**
+   * Let len1 = std::distance(begin(), end()), len2 = std::distance(list.begin(), list.end())
+   * It is O(len1+len2) to std::forward_list<>
+   * but this is O(min(len1, len2)) + O(1) = O(min(len1, len2))
+   * It is more efficient.
+   */
   void merge(Self& list);
   void merge(Self&& list) { merge(list); }
   template<typename BinaryPred>
@@ -264,6 +271,9 @@ public:
   template<typename BinaryPred>
   void merge(Self&& list, BinaryPred pred) { merge(list, std::move(pred)); }
 
+  /**
+   * It is O(n) to std::forward_list<>, but this is O(1) here since header->prev
+   */
   void splice_after(ConstIterator pos, Self& list);
   void splice_after(ConstIterator pos, Self&& list) { splice_after(pos, list); }
   void splice_after(ConstIterator pos, Self& list, ConstIterator it);
@@ -286,10 +296,14 @@ public:
   template<typename BinaryPred>
   SizeType unique(BinaryPred pred);
 
+  // O(nlgn) and stable(Don't destroy iterator)
+  // Merge sort(but only merge stage, no need to partition)
   void sort();
   template<typename Compare>
   void sort(Compare cmp);
-  
+
+  // O(nlgn)
+  // It take the quick sort, but the performance is wrong than sort()  
   void sort2();
 #ifdef FORWARD_LIST_DEBUG
   // For Debugging

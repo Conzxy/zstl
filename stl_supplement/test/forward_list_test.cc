@@ -88,26 +88,40 @@ TEST(forward_list, pop_front) {
 }
 
 TEST(forward_list, insert_after) {
-  ForwardList<int> list;
-  
-  auto il = { 2, 3, 4, 5, 6 };
-  list.insert_after(list.cbefore_begin(), 10, 1);
-  EXPECT_EQ(list.cbefore_end().extract()->next, nullptr);
+  FL<int> l{ 3, 4, 5, 6, 7, 8 };
 
-  list.insert_after(list.cbefore_end(), il.begin(), il.end());
+  auto iter_6 = zstl::advance_iter(l.begin(), 3);
+  l.insert_after(iter_6, 100);
+  equal_list(l, { 3, 4, 5, 6, 100, 7, 8 }); 
+
+  FL<int> l1{ 2, 3, 4, 5, 6 };
+  l1.insert_after(l1.begin(), 10, 1);
   
-  size_t i;
-  auto beg = list.cbegin();
-  for (i = 0; i < 10; ++i) {
+  EXPECT_EQ(l1.front(), 2);
+   
+  auto beg = l1.begin().next();
+  for (int i = 0; i < 10; ++i) {
     EXPECT_EQ(*beg++, 1);
   }
 
-  for (i = 0; i < 5; ++i) {
-    EXPECT_EQ(*beg++, i+2);
+  for (int i = 3; i <= 6; ++i) {
+    EXPECT_EQ(*beg++, i);
   }
   
-  EXPECT_EQ(*list.cbefore_end(), 6);
-  EXPECT_EQ(beg, list.end());
+  auto il = { 11, 22, 33, 44, 55, 66 };
+  FL<int> l2 = { 1, 2, 3 };
+  l2.insert_after(l2.begin().next(), il.begin(), il.end());
+    
+  auto beg2 = l2.begin(); 
+  EXPECT_EQ(*beg2++, 1);
+  EXPECT_EQ(*beg2++, 2);
+
+  for (uint32_t i = 0; i < il.size(); ++i) {
+    EXPECT_EQ(*beg2++, 11 * (i+1));
+  }
+
+  EXPECT_EQ(*beg2++, 3);
+  EXPECT_EQ(beg2.extract(), nullptr);
 
 }
 
@@ -259,7 +273,9 @@ TEST(forward_list, sort) {
   std::default_random_engine e(r());
   std::uniform_int_distribution<int> uniform_dist(0, N);
   std::generate_n(std::back_inserter(l2), N, [&]() { return uniform_dist(e); });
+  EXPECT_EQ(l2.size(), N);
   l2.sort();
+  EXPECT_EQ(l2.size(), N);
 
   EXPECT_TRUE(std::is_sorted(l2.begin(), l2.end()));
 }
@@ -270,8 +286,11 @@ TEST(forward_list, sort1) {
   std::default_random_engine e(r());
   std::uniform_int_distribution<int> uniform_dist(0, N);
   std::generate_n(std::back_inserter(l3), N, [&]() { return uniform_dist(e); });
-
+    
+  
+  EXPECT_EQ(l3.size(), N);
   l3.sort2();
+  EXPECT_EQ(l3.size(), N);
   //l3.print();
 
   EXPECT_TRUE(std::is_sorted(l3.begin(), l3.end()));

@@ -145,7 +145,7 @@ void FORWARD_LIST_TEMPLATE::insert_after(ConstIterator pos, SizeType count, Valu
 
   // The push_back() is so simple, thus not wrong.
   while (count--) {
-    push_back(create_node(val));
+    insert_after(pos, create_node(val));++pos;
   }
 }
 
@@ -154,8 +154,8 @@ template<typename InputIterator, typename>
 void FORWARD_LIST_TEMPLATE::insert_after(ConstIterator pos, InputIterator first, InputIterator last)
 {
   for (; first != last; ++first) {
-    push_back(create_node(*first));
-    // insert_after(pos, create_node(*first));++pos;
+    //push_back(create_node(*first));
+    insert_after(pos, create_node(*first));++pos;
   }
 }
 
@@ -281,11 +281,8 @@ void FORWARD_LIST_TEMPLATE::merge(Self& list, BinaryPred pred)
   }
 
   if (beg->next == nullptr) {
-    while (obeg->next != nullptr) {
-      auto old_node = obeg->next->next;
-      push_back(list.extract_after(obeg));
-      obeg->next = old_node;
-    }
+    // It's also ok when list is empty
+    splice_after(before_end(), list);
   }
 
   assert(list.empty());
@@ -353,6 +350,7 @@ void FORWARD_LIST_TEMPLATE::splice_after(ConstIterator pos, Self& list)
 
   pos_node->next = list.begin().extract();
   list.before_end().extract()->next = old_next;
+  header_->count += list.size();
 
   list.reset();
   ZASSERT(list.empty(), "The list must be empty");
@@ -459,7 +457,7 @@ void FORWARD_LIST_TEMPLATE::sort()
     list.push_front(extract_front());
     
     for (int8_t i = 0; ; ++i) {
-      if (lists[i].empty() || i == end_of_lists) {
+      if (lists[i].empty()) {
         list.swap(lists[i]);
         if (i == end_of_lists) end_of_lists++;
         break;
@@ -477,7 +475,7 @@ void FORWARD_LIST_TEMPLATE::sort()
     }
   } 
     
-  list = std::move(lists[end_of_lists]);
+  assert(list.empty());
 
   for (int i = end_of_lists - 1; i >= 0; --i) {
     list.merge(lists[i]);
@@ -498,7 +496,7 @@ void FORWARD_LIST_TEMPLATE::sort(Compare cmp)
     list.push_front(extract_front());
     
     for (int8_t i = 0; ; ++i) {
-      if (lists[i].empty() || i == end_of_lists) {
+      if (lists[i].empty()) {
         list.swap(lists[i]);
         if (i == end_of_lists) end_of_lists++;
         break;
@@ -516,7 +514,7 @@ void FORWARD_LIST_TEMPLATE::sort(Compare cmp)
     }
   } 
     
-  list = std::move(lists[end_of_lists]);
+  assert(list.empty());
 
   for (int i = end_of_lists - 1; i >= 0; --i) {
     list.merge(lists[i], cmp);
