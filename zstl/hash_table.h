@@ -1,10 +1,9 @@
-#ifndef TINYSTL_HASH_TABLE_H
-#define TINYSTL_HASH_TABLE_H
+#ifndef ZSTL_HASH_TABLE_H
+#define ZSTL_HASH_TABLE_H
 
 #include "stl_exception.h"
 #include "config.h"
 #include "allocator.h"
-#include "user_allocator.h"
 #include "vector.h"
 #include "hash_aux.h"
 
@@ -12,7 +11,7 @@
 #include <iostream>
 #endif 
 
-namespace TinySTL {
+namespace zstl {
 
 /**
  * @class HashTable
@@ -21,7 +20,7 @@ namespace TinySTL {
  * @tparam H hash function which convertion key to natural number
  * @tparam GK method which get key from value
  * @tparam EK method which compares two key whether them is equivalent
- * @tparam Alloc Allocator type(default is TinySTL::allocator)
+ * @tparam Alloc Allocator type(default is zstl::allocator)
  * @brief 
  * Implementation of hash table.
  * Its average time complexity of search is O(1)
@@ -29,7 +28,7 @@ namespace TinySTL {
  */
 template<
 typename V,typename K,typename H,typename GK,typename EK,
-typename Alloc=TinySTL::allocator<V>>
+typename Alloc=zstl::allocator<V>>
 class HashTable;
 
 /**
@@ -37,21 +36,6 @@ class HashTable;
  * @tparam T value type of hashtable
  * @brief node of linked list which used in chaining hashtable
  */
-template<typename T>
-struct HashNode {
-    T val;
-    struct HashNode* next;
-
-    explicit HashNode(T const& v, struct HashNode* n = nullptr)
-        : val{ v }
-        , next{ n }
-    { }
-
-    explicit HashNode(T&& v, struct HashNode* n = nullptr)
-        : val{ STL_MOVE(v) }
-        , next{ n }
-    { }  
-};
 
 /**
  * @class HashConstIterator
@@ -60,7 +44,7 @@ struct HashNode {
  * @tparam H hash function which convertion key to natural number
  * @tparam GK method which get key from value
  * @tparam EK method which compares two key whether them is equivalent
- * @tparam Alloc Allocator type(default is TinySTL::allocator)
+ * @tparam Alloc Allocator type(default is zstl::allocator)
  * @brief
  * Used for iterating hashtable
  */
@@ -85,9 +69,9 @@ public:
         , ht_{ ht }
     { }
 
-    reference operator*() const TINYSTL_NOEXCEPT 
+    reference operator*() const ZSTL_NOEXCEPT 
     { return cur_->val; }
-    pointer   operator->() const TINYSTL_NOEXCEPT
+    pointer   operator->() const ZSTL_NOEXCEPT
     { return cur_; }
 
     self& operator++() {
@@ -135,7 +119,7 @@ protected:
  * @tparam H hash function which convertion key to natural number
  * @tparam GK method which get key from value
  * @tparam EK method which compares two key whether them is equivalent
- * @tparam Alloc Allocator type(default is TinySTL::allocator)
+ * @tparam Alloc Allocator type(default is zstl::allocator)
  */
 template <
 typename V, typename K, typename H, typename GK, typename EK, 
@@ -158,9 +142,9 @@ public:
         : base::HashConstIterator(cur, ht)
     { }
 
-    reference operator*() const TINYSTL_NOEXCEPT 
+    reference operator*() const ZSTL_NOEXCEPT 
     { return cur_->val; }
-    pointer   operator->() const TINYSTL_NOEXCEPT
+    pointer   operator->() const ZSTL_NOEXCEPT
     { return cur_; }
 
     self& operator++() {
@@ -235,58 +219,58 @@ public:
 
     //modifiers
     template<typename... Args>
-    TinySTL::pair<iterator, bool> insertUnique(Args&&... args);
+    zstl::pair<iterator, bool> insertUnique(Args&&... args);
 
     void clear();
 
     // position interface
-    iterator begin() TINYSTL_NOEXCEPT
+    iterator begin() ZSTL_NOEXCEPT
     { return makeIter(getFirstList()); }
 
-    iterator end() TINYSTL_NOEXCEPT
+    iterator end() ZSTL_NOEXCEPT
     { return makeIter(nullptr); }
 
-    const_iterator begin() const TINYSTL_NOEXCEPT
+    const_iterator begin() const ZSTL_NOEXCEPT
     { return makeConstIter(getFirstList()); }
 
-    const_iterator end() const TINYSTL_NOEXCEPT
+    const_iterator end() const ZSTL_NOEXCEPT
     { return makeConstIter(nullptr); }
 
-    const_iterator cbegin() const TINYSTL_NOEXCEPT
+    const_iterator cbegin() const ZSTL_NOEXCEPT
     { return makeConstIter(getFirstList()); }
 
-    const_iterator cend() const TINYSTL_NOEXCEPT
+    const_iterator cend() const ZSTL_NOEXCEPT
     { return makeConstIter(nullptr); }
 
     // reverse_iterator is wrapped by adapter
 
 
     // field information:
-    size_type size() const TINYSTL_NOEXCEPT
+    size_type size() const ZSTL_NOEXCEPT
     { return impl_.numElements; }
 
-    bool empty() const TINYSTL_NOEXCEPT 
+    bool empty() const ZSTL_NOEXCEPT 
     { return size(); }
 
-    size_type max_size() const TINYSTL_NOEXCEPT
+    size_type max_size() const ZSTL_NOEXCEPT
     { return PRIME_LIST[PRIMES_NUM-1]; }
 
-    Table const& table() const TINYSTL_NOEXCEPT
+    Table const& table() const ZSTL_NOEXCEPT
     { return impl_.table; }    
 
-    size_type tableSize() const TINYSTL_NOEXCEPT
+    size_type tableSize() const ZSTL_NOEXCEPT
     { return impl_.table.size(); }
 
-    EK equalKey() const TINYSTL_NOEXCEPT
+    EK equalKey() const ZSTL_NOEXCEPT
     { return impl_.equalKey; }
 
-    GK getKey() const TINYSTL_NOEXCEPT
+    GK getKey() const ZSTL_NOEXCEPT
     { return impl_.getKey; }
 
-    H hash() const TINYSTL_NOEXCEPT
+    H hash() const ZSTL_NOEXCEPT
     { return impl_.hashFun; }
 
-    HashMethod hashMethod() const TINYSTL_NOEXCEPT
+    HashMethod hashMethod() const ZSTL_NOEXCEPT
     { return impl_.hashMethod; }
 
     size_type table_num(key_type const& key) const;
@@ -302,19 +286,19 @@ public:
     // rehash
     void rehash(size_type hint);
 
-    double load_factor() const TINYSTL_NOEXCEPT
+    double load_factor() const ZSTL_NOEXCEPT
     { return static_cast<double>(size()) / tableSize(); }
 
     // allocator
     allocator_type&
-    get_allocator() const TINYSTL_NOEXCEPT 
+    get_allocator() const ZSTL_NOEXCEPT 
     { return impl_; }
 
-    TINYSTL_CONSTEXPR size_type 
-    hashKey(key_type const& key) const TINYSTL_NOEXCEPT;
+    ZSTL_CONSTEXPR size_type 
+    hashKey(key_type const& key) const ZSTL_NOEXCEPT;
 
-    TINYSTL_CONSTEXPR size_type 
-    hashVal(value_type const& val) const TINYSTL_NOEXCEPT;
+    ZSTL_CONSTEXPR size_type 
+    hashVal(value_type const& val) const ZSTL_NOEXCEPT;
 
     // debug helper
     #ifdef HASH_DEBUG
@@ -331,15 +315,15 @@ private:
     void initTable(size_type const n);
     Node* getFirstList() const;
 
-    Table& table() TINYSTL_NOEXCEPT
+    Table& table() ZSTL_NOEXCEPT
     { return impl_.table; }
 
     void reclaimSentinel(Table& table);
 
-    void incElemensNum(size_type n) TINYSTL_NOEXCEPT
+    void incElemensNum(size_type n) ZSTL_NOEXCEPT
     { impl_.numElements += n; }
 
-    void decElementNums(size_type n) TINYSTL_NOEXCEPT
+    void decElementNums(size_type n) ZSTL_NOEXCEPT
     { impl_.numElement -= n; }
 
     template<typename Args> pair<iterator,bool> insert_unique_norehash(Args&& val);
@@ -357,12 +341,12 @@ private:
 
     //iterator construct helper
     iterator 
-    makeIter(Node* node) const TINYSTL_NOEXCEPT
+    makeIter(Node* node) const ZSTL_NOEXCEPT
     { return iterator(node,*this); }
 
 
     const_iterator 
-    makeConstIter(Node* node) const TINYSTL_NOEXCEPT
+    makeConstIter(Node* node) const ZSTL_NOEXCEPT
     { return const_iterator(node,*this); }
 
     //friend declaration
@@ -401,15 +385,15 @@ private:
     HashTable<V, K, H, GK, EK, Alloc>
 
 TEMPLATE_OF_HASHTABLE
-TINYSTL_CONSTEXPR auto
-HASHTABLE::hashKey(key_type const& key) const TINYSTL_NOEXCEPT
+ZSTL_CONSTEXPR auto
+HASHTABLE::hashKey(key_type const& key) const ZSTL_NOEXCEPT
 -> size_type {
     return hashMethod()(hash()(key), tableSize());
 }
 
 TEMPLATE_OF_HASHTABLE
-TINYSTL_CONSTEXPR auto
-HASHTABLE::hashVal(value_type const& val) const TINYSTL_NOEXCEPT
+ZSTL_CONSTEXPR auto
+HASHTABLE::hashVal(value_type const& val) const ZSTL_NOEXCEPT
 -> size_type {
     return hashKey(getKey()(val));
 }
@@ -418,7 +402,7 @@ TEMPLATE_OF_HASHTABLE
 template<typename ...Args>
 auto
 HASHTABLE::insertUnique(Args&& ...args) 
--> TinySTL::pair<iterator, bool> {
+-> zstl::pair<iterator, bool> {
     rehash(size() + 1);
 
     const auto node = newNode(STL_FORWARD(Args, args)...);
@@ -433,7 +417,7 @@ HASHTABLE::insertUnique(Args&& ...args)
             // destory newly constructed node
             // and return status code(denoetd in pair::second)
             destroyNode(node);
-            return TinySTL::make_pair(makeIter(h), false);
+            return zstl::make_pair(makeIter(h), false);
         }
     }
 
@@ -443,7 +427,7 @@ HASHTABLE::insertUnique(Args&& ...args)
     head->next = node;
     incElemensNum(1);
 
-    return TinySTL::make_pair(makeIter(node), true);
+    return zstl::make_pair(makeIter(node), true);
 }
 
 TEMPLATE_OF_HASHTABLE
@@ -596,6 +580,6 @@ HASHTABLE::printTableLayout() const {
 }
 #endif
 
-} // namespace TinySTL
+} // namespace zstl
 
 #endif

@@ -1,4 +1,5 @@
 #pragma once
+#include <forward_list>
 #ifndef STL_SUP_FORWARD_LIST_FWD_H
 #define STL_SUP_FORWARD_LIST_FWD_H
 

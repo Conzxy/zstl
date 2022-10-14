@@ -535,7 +535,7 @@ Vector<T,Alloc>::emplace(const_iterator position,Args&&...args)
 	auto pos = const_cast<iterator>(position);
 
 	if(this->last_ < this->capa_ ){
-		if(position == end())
+		if(position == cend())
 			emplace_back(zstl::forward<Args>(args)...);
 		else{
 			AllocTraits::construct(*this, end(),STL_MOVE(back()));
@@ -545,7 +545,7 @@ Vector<T,Alloc>::emplace(const_iterator position,Args&&...args)
 				MAKE_MOVE_IF_NOEXCEPT_ITERATOR(pos),
 				MAKE_MOVE_IF_NOEXCEPT_ITERATOR(this->last_-1),
 				this->last_);
-			*position = value_type(zstl::forward<Args>(args)...);
+			*pos = value_type(zstl::forward<Args>(args)...);
 			++this->last_;
 		}
 	}

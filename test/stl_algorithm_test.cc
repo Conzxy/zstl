@@ -1,5 +1,6 @@
 #include "stl_algorithm.h"
 #include "vector.h"
+
 #include <forward_list>
 
 #include <gtest/gtest.h>
@@ -91,7 +92,7 @@ TEST(stl_algorithm, search) {
     zstl::search(
       set.begin(), set.end(), 
       subset.begin(), subset.end()),
-    set.begin()+1);
+      set.begin()+1);
 }
 
 TEST(stl_algorithm, find_end) {
@@ -102,8 +103,14 @@ TEST(stl_algorithm, find_end) {
   EXPECT_EQ(zstl::find_end(
     set.begin(), set.end(),
     subset.begin(), subset.end()), set.end()-4);
+  
+  std::forward_list<int> list(subset);
 
   // Test for forward iterator
+  EXPECT_EQ(zstl::find_end(
+    set.begin(), set.end(),
+    list.begin(), list.end()), zstl::advance_iter(set.begin(), set.size()-4));
+
 }
 
 TEST(stl_algorithm, transform) {

@@ -1,11 +1,14 @@
 //CLASS TEMPLATE function
 //use type erasure to make function to accept all callables
+#ifndef ZSTL_FUNCTION_H
+#define ZSTL_FUNCTION_H
 
-#pragma once
 #include <exception>
+
 #include "invoke.h"
 
 namespace zstl{
+    // SFINAE predicate
     template<typename T>
     class IsEqualComparable {
     private:
@@ -18,7 +21,11 @@ namespace zstl{
     public:
         static constexpr bool value=decltype(test<T>(nullptr, nullptr))::value;
     };
-
+    
+    // Because class template support partial specilization
+    // and it is also a SFINAE context, we can just use bool
+    // non-type template parameter instead of Enable_if_t to
+    // remove non-disired specilization
     template<typename T, bool=IsEqualComparable<T>::value>
     class TryEquals {
     public:
@@ -32,11 +39,32 @@ namespace zstl{
     template<typename T>
     class TryEquals<T, false> {
     public:
-        static bool equals(T const& x, T const& y) {
+        static bool equals(T const& , T const& ) {
             throw NotEqualityComparable();
         }
     };
-
+  
+    // User desire to use zstl::function as following:
+    // zstl::function<void()> thread_func = ...;
+    //
+    // But we must write this template as following since we
+    // want accept all callable including lambda expression:
+    // template<typename Functor, typename R, typename... Args>
+    //
+    // Here, we use a technique called "Type Erasure": Depend
+    // on the virtual function to make derived class store the
+    // Functor and implemetation specific function.
+    //
+    // template<typename R, typename... Args> this is base class.
+    // template<typename Functor, typename R, typename... Args> 
+    // this is derived class.
+    //
+    // Then, used can just provide a signature type, we split it
+    // to R and Args, and construct base class object, then call
+    // according virtual function.
+    //
+    // Same technique is also applied in boost::any and std::shared_ptr
+    // (I guess since I don't see the source code of shared_ptr)
     template<typename R, typename... Args>
     class FunctorBridge {
     public:
@@ -150,4 +178,6 @@ namespace zstl{
             return !(f1==f2);
         }
     };
-}
+} // namespace zstl
+
+#endif // ZSTL_FUNCTION_H

@@ -18,14 +18,15 @@
 #include "type_traits.h"
 #include "stl_move.h"
 #include "config.h"
+#include <iterator>
 
 namespace zstl {
 
-struct Input_iterator_tag{};
-struct Output_iterator_tag{};
-struct Forward_iterator_tag : Input_iterator_tag{};
-struct Bidirectional_iterator_tag : Forward_iterator_tag{};
-struct Random_access_iterator_tag : Bidirectional_iterator_tag{};
+struct Input_iterator_tag {};
+struct Output_iterator_tag {};
+struct Forward_iterator_tag : Input_iterator_tag {};
+struct Bidirectional_iterator_tag : Forward_iterator_tag {};
+struct Random_access_iterator_tag : Bidirectional_iterator_tag {};
 
 template<class Category,class T,class Distance=ptrdiff_t,
 		class Pointer=T*,class Reference=T&>
@@ -133,9 +134,9 @@ struct has_iterator_of<iter,U,Void_t<
 template<typename Iter> \
 struct is_##name##_iterator : has_iterator_of<Iter, tag> {};
 
-is_XXX_iterator_TEMPLATE(input, Input_iterator_tag)
-is_XXX_iterator_TEMPLATE(output, Output_iterator_tag)
-is_XXX_iterator_TEMPLATE(forward, Forward_iterator_tag)
+is_XXX_iterator_TEMPLATE(input,         Input_iterator_tag)
+is_XXX_iterator_TEMPLATE(output,        Output_iterator_tag)
+is_XXX_iterator_TEMPLATE(forward,       Forward_iterator_tag)
 is_XXX_iterator_TEMPLATE(bidirectional, Bidirectional_iterator_tag)
 is_XXX_iterator_TEMPLATE(random_access, Random_access_iterator_tag)
 
